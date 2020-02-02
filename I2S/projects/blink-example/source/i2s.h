@@ -81,7 +81,7 @@ typedef struct {
 	i2sx_tx_rx_cr5_config tx_cfg_5_reg;
 	uint32_t tx_data_reg[2];
 	i2sx_tx_rx_fr_n tx_fifo_reg[2];
-	uint32_t tx_word_mask; // 0 = word N enabled ; 1 = word N is masked (The transmit data pins are tri-stated when masked.)
+	uint32_t tx_word_mask_reg; // 0 = word N enabled ; 1 = word N is masked (The transmit data pins are tri-stated when masked.)
 } tx_config_regs;
 
 typedef struct {
@@ -93,8 +93,21 @@ typedef struct {
 	i2sx_tx_rx_cr5_config rx_cfg_5_reg;
 	uint32_t rx_data_reg[2];
 	i2sx_tx_rx_fr_n rx_fifo_reg[2];
-	uint32_t rx_word_mask; // 0 = word N enabled ; 1 = word N is masked (The transmit data pins are tri-stated when masked.)
+	uint32_t rx_word_mask_reg; // 0 = word N enabled ; 1 = word N is masked (The transmit data pins are tri-stated when masked.)
 } rx_config_regs;
+
+typedef struct{
+	bool driver_update_flag;
+	bool MCLK_output_enable;
+	uint32_t MCLK_input_clk_select;// 2 bits
+} i2sx_mclk_ctrl_reg;
+
+typedef struct {
+	uint8_t fract; // 8 bits
+	uint32_t divide; // 12 bits
+} i2sx_mclk_div_reg;
+
+
 
 void i2s_init(void);
 
