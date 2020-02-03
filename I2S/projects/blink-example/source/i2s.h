@@ -9,6 +9,24 @@
 #define I2S_H_
 
 #include "MK64F12.h"
+#include <stdbool.h>
+
+
+typedef enum
+{
+	asynchronous_mode,
+	synchronous_with_receiver,
+	synchronous_with_another_SAI_transmitter,
+	synchronous_with_another_SAI_receiver
+} i2s_synchronous_mode;
+
+typedef enum{
+	bus_clock,
+	master_clock_1,
+	master_clock_2,
+	master_clock_3
+} i2s_mclk_select;
+
 
 typedef struct {
 	bool rx_tx_enable;
@@ -108,6 +126,13 @@ typedef struct {
 } i2sx_mclk_div_reg;
 
 
+
+void tx_set_reg_0(i2sx_tx_rx_cr0_config *);
+void tx_set_reg_1(i2sx_tx_rx_cr1_config *);
+void tx_set_reg_2(i2sx_tx_rx_cr2_config *);
+void tx_set_reg_3(i2sx_tx_rx_cr3_config *);
+void tx_set_reg_4(i2sx_tx_rx_cr4_config *);
+void tx_set_reg_5(i2sx_tx_rx_cr5_config *);
 
 void i2s_init(void);
 
