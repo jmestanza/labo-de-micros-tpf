@@ -14,6 +14,8 @@ static PORT_Type* portPointers[] = PORT_BASE_PTRS;
 
 
 void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
+	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
+
 	sim_ptr->SCGC5 |= SIM_SCGC5_PORTB_MASK; // clk gating port B and C
 	sim_ptr->SCGC5 |= SIM_SCGC5_PORTC_MASK;
 
@@ -125,7 +127,7 @@ void tx_set_reg_5(i2sx_tx_rx_cr5_config * reg_5_tx){
 
 void i2s_init(void){
 	bool irqEnabled = false;
-	//clock gating and mux alternative selection
+	//clock gating (ports and module) and mux alternative selection
 	i2s_set_pin( PIN_I2S_TX_BLCK, 4, irqEnabled);
 	i2s_set_pin( PIN_I2S_TX_FS, 4, irqEnabled);
 	i2s_set_pin( PIN_I2S_TX_D0, 6, irqEnabled);
@@ -156,7 +158,7 @@ void i2s_init(void){
 
 	tx_cfg.tx_cfg_1_reg.transmit_fifo_watermark = 7; // max value just in case
 
-	tx_set_reg_1(& tx_cfg.tx_cfg_1_reg);
+	//tx_set_reg_1(& tx_cfg.tx_cfg_1_reg);
 
 	tx_cfg.tx_cfg_2_reg.synchronous_mode = asynchronous_mode; // ??
 	tx_cfg.tx_cfg_2_reg.bit_clock_swap = false; // use the normal bit clock source
@@ -166,13 +168,13 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_2_reg.bit_clock_direction = true; // bit clk is gneerated internally in Master mode
 	tx_cfg.tx_cfg_2_reg.bit_clock_divide = 0; // divides by (DIV+1)*2
 
-	tx_set_reg_2(& tx_cfg.tx_cfg_2_reg);
+	//tx_set_reg_2(& tx_cfg.tx_cfg_2_reg);
 
 	tx_cfg.tx_cfg_3_reg.transmit_channel_1_enable = true;
 	tx_cfg.tx_cfg_3_reg.transmit_channel_2_enable = true;
 	tx_cfg.tx_cfg_3_reg.word_flag_configuration = 0; // ??
 
-	tx_set_reg_3(& tx_cfg.tx_cfg_3_reg);
+	//tx_set_reg_3(& tx_cfg.tx_cfg_3_reg);
 
 	tx_cfg.tx_cfg_4_reg.frame_size = 0; // (N+1) word per frame, in this case 1 word per frame
 	tx_cfg.tx_cfg_4_reg.sync_width = 0; // ??
@@ -181,13 +183,13 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_4_reg.frame_sync_polarity = false; // frame sync active high
 	tx_cfg.tx_cfg_4_reg.frame_sync_direction = true ; // frame sync is generated internally in master mode
 
-	tx_set_reg_4(& tx_cfg.tx_cfg_4_reg);
+	//tx_set_reg_4(& tx_cfg.tx_cfg_4_reg);
 
 	tx_cfg.tx_cfg_5_reg.word_n_width = 15; // (N-1)number of bits in each word except for the first
 	tx_cfg.tx_cfg_5_reg.word_0_width = 15;
 	tx_cfg.tx_cfg_5_reg.first_bit_shifted = 0;
 
-	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
+	//tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
 
 }
 
