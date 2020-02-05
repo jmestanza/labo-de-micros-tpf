@@ -10,6 +10,7 @@
 
 #include "board.h"
 #include "gpio.h"
+#include "i2s.h"
 
 
 /*******************************************************************************
@@ -34,6 +35,7 @@ static void delayLoop(uint32_t veces);
 void App_Init (void)
 {
     gpioMode(PIN_LED_BLUE, OUTPUT);
+    i2s_init();
 }
 
 /* Función que se llama constantemente en un ciclo infinito */

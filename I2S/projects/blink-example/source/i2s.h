@@ -8,6 +8,7 @@
 #ifndef I2S_H_
 #define I2S_H_
 
+#include "board.h"
 #include "MK64F12.h"
 #include <stdbool.h>
 
@@ -126,6 +127,7 @@ typedef struct {
 } i2sx_mclk_div_reg;
 
 
+void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled);
 
 void tx_set_reg_0(i2sx_tx_rx_cr0_config *);
 void tx_set_reg_1(i2sx_tx_rx_cr1_config *);
@@ -136,5 +138,6 @@ void tx_set_reg_5(i2sx_tx_rx_cr5_config *);
 
 void i2s_init(void);
 
+void i2s_send_16bit_data(uint16_t msg);
 
 #endif /* I2S_H_ */
