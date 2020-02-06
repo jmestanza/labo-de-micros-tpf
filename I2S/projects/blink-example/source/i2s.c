@@ -33,6 +33,7 @@ bool isFIFORequestFlag(uint32_t csr){
 
 
 __ISR__ I2S0_Tx_IRQHandler(void){
+
 	if(isWordStartFlag(i2s_ptr->TCSR)){
 		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag
 	}
@@ -99,6 +100,12 @@ void i2s_init(void){
 	i2s_set_pin( PIN_I2S_RX_FS, 4, irqEnabled);
 	i2s_set_pin( PIN_I2S_RX_D0, 4, irqEnabled);
 
+	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_DUF_MASK) | I2S_MCR_DUF(0);
+	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_MOE_MASK) | I2S_MCR_MOE(1);
+	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_MICS_MASK) | I2S_MCR_MICS(0);
+	i2s_ptr->MDR =  (i2s_ptr->MDR & ~I2S_MDR_DIVIDE_MASK) | I2S_MDR_DIVIDE(10000);
+	i2s_ptr->MDR =  (i2s_ptr->MDR & ~I2S_MDR_FRACT_MASK) | I2S_MDR_FRACT(0);
+
 	tx_config_regs tx_cfg;
 	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true;
 	tx_cfg.tx_cfg_0_reg.stop_enable = true; // transmitter enabled in stop mode
@@ -148,8 +155,8 @@ void i2s_init(void){
 
 	tx_set_reg_4(& tx_cfg.tx_cfg_4_reg);
 
-	tx_cfg.tx_cfg_5_reg.word_n_width = 15; // (N-1)number of bits in each word except for the first
-	tx_cfg.tx_cfg_5_reg.word_0_width = 15;
+	tx_cfg.tx_cfg_5_reg.word_n_width = 31; // (N-1)number of bits in each word except for the first
+	tx_cfg.tx_cfg_5_reg.word_0_width = 31;
 	tx_cfg.tx_cfg_5_reg.first_bit_shifted = 0;
 
 	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);

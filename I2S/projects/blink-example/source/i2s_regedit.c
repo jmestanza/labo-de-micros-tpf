@@ -37,7 +37,7 @@ void tx_set_reg_1(i2sx_tx_rx_cr1_config * reg_1_tx){
 	i2s_ptr->TCR1 = ~(I2S_TCR1_TFW_MASK);
 	i2s_ptr->TCR1 |=  I2S_TCR1_TFW(reg_1_tx->transmit_fifo_watermark);
 }
-
+// MCLK Control Register (MCR[MICS]) and MDR also
 void tx_set_reg_2(i2sx_tx_rx_cr2_config * reg_2_tx){
 	i2s_ptr->TCR2 = ~(I2S_TCR2_SYNC_MASK |
 					  I2S_TCR2_BCS_MASK |
@@ -57,11 +57,11 @@ void tx_set_reg_2(i2sx_tx_rx_cr2_config * reg_2_tx){
 }
 
 void tx_set_reg_3(i2sx_tx_rx_cr3_config * reg_3_tx){
-	uint32_t channels = (reg_3_tx->transmit_channel_1_enable << 16) | (reg_3_tx->transmit_channel_2_enable << 17);
+//	uint32_t channels = (reg_3_tx->transmit_channel_1_enable << 16) | (reg_3_tx->transmit_channel_2_enable << 17);
 	i2s_ptr->TCR3 = ~(I2S_TCR3_TCE_MASK |
 					  I2S_TCR3_WDFL_MASK);
 
-	i2s_ptr->TCR3 |=  I2S_TCR3_TCE(channels) |
+	i2s_ptr->TCR3 |=  I2S_TCR3_TCE_MASK |  // set both channels
 					  I2S_TCR3_WDFL(reg_3_tx->word_flag_configuration);
 }
 

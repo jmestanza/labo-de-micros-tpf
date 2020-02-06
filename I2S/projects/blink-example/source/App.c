@@ -41,9 +41,8 @@ void App_Init (void)
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
+	i2s_send_16bit_data(4);
 	i2s_send_16bit_data(10);
-    //delayLoop(4000000UL);
-    //gpioToggle(PIN_LED_BLUE);
 }
 
 
