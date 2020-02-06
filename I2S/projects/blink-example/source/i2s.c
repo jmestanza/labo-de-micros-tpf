@@ -7,10 +7,66 @@
 
 #include "i2s.h"
 
-
 static I2S_Type * i2s_ptr = I2S0;
 static SIM_Type* sim_ptr = SIM;
 static PORT_Type* portPointers[] = PORT_BASE_PTRS;
+
+bool isWordStartFlag(uint32_t csr){
+	return (csr & I2S_TCSR_WSF_MASK) == I2S_TCSR_WSF_MASK;
+}
+
+bool isSyncErrorFlag(uint32_t csr){
+	return (csr & I2S_TCSR_SEF_MASK) == I2S_TCSR_SEF_MASK;
+}
+
+bool isFIFOErrorFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FEF_MASK) == I2S_TCSR_FEF_MASK;
+}
+
+bool isFIFOWarningFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FWF_MASK) == I2S_TCSR_FWF_MASK;
+}
+
+bool isFIFORequestFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FRF_MASK) == I2S_TCSR_FRF_MASK;
+}
+
+
+__ISR__ I2S0_Tx_IRQHandler(void){
+	if(isWordStartFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag
+	}
+	if(isSyncErrorFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_SEF_MASK; //  clear the sync error flag
+	}
+	if(isFIFOErrorFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_FEF_MASK; //  clear the fifo error flag
+	}
+	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
+	}
+	if(isFIFORequestFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_FRF_MASK; //  clear the fifo request flag
+	}
+}
+
+__ISR__ I2S0_Rx_IRQHandler(void){
+	if(isWordStartFlag(i2s_ptr->RCSR)){
+		i2s_ptr->RCSR &= ~I2S_RCSR_WSF_MASK; //  clear the flag
+	}
+	if(isSyncErrorFlag(i2s_ptr->RCSR)){
+		i2s_ptr->RCSR &= ~I2S_RCSR_SEF_MASK; //  clear the sync error flag
+	}
+	if(isFIFOErrorFlag(i2s_ptr->RCSR)){
+		i2s_ptr->RCSR &= ~I2S_RCSR_FEF_MASK; //  clear the fifo error flag
+	}
+	if(isFIFOWarningFlag(i2s_ptr->RCSR)){
+		i2s_ptr->RCSR &= ~I2S_RCSR_FWF_MASK; //  clear the fifo warning flag
+	}
+	if(isFIFORequestFlag(i2s_ptr->RCSR)){
+		i2s_ptr->RCSR &= ~I2S_RCSR_FRF_MASK; //  clear the fifo request flag
+	}
+}
 
 
 void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
@@ -30,99 +86,6 @@ void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
 								PORT_PCR_PS(0) |
 								PORT_PCR_MUX(mux_alt) |
 								PORT_PCR_IRQC(irqEnabled); // edit them
-}
-
-
-
-
-void tx_set_reg_0(i2sx_tx_rx_cr0_config * reg_0_tx){
-	i2s_ptr->TCSR &=~(I2S_TCSR_TE_MASK |
-					  I2S_TCSR_STOPE_MASK |
-					  I2S_TCSR_DBGE_MASK |
-					  I2S_TCSR_BCE_MASK |
-					  I2S_TCSR_FR_MASK |
-					  I2S_TCSR_SR_MASK |
-					  I2S_TCSR_WSIE_MASK |
-					  I2S_TCSR_SEIE_MASK |
-					  I2S_TCSR_FEIE_MASK |
-					  I2S_TCSR_FWIE_MASK |
-					  I2S_TCSR_FRIE_MASK |
-					  I2S_TCSR_FWDE_MASK |
-					  I2S_TCSR_FRDE_MASK) ;
-
-	i2s_ptr->TCSR|= I2S_TCSR_TE(reg_0_tx->rx_tx_enable) |
-					I2S_TCSR_STOPE(reg_0_tx->stop_enable) |
-					I2S_TCSR_DBGE(reg_0_tx->debug_enable) |
-					I2S_TCSR_BCE(reg_0_tx->bit_clock_enable) |
-					I2S_TCSR_FR(reg_0_tx->fifo_reset) |
-					I2S_TCSR_SR(reg_0_tx->software_reset) |
-					I2S_TCSR_WSIE(reg_0_tx->word_start_interrupt_enable) |
-					I2S_TCSR_SEIE(reg_0_tx->sync_error_interrupt_enable) |
-					I2S_TCSR_FEIE(reg_0_tx->fifo_error_interrupt_enable) |
-					I2S_TCSR_FWIE(reg_0_tx->fifo_warning_interrupt_enable) |
-					I2S_TCSR_FRIE(reg_0_tx->fifo_request_interrupt_enable) |
-					I2S_TCSR_FWDE(reg_0_tx->fifo_warning_dma_enable) |
-					I2S_TCSR_FRDE(reg_0_tx->fifo_request_dma_enable);
-}
-
-void tx_set_reg_1(i2sx_tx_rx_cr1_config * reg_1_tx){
-	i2s_ptr->TCR1 = ~(I2S_TCR1_TFW_MASK);
-	i2s_ptr->TCR1 |=  I2S_TCR1_TFW(reg_1_tx->transmit_fifo_watermark);
-}
-
-void tx_set_reg_2(i2sx_tx_rx_cr2_config * reg_2_tx){
-	i2s_ptr->TCR2 = ~(I2S_TCR2_SYNC_MASK |
-					  I2S_TCR2_BCS_MASK |
-					  I2S_TCR2_BCI_MASK |
-					  I2S_TCR2_MSEL_MASK |
-					  I2S_TCR2_BCP_MASK |
-					  I2S_TCR2_BCD_MASK |
-					  I2S_TCR2_DIV_MASK);
-
-	i2s_ptr->TCR2 |=  I2S_TCR2_SYNC(reg_2_tx->synchronous_mode) |
-					  I2S_TCR2_BCS(reg_2_tx->bit_clock_swap) |
-					  I2S_TCR2_BCI(reg_2_tx->bit_clock_input) |
-					  I2S_TCR2_MSEL(reg_2_tx->master_clock_select) |
-					  I2S_TCR2_BCP(reg_2_tx->bit_clock_polarity) |
-					  I2S_TCR2_BCD(reg_2_tx->bit_clock_direction) |
-					  I2S_TCR2_DIV(reg_2_tx->bit_clock_divide);
-}
-
-void tx_set_reg_3(i2sx_tx_rx_cr3_config * reg_3_tx){
-	uint32_t channels = (reg_3_tx->transmit_channel_1_enable << 16) | (reg_3_tx->transmit_channel_2_enable << 17);
-	i2s_ptr->TCR3 = ~(I2S_TCR3_TCE_MASK |
-					  I2S_TCR3_WDFL_MASK);
-
-	i2s_ptr->TCR3 |=  I2S_TCR3_TCE(channels) |
-					  I2S_TCR3_WDFL(reg_3_tx->word_flag_configuration);
-}
-
-void tx_set_reg_4(i2sx_tx_rx_cr4_config * reg_4_tx){
-	i2s_ptr->TCR4 = ~(I2S_TCR4_FRSZ_MASK |
-					  I2S_TCR4_SYWD_MASK |
-					  I2S_TCR4_MF_MASK |
-					  I2S_TCR4_FSE_MASK |
-					  I2S_TCR4_FSP_MASK |
-					  I2S_TCR4_FSD_MASK);
-
-	i2s_ptr->TCR4 |=  I2S_TCR4_FRSZ(reg_4_tx->frame_size) |
-					  I2S_TCR4_SYWD(reg_4_tx->sync_width) |
-					  I2S_TCR4_MF(reg_4_tx->is_MSB_first) |
-					  I2S_TCR4_FSE(reg_4_tx->frame_sync_early) |
-					  I2S_TCR4_FSP(reg_4_tx->frame_sync_polarity) |
-					  I2S_TCR4_FSD(reg_4_tx->frame_sync_direction);
-}
-
-
-void tx_set_reg_5(i2sx_tx_rx_cr5_config * reg_5_tx){
-
-	i2s_ptr->TCR5 = ~(I2S_TCR5_WNW_MASK |
-					  I2S_TCR5_W0W_MASK |
-					  I2S_TCR5_FBT_MASK);
-
-	i2s_ptr->TCR5 |= I2S_TCR5_WNW(reg_5_tx->word_n_width) |
-					 I2S_TCR5_W0W(reg_5_tx->word_0_width) |
-					 I2S_TCR5_FBT(reg_5_tx->first_bit_shifted);
 }
 
 void i2s_init(void){
@@ -146,11 +109,11 @@ void i2s_init(void){
 	//tx_cfg.tx_cfg_0_reg.fifo_error_flag   don't config
 	//tx_cfg.tx_cfg_0_reg.fifo_warning_flag  don't config
 	//tx_cfg.tx_cfg_0_reg.fifo_request_flag don't config
-	tx_cfg.tx_cfg_0_reg.word_start_interrupt_enable = false;
-	tx_cfg.tx_cfg_0_reg.sync_error_interrupt_enable = false;
-	tx_cfg.tx_cfg_0_reg.fifo_error_interrupt_enable = false;
-	tx_cfg.tx_cfg_0_reg.fifo_warning_interrupt_enable = false;
-	tx_cfg.tx_cfg_0_reg.fifo_request_interrupt_enable = false;
+	tx_cfg.tx_cfg_0_reg.word_start_interrupt_enable = true;
+	tx_cfg.tx_cfg_0_reg.sync_error_interrupt_enable = true;
+	tx_cfg.tx_cfg_0_reg.fifo_error_interrupt_enable = true;
+	tx_cfg.tx_cfg_0_reg.fifo_warning_interrupt_enable = true;
+	tx_cfg.tx_cfg_0_reg.fifo_request_interrupt_enable = true;
 	tx_cfg.tx_cfg_0_reg.fifo_warning_dma_enable = false;
 	tx_cfg.tx_cfg_0_reg.fifo_request_dma_enable = false;
 
@@ -158,7 +121,7 @@ void i2s_init(void){
 
 	tx_cfg.tx_cfg_1_reg.transmit_fifo_watermark = 7; // max value just in case
 
-	//tx_set_reg_1(& tx_cfg.tx_cfg_1_reg);
+	tx_set_reg_1(& tx_cfg.tx_cfg_1_reg);
 
 	tx_cfg.tx_cfg_2_reg.synchronous_mode = asynchronous_mode; // ??
 	tx_cfg.tx_cfg_2_reg.bit_clock_swap = false; // use the normal bit clock source
@@ -168,13 +131,13 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_2_reg.bit_clock_direction = true; // bit clk is gneerated internally in Master mode
 	tx_cfg.tx_cfg_2_reg.bit_clock_divide = 0; // divides by (DIV+1)*2
 
-	//tx_set_reg_2(& tx_cfg.tx_cfg_2_reg);
+	tx_set_reg_2(& tx_cfg.tx_cfg_2_reg);
 
 	tx_cfg.tx_cfg_3_reg.transmit_channel_1_enable = true;
 	tx_cfg.tx_cfg_3_reg.transmit_channel_2_enable = true;
 	tx_cfg.tx_cfg_3_reg.word_flag_configuration = 0; // ??
 
-	//tx_set_reg_3(& tx_cfg.tx_cfg_3_reg);
+	tx_set_reg_3(& tx_cfg.tx_cfg_3_reg);
 
 	tx_cfg.tx_cfg_4_reg.frame_size = 0; // (N+1) word per frame, in this case 1 word per frame
 	tx_cfg.tx_cfg_4_reg.sync_width = 0; // ??
@@ -183,17 +146,22 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_4_reg.frame_sync_polarity = false; // frame sync active high
 	tx_cfg.tx_cfg_4_reg.frame_sync_direction = true ; // frame sync is generated internally in master mode
 
-	//tx_set_reg_4(& tx_cfg.tx_cfg_4_reg);
+	tx_set_reg_4(& tx_cfg.tx_cfg_4_reg);
 
 	tx_cfg.tx_cfg_5_reg.word_n_width = 15; // (N-1)number of bits in each word except for the first
 	tx_cfg.tx_cfg_5_reg.word_0_width = 15;
 	tx_cfg.tx_cfg_5_reg.first_bit_shifted = 0;
 
-	//tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
+	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
+
+	NVIC_EnableIRQ(I2S0_Rx_IRQn);
+	NVIC_EnableIRQ(I2S0_Tx_IRQn);
 
 }
 
-void i2s_send_16bit_data(uint16_t msg){
+void i2s_send_16bit_data(uint32_t msg){
+	i2s_ptr->TDR[0] = msg;
+	i2s_ptr->TDR[1] = msg;
 	i2s_ptr->TDR[0] = msg;
 	i2s_ptr->TDR[1] = msg;
 }
