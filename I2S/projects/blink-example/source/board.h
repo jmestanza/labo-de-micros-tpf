@@ -21,7 +21,7 @@
 /***** BOARD defines **********************************************************/
 
 // On Board User LEDs
-#define PIN_LED_BLUE    PORTNUM2PIN(PB,21) // PTB21
+//#define PIN_LED_BLUE    PORTNUM2PIN(PB,21) // PTB21
 
 #define PIN_I2S_TX_BLCK	PORTNUM2PIN(PB,18)
 #define PIN_I2S_TX_FS	PORTNUM2PIN(PB,19)

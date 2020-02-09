@@ -22,7 +22,6 @@
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
 
-static void delayLoop(uint32_t veces);
 
 
 /*******************************************************************************
@@ -34,15 +33,14 @@ static void delayLoop(uint32_t veces);
 /* Función que se llama 1 vez, al comienzo del programa */
 void App_Init (void)
 {
-    gpioMode(PIN_LED_BLUE, OUTPUT);
+    //gpioMode(PIN_LED_BLUE, OUTPUT);
     i2s_init();
 }
 
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
-	i2s_send_16bit_data(4);
-	i2s_send_16bit_data(10);
+	i2s_send_data(2947526575);
 }
 
 
@@ -51,11 +49,6 @@ void App_Run (void)
                         LOCAL FUNCTION DEFINITIONS
  *******************************************************************************
  ******************************************************************************/
-
-static void delayLoop(uint32_t veces)
-{
-    while (veces--);
-}
 
 
 /*******************************************************************************

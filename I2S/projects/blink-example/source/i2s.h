@@ -23,6 +23,8 @@ void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled);
 
 void i2s_init(void);
 
-void i2s_send_16bit_data(uint32_t msg);
+bool isFIFOFull(uint32_t tranfer_fifo_register_n);
+
+void i2s_send_data(uint32_t msg);
 
 #endif /* I2S_H_ */
