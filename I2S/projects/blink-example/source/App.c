@@ -11,7 +11,7 @@
 #include "board.h"
 #include "gpio.h"
 #include "i2s.h"
-
+#include "DMA.h"
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -21,7 +21,10 @@
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
+// 4294967295 = 0x FF FF FF FF
+// 2694881440 = 0x A0 A0 A0 A0
 
+static uint32_t data[] = {0,4294967295, 0 , 4294967295, 0 , 2694881440};
 
 
 /*******************************************************************************
@@ -35,12 +38,19 @@ void App_Init (void)
 {
     //gpioMode(PIN_LED_BLUE, OUTPUT);
     i2s_init();
+    DMA0_Config(funcallback);
+    DMA0_ConfigPingPongBuffer(N, L, &data[0], i2s_get_transfer_fifo_reg_address(0));
 }
 
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
-	i2s_send_data(2947526575);
+	bool right = true;
+	for(int i = 0 ; i< 10 ; i++){
+		i2s_send_data( 10, !right); // lots of faith in this
+		i2s_send_data( 15, right);
+	}
+	//i2s_send_data(2947526575); // 0xAFAFAFAF
 }
 
 

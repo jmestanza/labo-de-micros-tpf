@@ -15,6 +15,7 @@
 #include "i2s_regedit.h"
 #include "hardware.h"
 
+
 __ISR__ I2S0_Tx_IRQHandler(void);
 __ISR__ I2S0_Rx_IRQHandler(void);
 
@@ -25,6 +26,14 @@ void i2s_init(void);
 
 bool isFIFOFull(uint32_t tranfer_fifo_register_n);
 
-void i2s_send_data(uint32_t msg);
+uint32_t * i2s_get_transfer_fifo_reg_address(bool);
+
+void i2s_send_data(uint32_t msg, bool left_or_right);
+
+//uint32_t FloatToUint(float n)
+//{
+//   return (uint32_t)(*(uint32_t*)&n);
+//}
+
 
 #endif /* I2S_H_ */

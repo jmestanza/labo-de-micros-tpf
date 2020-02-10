@@ -7,11 +7,16 @@
 
 #include "i2s.h"
 
+
 static I2S_Type * i2s_ptr = I2S0;
 static SIM_Type* sim_ptr = SIM;
 static PORT_Type* portPointers[] = PORT_BASE_PTRS;
 
+//sim_ptr->SOPT2  // config this according to the application note
+//sim_ptr->CLKDIV2
+
 bool isWordStartFlag(uint32_t csr){
+
 	return (csr & I2S_TCSR_WSF_MASK) == I2S_TCSR_WSF_MASK;
 }
 
@@ -196,18 +201,19 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 }
 
 
-void i2s_send_data(uint32_t msg){
 
+uint32_t * i2s_get_transfer_fifo_reg_address(bool left_or_right){
+	return &i2s_ptr->TFR[left_or_right];
+}
 
-//	Transmit Data Register
-//	The corresponding TCR3[TCE] bit must be set before accessing the channel's transmit data register.
-//	Writes to this register when the transmit FIFO is not full
-//  will push the data written into the transmit data
-//	FIFO. Writes to this register when the transmit
-// 	FIFO is full are ignored.
-	uint32_t TFR0 = i2s_ptr->TFR[0];
+void i2s_send_data(uint32_t msg, bool left_or_right){
+
+//	Transmit Data Register: TCR3[TCE] bit must be set before accessing the channel's TDR.
+//	Writes to TDR when the Tx FIFO is not full will push the data written into the Tx data
+//	FIFO. Writes to this register when the transmit	FIFO is full are ignored.
+	uint32_t TFR0 = i2s_ptr->TFR[left_or_right];
 	if(!isFIFOFull(TFR0)){
-		i2s_ptr->TDR[0] = msg;
+		i2s_ptr->TDR[left_or_right] = msg;
 	}
 
 }
