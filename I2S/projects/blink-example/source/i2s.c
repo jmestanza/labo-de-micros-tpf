@@ -38,7 +38,7 @@ bool isFIFORequestFlag(uint32_t csr){
 
 
 __ISR__ I2S0_Tx_IRQHandler(void){
-
+	//uint16_t citer = DMA0->TCD[0].CITER_ELINKNO;
 	if(isWordStartFlag(i2s_ptr->TCSR)){
 		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
 	}
@@ -80,7 +80,7 @@ __ISR__ I2S0_Rx_IRQHandler(void){
 }
 */
 
-void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
+void i2s_set_pin(pin_t pin, uint8_t mux_alt, uint8_t irqEnabled){
 	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
 
 	sim_ptr->SCGC5 |= SIM_SCGC5_PORTB_MASK; // clk gating port B and C
@@ -101,16 +101,16 @@ void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
 
 void i2s_init(void){
 
-
-	bool irqEnabled = false;
+	uint8_t irqDisabled = 0;
+	uint8_t irqEnabledDMA = 1; //
 	//clock gating (ports and module) and mux alternative selection
-	i2s_set_pin( PIN_I2S_TX_BLCK, 4, irqEnabled);
-	i2s_set_pin( PIN_I2S_TX_FS, 4, irqEnabled);
-	i2s_set_pin( PIN_I2S_TX_D0, 6, irqEnabled);
-	i2s_set_pin( PIN_I2S_MCLK, 4, irqEnabled);
-	i2s_set_pin( PIN_I2S_RX_BCLK, 4, irqEnabled);
-	i2s_set_pin( PIN_I2S_RX_FS, 4, irqEnabled);
-	i2s_set_pin( PIN_I2S_RX_D0, 4, irqEnabled);
+	i2s_set_pin( PIN_I2S_TX_BLCK, 4, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_TX_FS, 4, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_TX_D0, 6, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_MCLK, 4, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_RX_BCLK, 4, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_RX_FS, 4, irqEnabledDMA);
+	i2s_set_pin( PIN_I2S_RX_D0, 4, irqEnabledDMA);
 
 	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_DUF_MASK) | I2S_MCR_DUF(0);
 	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_MOE_MASK) | I2S_MCR_MOE(1);
@@ -174,8 +174,8 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_0_reg.fifo_error_interrupt_enable = true;
 	tx_cfg.tx_cfg_0_reg.fifo_warning_interrupt_enable = false;
 	tx_cfg.tx_cfg_0_reg.fifo_request_interrupt_enable = false;
-	tx_cfg.tx_cfg_0_reg.fifo_warning_dma_enable = false;
-	tx_cfg.tx_cfg_0_reg.fifo_request_dma_enable = false;
+	tx_cfg.tx_cfg_0_reg.fifo_warning_dma_enable = true;
+	tx_cfg.tx_cfg_0_reg.fifo_request_dma_enable = true;
 
 	tx_set_reg_0(& tx_cfg.tx_cfg_0_reg);
 
@@ -202,18 +202,16 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 
 
 
-uint32_t * i2s_get_transfer_fifo_reg_address(bool left_or_right){
-	return &i2s_ptr->TFR[left_or_right];
+uint32_t * i2s_get_transfer_fifo_reg_address(void){
+	return (uint32_t*)&i2s_ptr->TFR[0];
 }
 
-void i2s_send_data(uint32_t msg, bool left_or_right){
+void i2s_send_data(uint32_t msg){
 
 //	Transmit Data Register: TCR3[TCE] bit must be set before accessing the channel's TDR.
 //	Writes to TDR when the Tx FIFO is not full will push the data written into the Tx data
 //	FIFO. Writes to this register when the transmit	FIFO is full are ignored.
-	uint32_t TFR0 = i2s_ptr->TFR[left_or_right];
-	if(!isFIFOFull(TFR0)){
-		i2s_ptr->TDR[left_or_right] = msg;
+	if(!isFIFOFull(i2s_ptr->TFR[0])){
+		i2s_ptr->TDR[0] = msg;
 	}
-
 }

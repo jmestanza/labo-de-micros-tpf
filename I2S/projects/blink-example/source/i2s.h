@@ -20,15 +20,15 @@ __ISR__ I2S0_Tx_IRQHandler(void);
 __ISR__ I2S0_Rx_IRQHandler(void);
 
 
-void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled);
+void i2s_set_pin(pin_t pin, uint8_t mux_alt, uint8_t irqEnabled);
 
 void i2s_init(void);
 
 bool isFIFOFull(uint32_t tranfer_fifo_register_n);
 
-uint32_t * i2s_get_transfer_fifo_reg_address(bool);
+uint32_t * i2s_get_transfer_fifo_reg_address(void);
 
-void i2s_send_data(uint32_t msg, bool left_or_right);
+void i2s_send_data(uint32_t msg);
 
 //uint32_t FloatToUint(float n)
 //{

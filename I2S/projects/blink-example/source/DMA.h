@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "hardware.h"
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
@@ -20,6 +20,8 @@
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
+__ISR__ DMA0_IRQHandler(void);
+
 
 void DMA0_Config(void(*funcallback)(void));
 

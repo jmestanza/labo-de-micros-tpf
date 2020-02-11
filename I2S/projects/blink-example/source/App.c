@@ -24,7 +24,7 @@
 // 4294967295 = 0x FF FF FF FF
 // 2694881440 = 0x A0 A0 A0 A0
 
-static uint32_t data[] = {0,4294967295, 0 , 4294967295, 0 , 2694881440};
+static uint32_t data[] = {4294967295, 0 , 2694881440, 0 }; // 2 * N = 4 = sizeof(data)
 
 
 /*******************************************************************************
@@ -33,24 +33,29 @@ static uint32_t data[] = {0,4294967295, 0 , 4294967295, 0 , 2694881440};
  *******************************************************************************
  ******************************************************************************/
 
+void process(void){ // this function is called when DMA has transfered one block (half of the total)
+
+}
+
+
+
 /* Función que se llama 1 vez, al comienzo del programa */
+
+
 void App_Init (void)
 {
     //gpioMode(PIN_LED_BLUE, OUTPUT);
     i2s_init();
-    DMA0_Config(funcallback);
-    DMA0_ConfigPingPongBuffer(N, L, &data[0], i2s_get_transfer_fifo_reg_address(0));
+    DMA0_Config(process);
+    DMA0_ConfigPingPongBuffer(sizeof(data)/2, 4, &data[0], i2s_get_transfer_fifo_reg_address());
+    DMA0_EnableRequest();
 }
+
+
 
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
-	bool right = true;
-	for(int i = 0 ; i< 10 ; i++){
-		i2s_send_data( 10, !right); // lots of faith in this
-		i2s_send_data( 15, right);
-	}
-	//i2s_send_data(2947526575); // 0xAFAFAFAF
 }
 
 
