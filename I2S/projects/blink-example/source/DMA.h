@@ -15,7 +15,13 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-
+typedef enum{
+	transfer_8bit= 0,
+	transfer_16bit,
+	transfer_32bit,
+	transfer_16bit_burst=4,
+	transfer_32bit_burst
+} transfer_sd_size;
 
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE

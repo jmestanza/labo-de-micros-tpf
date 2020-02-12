@@ -24,7 +24,23 @@
 // 4294967295 = 0x FF FF FF FF
 // 2694881440 = 0x A0 A0 A0 A0
 
-static uint32_t data[] = {4294967295, 0 , 2694881440, 0 }; // 2 * N = 4 = sizeof(data)
+//static uint32_t data[] = {4294967295, 0 , 2694881440, 0 };
+
+//uint32_t data[16] __attribute__((aligned(32))) =
+//{
+//		0, 2, 4, 6, // 4 samples
+//		8,10,12,14,
+//		1,3,5,7,
+//		9,11,13,15
+//};
+
+uint32_t data[16] __attribute__((aligned(32))) =
+{
+		4294967295, 0, 4294967295, 0, // 4 samples
+		2694881440, 0, 2694881440, 2694881440,
+		1,3,5,7,
+		9,11,13,15
+};
 
 
 /*******************************************************************************
@@ -46,8 +62,8 @@ void App_Init (void)
 {
     //gpioMode(PIN_LED_BLUE, OUTPUT);
     i2s_init();
-    DMA0_Config(process);
-    DMA0_ConfigPingPongBuffer(sizeof(data)/2, 4, &data[0], i2s_get_transfer_fifo_reg_address());
+    DMA0_Config(process); // 4 samples , 4 bytes (uint32_t)
+    DMA0_ConfigPingPongBuffer(4, 4, &data[0], i2s_get_transfer_fifo_reg_address());
     DMA0_EnableRequest();
 }
 

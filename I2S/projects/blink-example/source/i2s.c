@@ -38,7 +38,10 @@ bool isFIFORequestFlag(uint32_t csr){
 
 
 __ISR__ I2S0_Tx_IRQHandler(void){
-	//uint16_t citer = DMA0->TCD[0].CITER_ELINKNO;
+	uint32_t errors = DMA0->ES;
+	uint16_t citer = DMA0->TCD[0].CITER_ELINKNO;
+	uint32_t hardware = DMA0->HRS;
+
 	if(isWordStartFlag(i2s_ptr->TCSR)){
 		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
 	}
@@ -60,25 +63,7 @@ __ISR__ I2S0_Tx_IRQHandler(void){
 	}
 }
 
-/*
-__ISR__ I2S0_Rx_IRQHandler(void){
-	if(isWordStartFlag(i2s_ptr->RCSR)){
-		i2s_ptr->RCSR &= ~I2S_RCSR_WSF_MASK; //  clear the flag  w1c
-	}
-	if(isSyncErrorFlag(i2s_ptr->RCSR)){
-		i2s_ptr->RCSR &= ~I2S_RCSR_SEF_MASK; //  clear the sync error flag w1c
-	}
-	if(isFIFOErrorFlag(i2s_ptr->RCSR)){
-		i2s_ptr->RCSR &= ~I2S_RCSR_FEF_MASK; //  clear the fifo error flag w1c
-	}
-	if(isFIFOWarningFlag(i2s_ptr->RCSR)){
-		i2s_ptr->RCSR &= ~I2S_RCSR_FWF_MASK; //  clear the fifo warning flag
-	}
-	if(isFIFORequestFlag(i2s_ptr->RCSR)){
-		i2s_ptr->RCSR &= ~I2S_RCSR_FRF_MASK; //  clear the fifo request flag
-	}
-}
-*/
+
 
 void i2s_set_pin(pin_t pin, uint8_t mux_alt, uint8_t irqEnabled){
 	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
@@ -101,16 +86,15 @@ void i2s_set_pin(pin_t pin, uint8_t mux_alt, uint8_t irqEnabled){
 
 void i2s_init(void){
 
-	uint8_t irqDisabled = 0;
 	uint8_t irqEnabledDMA = 1; //
 	//clock gating (ports and module) and mux alternative selection
 	i2s_set_pin( PIN_I2S_TX_BLCK, 4, irqEnabledDMA);
 	i2s_set_pin( PIN_I2S_TX_FS, 4, irqEnabledDMA);
 	i2s_set_pin( PIN_I2S_TX_D0, 6, irqEnabledDMA);
 	i2s_set_pin( PIN_I2S_MCLK, 4, irqEnabledDMA);
-	i2s_set_pin( PIN_I2S_RX_BCLK, 4, irqEnabledDMA);
-	i2s_set_pin( PIN_I2S_RX_FS, 4, irqEnabledDMA);
-	i2s_set_pin( PIN_I2S_RX_D0, 4, irqEnabledDMA);
+//	i2s_set_pin( PIN_I2S_RX_BCLK, 4, irqEnabledDMA);
+//	i2s_set_pin( PIN_I2S_RX_FS, 4, irqEnabledDMA);
+//	i2s_set_pin( PIN_I2S_RX_D0, 4, irqEnabledDMA);
 
 	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_DUF_MASK) | I2S_MCR_DUF(0);
 	i2s_ptr->MCR = (i2s_ptr->MCR & ~I2S_MCR_MOE_MASK) | I2S_MCR_MOE(1);
@@ -159,16 +143,12 @@ void i2s_init(void){
 
 	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
 
-
 	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true;
 	tx_cfg.tx_cfg_0_reg.stop_enable = true; // transmitter enabled in stop mode
 	tx_cfg.tx_cfg_0_reg.debug_enable = true; // transmitter enabled in debug mode
 	tx_cfg.tx_cfg_0_reg.bit_clock_enable = true; // if Trans. En. is set, this too. when software clear this field the T.E remains enabled and this bit too until the end of the frame
 	tx_cfg.tx_cfg_0_reg.fifo_reset = false; // should reset when Tx is disabled or the fifo error flag is set
 	tx_cfg.tx_cfg_0_reg.software_reset = false; // software resets if 1
-	//tx_cfg.tx_cfg_0_reg.fifo_error_flag   don't config
-	//tx_cfg.tx_cfg_0_reg.fifo_warning_flag  don't config
-	//tx_cfg.tx_cfg_0_reg.fifo_request_flag don't config
 	tx_cfg.tx_cfg_0_reg.word_start_interrupt_enable = false;
 	tx_cfg.tx_cfg_0_reg.sync_error_interrupt_enable = false;
 	tx_cfg.tx_cfg_0_reg.fifo_error_interrupt_enable = true;
@@ -179,13 +159,11 @@ void i2s_init(void){
 
 	tx_set_reg_0(& tx_cfg.tx_cfg_0_reg);
 
-	//NVIC_EnableIRQ(I2S0_Rx_IRQn);
 	NVIC_EnableIRQ(I2S0_Tx_IRQn);
 
 }
 
 bool isFIFOFull(uint32_t tranfer_fifo_register_n){
-
 	uint32_t WFP = tranfer_fifo_register_n & I2S_TFR_WFP_MASK;
 	uint32_t RFP = tranfer_fifo_register_n & I2S_TFR_RFP_MASK;
 	uint32_t WFP_MSB = (WFP & (1<<19)) == (1<<19);
@@ -203,11 +181,10 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 
 
 uint32_t * i2s_get_transfer_fifo_reg_address(void){
-	return (uint32_t*)&i2s_ptr->TFR[0];
+	return &i2s_ptr->TFR[0];
 }
 
 void i2s_send_data(uint32_t msg){
-
 //	Transmit Data Register: TCR3[TCE] bit must be set before accessing the channel's TDR.
 //	Writes to TDR when the Tx FIFO is not full will push the data written into the Tx data
 //	FIFO. Writes to this register when the transmit	FIFO is full are ignored.
