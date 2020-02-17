@@ -42,7 +42,7 @@
 //		9,11,13,15
 //};
 
-uint32_t data[32] __attribute__((aligned(4))) =
+uint32_t data[32] __attribute__((aligned(1024))) =
 {
 		1, 2, 3, 4, // 4 samples
 		5, 6, 7, 8,
@@ -54,15 +54,7 @@ uint32_t data[32] __attribute__((aligned(4))) =
 		29,30,31,32
 };
 
-
-//uint32_t dst[16] __attribute__((aligned(4))) =
-//{
-//		0, 0, 0, 0, // 4 samples
-//		0, 0, 0, 0,
-//		0, 0, 0, 0,
-//		0, 0, 0, 0
-//};
-uint32_t dst[100];
+uint32_t dst[50] __attribute__((aligned(1024)));
 			 //__attribute__((aligned(4)));
 
 
@@ -86,9 +78,7 @@ void App_Init (void)
     //gpioMode(PIN_LED_BLUE, OUTPUT);
     i2s_init();
     DMA0_Config(process); // 4 samples , 4 bytes (uint32_t)
-
-//    DMA0_ConfigPingPongBuffer(4, 4, data, dst);
-    DMA0_ConfigClassic(4, 4, data, dst);
+    DMA0_ConfigClassic(7, 4, data, dst); // mod 32
     DMA0_EnableRequest();
 }
 

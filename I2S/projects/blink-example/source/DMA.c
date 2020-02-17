@@ -22,12 +22,9 @@ void DMA0_Config(void(*funcallback)(void))
 }
 
 
-void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
+void DMA0_ConfigClassic(uint16_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
 	/* Clear all the pending events. */
 	NVIC_ClearPendingIRQ(DMA0_IRQn);
-
-
-
 	uint16_t size_bit;
 		switch(L)
 		{
@@ -44,20 +41,14 @@ void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uin
     DMA0->TCD[0].DADDR = (uint32_t)i2s_tx0_reg_address;
     DMA0->TCD[0].DOFF = L; // ✓
     DMA0->TCD[0].DLAST_SGA = 0; // ✓
-    DMA0->TCD[0].BITER_ELINKNO = DMA_BITER_ELINKNO_BITER(N*2);
-    DMA0->TCD[0].CITER_ELINKNO = DMA_CITER_ELINKNO_CITER(N*2);
+    DMA0->TCD[0].BITER_ELINKNO = DMA_BITER_ELINKNO_BITER(N);
+    DMA0->TCD[0].CITER_ELINKNO = DMA_CITER_ELINKNO_CITER(N);
 	DMA0->TCD[0].CSR = DMA_CSR_INTHALF_MASK | DMA_CSR_INTMAJOR_MASK; // The half-point interrupt is enabled.
-
-	/* Enable the DMA interrupts. */
 	NVIC_EnableIRQ(DMA0_IRQn);
-
-//
-//	DMA0->SERQ = DMA_SERQ_SERQ(0); // nada
-
 	DMA0->TCD[0].ATTR = DMA_ATTR_SSIZE(size_bit) |
 						DMA_ATTR_DSIZE(size_bit) |
-						DMA_ATTR_SMOD(4) |
-						DMA_ATTR_DMOD(4); // => circular buffer with modulus 4
+						DMA_ATTR_SMOD(N) |
+						DMA_ATTR_DMOD(N); // => circular buffer with modulus N
 }
 
 void DMA0_ConfigPingPongBuffer(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
