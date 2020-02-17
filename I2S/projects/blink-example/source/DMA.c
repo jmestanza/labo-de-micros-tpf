@@ -25,8 +25,6 @@ void DMA0_Config(void(*funcallback)(void))
 void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
 	/* Clear all the pending events. */
 	NVIC_ClearPendingIRQ(DMA0_IRQn);
-	/* Enable the DMA interrupts. */
-	NVIC_EnableIRQ(DMA0_IRQn);
 
 
 
@@ -39,40 +37,27 @@ void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uin
 		default: size_bit = transfer_32bit; break;
 		}
 
-	DMA0->TCD[0].NBYTES_MLOFFYES = DMA_NBYTES_MLOFFYES_SMLOE_MASK |
-								   DMA_NBYTES_MLOFFYES_MLOFF(0) |
-								   DMA_NBYTES_MLOFFYES_NBYTES(L);  // src minor loop offset enable and applied
-
-
-
-//    3. Source address is initialized to buffer base address.
+	DMA0->TCD[0].NBYTES_MLOFFNO =  DMA_NBYTES_MLOFFNO_NBYTES(L);  // src minor loop offset enable and applied
     DMA0->TCD[0].SADDR = (uint32_t)src_buff_address;
-//    4. Source address offset after each write is set to N* L*2.
-    DMA0->TCD[0].SOFF = L; // 2LN
-//    5. Source address offset for the end of major loop is set to –[(N*2) * (L*3) – L].
-    DMA0->TCD[0].SLAST = -2*N*L; // at the completition of the major it count
-//    6. Destination address is initialized and fixed to the I2S_TX0 register.
+    DMA0->TCD[0].SOFF = L;
+    DMA0->TCD[0].SLAST = 0 ;
     DMA0->TCD[0].DADDR = (uint32_t)i2s_tx0_reg_address;
-
-//    7. Destination address offset after each write is set to 0.
     DMA0->TCD[0].DOFF = L; // ✓
-//    8. Destination address offset for the end of major loop is set to 0.
-    DMA0->TCD[0].DLAST_SGA = -2*N*L; // ✓
-
-//    9. Major loop count is set to N*2.
+    DMA0->TCD[0].DLAST_SGA = 0; // ✓
     DMA0->TCD[0].BITER_ELINKNO = DMA_BITER_ELINKNO_BITER(N*2);
     DMA0->TCD[0].CITER_ELINKNO = DMA_CITER_ELINKNO_CITER(N*2);
-
-//    10. Enable half interrupt.
 	DMA0->TCD[0].CSR = DMA_CSR_INTHALF_MASK | DMA_CSR_INTMAJOR_MASK; // The half-point interrupt is enabled.
 
-	DMA0->SERQ = DMA_SERQ_SERQ(0); // nada
+	/* Enable the DMA interrupts. */
+	NVIC_EnableIRQ(DMA0_IRQn);
+
+//
+//	DMA0->SERQ = DMA_SERQ_SERQ(0); // nada
 
 	DMA0->TCD[0].ATTR = DMA_ATTR_SSIZE(size_bit) |
-						DMA_ATTR_DSIZE(size_bit) ;
-						//| DMA_ATTR_SMOD(2);; // 2 => circular buffer with modulus 4
-
-
+						DMA_ATTR_DSIZE(size_bit) |
+						DMA_ATTR_SMOD(4) |
+						DMA_ATTR_DMOD(4); // => circular buffer with modulus 4
 }
 
 void DMA0_ConfigPingPongBuffer(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
@@ -89,8 +74,7 @@ void DMA0_ConfigPingPongBuffer(uint32_t N, uint32_t L, uint32_t * src_buff_addre
 
 	/* Clear all the pending events. */
 	NVIC_ClearPendingIRQ(DMA0_IRQn);
-	/* Enable the DMA interrupts. */
-	NVIC_EnableIRQ(DMA0_IRQn);
+
 
 //    1. Minor loop offset is enabled and it is applied to source address only; value: L – [(N *2) * (L*2)].
 //and 2. Minor loop transfer count is set to L*2.
@@ -121,6 +105,9 @@ void DMA0_ConfigPingPongBuffer(uint32_t N, uint32_t L, uint32_t * src_buff_addre
 
 //    10. Enable half interrupt.
 	DMA0->TCD[0].CSR = DMA_CSR_INTHALF_MASK | DMA_CSR_INTMAJOR_MASK; // The half-point interrupt is enabled.
+
+	/* Enable the DMA interrupts. */
+	NVIC_EnableIRQ(DMA0_IRQn);
 
 	DMA0->SERQ = DMA_SERQ_SERQ(0); // nada
 
