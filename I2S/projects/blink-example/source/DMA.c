@@ -134,6 +134,17 @@ void DMA0_GenerateRequest(void){
 __ISR__ DMA0_IRQHandler(void)
 {
 	/* Clear the interrupt flag. */
-	DMA0->CINT |= (1<<16)-1; // w1c,  all interrupts
-	processData();
+	DMA0->CINT |= 1; // w1c,  all interrupts
+	if(DMA0->TCD[0].CITER_ELINKNO == DMA0->TCD[0].BITER_ELINKNO){
+
+	}
+	if(DMA0->TCD[0].BITER_ELINKNO % 2 == 0){
+		if(DMA0->TCD[0].CITER_ELINKNO == (DMA0->TCD[0].BITER_ELINKNO/2)){
+			processData(); // we are in the half
+		}
+	}else{
+		if(DMA0->TCD[0].CITER_ELINKNO == (DMA0->TCD[0].BITER_ELINKNO+1)/2){
+			processData(); // we are in the half
+		}
+	}
 }
