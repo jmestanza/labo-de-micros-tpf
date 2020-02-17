@@ -5,6 +5,8 @@
 
 void (*processData)(void);
 
+
+
 void DMA0_Config(void(*funcallback)(void))
 {
 	processData = funcallback;
@@ -16,6 +18,60 @@ void DMA0_Config(void(*funcallback)(void))
 	DMAMUX->CHCFG[0] = DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE(13);   // I2STx
 	// the weird mask is kDmaRequestMux0I2S0Tx
 	/* Enable the interrupts for the channel 0. */
+
+}
+
+
+void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address){
+	/* Clear all the pending events. */
+	NVIC_ClearPendingIRQ(DMA0_IRQn);
+	/* Enable the DMA interrupts. */
+	NVIC_EnableIRQ(DMA0_IRQn);
+
+
+
+	uint16_t size_bit;
+		switch(L)
+		{
+		case 1: size_bit = transfer_8bit; break;
+		case 2: size_bit = transfer_16bit; break;
+		case 4: size_bit = transfer_32bit; break;
+		default: size_bit = transfer_32bit; break;
+		}
+
+	DMA0->TCD[0].NBYTES_MLOFFYES = DMA_NBYTES_MLOFFYES_SMLOE_MASK |
+								   DMA_NBYTES_MLOFFYES_MLOFF(0) |
+								   DMA_NBYTES_MLOFFYES_NBYTES(L);  // src minor loop offset enable and applied
+
+
+
+//    3. Source address is initialized to buffer base address.
+    DMA0->TCD[0].SADDR = (uint32_t)src_buff_address;
+//    4. Source address offset after each write is set to N* L*2.
+    DMA0->TCD[0].SOFF = L; // 2LN
+//    5. Source address offset for the end of major loop is set to –[(N*2) * (L*3) – L].
+    DMA0->TCD[0].SLAST = -2*N*L; // at the completition of the major it count
+//    6. Destination address is initialized and fixed to the I2S_TX0 register.
+    DMA0->TCD[0].DADDR = (uint32_t)i2s_tx0_reg_address;
+
+//    7. Destination address offset after each write is set to 0.
+    DMA0->TCD[0].DOFF = L; // ✓
+//    8. Destination address offset for the end of major loop is set to 0.
+    DMA0->TCD[0].DLAST_SGA = -2*N*L; // ✓
+
+//    9. Major loop count is set to N*2.
+    DMA0->TCD[0].BITER_ELINKNO = DMA_BITER_ELINKNO_BITER(N*2);
+    DMA0->TCD[0].CITER_ELINKNO = DMA_CITER_ELINKNO_CITER(N*2);
+
+//    10. Enable half interrupt.
+	DMA0->TCD[0].CSR = DMA_CSR_INTHALF_MASK | DMA_CSR_INTMAJOR_MASK; // The half-point interrupt is enabled.
+
+	DMA0->SERQ = DMA_SERQ_SERQ(0); // nada
+
+	DMA0->TCD[0].ATTR = DMA_ATTR_SSIZE(size_bit) |
+						DMA_ATTR_DSIZE(size_bit) ;
+						//| DMA_ATTR_SMOD(2);; // 2 => circular buffer with modulus 4
+
 
 }
 
@@ -91,6 +147,10 @@ void DMA0_DisableRequest(void)
 
 	DMAMUX->CHCFG[0] &= ~(DMAMUX_CHCFG_ENBL_MASK);
 	DMAMUX->CHCFG[0] |= DMAMUX_CHCFG_ENBL(0);
+}
+
+void DMA0_GenerateRequest(void){
+	DMA0->TCD[0].CSR |= DMA_CSR_START(1); // automatically cleared by hardware
 }
 
 __ISR__ DMA0_IRQHandler(void)

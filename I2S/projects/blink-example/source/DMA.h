@@ -28,13 +28,15 @@ typedef enum{
  ******************************************************************************/
 __ISR__ DMA0_IRQHandler(void);
 
-
 void DMA0_Config(void(*funcallback)(void));
 
 void DMA0_ConfigPingPongBuffer(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address);
 
+void DMA0_ConfigClassic(uint32_t N, uint32_t L, uint32_t * src_buff_address, uint32_t * i2s_tx0_reg_address);
 
 void DMA0_EnableRequest(void);
+
+void DMA0_GenerateRequest(void);
 
 void DMA0_DisableRequest(void);
 
