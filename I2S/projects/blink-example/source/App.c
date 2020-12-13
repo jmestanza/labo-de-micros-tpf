@@ -24,7 +24,7 @@
 // 4294967295 = 0x FF FF FF FF
 // 2694881440 = 0x A0 A0 A0 A0
 
-//static uint32_t data[] = {4294967295, 0 , 2694881440, 0 };
+static uint32_t data[] = {4294967295, 0 , 2694881440, 0 };
 
 //uint32_t data[16] __attribute__((aligned(4))) =
 //{
@@ -42,17 +42,17 @@
 //		9,11,13,15
 //};
 
-uint32_t data[32] __attribute__((aligned(1024))) =
-{
-		1, 2, 3, 4, // 4 samples
-		5, 6, 7, 8,
-		9, 10, 11, 12,
-		13,14,15, 16,
-		17,18,19,20,
-		21,22,23,24,
-		25,26,27,28,
-		29,30,31,32
-};
+//uint32_t data[32] __attribute__((aligned(1024))) =
+//{
+//		1, 2, 3, 4, // 4 samples
+//		5, 6, 7, 8,
+//		9, 10, 11, 12,
+//		13,14,15, 16,
+//		17,18,19,20,
+//		21,22,23,24,
+//		25,26,27,28,
+//		29,30,31,32
+//};
 
 uint32_t dst[50] __attribute__((aligned(1024)));
 			 //__attribute__((aligned(4)));
@@ -87,7 +87,7 @@ void App_Init (void)
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
-	//DMA0_GenerateRequest();
+//	DMA0_GenerateRequest();
 }
 
 
