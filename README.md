@@ -13,4 +13,6 @@ Vemos si hay conflictos. Si hay, los resolvemos y sino,
 mergeamos. Una vez mergeada con master, podemos borrar la branch.  
 **Nota**: Si borramos la branch desde el navegador y al ejecutar (localmente) git branch aparece, para borrarla localmente
 corremos 
-- [git branch -d bug-fix]
+- **[git branch -d bug-fix]**  
+Para cambiar de branch usamos (por ejemplo a la branch master)
+- **[git checkout master]**
