@@ -178,65 +178,65 @@ Discarded input sections
  .debug_macro   0x00000000       0x48 ./SDK/CMSIS/system_MK64F12.o
  .debug_macro   0x00000000     0xe07b ./SDK/CMSIS/system_MK64F12.o
  .debug_macro   0x00000000     0x122b ./SDK/CMSIS/system_MK64F12.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .text          0x00000000        0x0 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .data          0x00000000        0x0 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .bss           0x00000000        0x0 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .text          0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .data          0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .bss           0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.portPtrList
-                0x00000000       0x14 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x14 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.gpioPtrList
-                0x00000000       0x14 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x14 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.mode2pcr
-                0x00000000       0x10 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x10 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioMode
-                0x00000000       0x98 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x98 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioWrite
-                0x00000000       0x5c C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x5c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioToggle
-                0x00000000       0x48 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x48 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioRead
-                0x00000000       0x68 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x68 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.parsePin
-                0x00000000       0x42 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_info    0x00000000      0x48c C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_abbrev  0x00000000      0x162 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x42 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_info    0x00000000      0x48c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_abbrev  0x00000000      0x162 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .debug_aranges
-                0x00000000       0x40 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_ranges  0x00000000       0x60 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0xd5 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0xa5a C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0x34e C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x22 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x3a C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x10 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x5c C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x1c C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x22 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0xdf C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0xecf C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x48 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000     0xe07b C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000     0x122b C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x16 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_line    0x00000000      0x1ec C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_str     0x00000000    0x772d6 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .comment       0x00000000       0x7f C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
- .debug_frame   0x00000000       0xc8 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x40 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_ranges  0x00000000       0x60 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0xd5 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0xa5a C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0x34e C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x22 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x3a C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x10 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x5c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x1c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x22 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0xdf C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0xecf C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x48 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000     0xe07b C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000     0x122b C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x16 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_line    0x00000000      0x1ec C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_str     0x00000000    0x772d6 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .comment       0x00000000       0x7f C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_frame   0x00000000       0xc8 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .ARM.attributes
-                0x00000000       0x39 C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x39 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
 
 Memory Configuration
 
@@ -257,7 +257,7 @@ LOAD ./SDK/startup/main.o
 LOAD ./SDK/startup/semihost_hardfault.o
 LOAD ./SDK/startup/startup_mk64f12.o
 LOAD ./SDK/CMSIS/system_MK64F12.o
-LOAD C:/Users/joa-m/Desktop/micros-i2s-viejo/I2S/projects/blink-example/source/gpio.o
+LOAD C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
 START GROUP
 LOAD c:/nxp/mcuxpressoide_10.2.0_759/ide/tools/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libcr_c.a
 LOAD c:/nxp/mcuxpressoide_10.2.0_759/ide/tools/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libcr_eabihelpers.a
@@ -972,22 +972,22 @@ OUTPUT(Blink.axf elf32-littlearm)
  .debug_line    0x00000a13      0x6d8 ./SDK/startup/startup_mk64f12.o
  .debug_line    0x000010eb      0x1c7 ./SDK/CMSIS/system_MK64F12.o
 
-.debug_str      0x00000000    0x78751
+.debug_str      0x00000000    0x7879a
  .debug_str     0x00000000    0x77012 ./source/App.o
                               0x77190 (size before relaxing)
- .debug_str     0x00077012      0xc51 ./source/i2s.o
+ .debug_str     0x00077012      0xc9a ./source/i2s.o
                               0x77e14 (size before relaxing)
- .debug_str     0x00077c63       0x9c ./source/i2s_regedit.o
+ .debug_str     0x00077cac       0x9c ./source/i2s_regedit.o
                               0x70ac9 (size before relaxing)
- .debug_str     0x00077cff      0x178 ./SDK/startup/hardware.o
+ .debug_str     0x00077d48      0x178 ./SDK/startup/hardware.o
                               0x771f9 (size before relaxing)
- .debug_str     0x00077e77       0x1b ./SDK/startup/main.o
+ .debug_str     0x00077ec0       0x1b ./SDK/startup/main.o
                               0x76fcd (size before relaxing)
- .debug_str     0x00077e92       0x36 ./SDK/startup/semihost_hardfault.o
+ .debug_str     0x00077edb       0x36 ./SDK/startup/semihost_hardfault.o
                                0x2d33 (size before relaxing)
- .debug_str     0x00077ec8      0x827 ./SDK/startup/startup_mk64f12.o
+ .debug_str     0x00077f11      0x827 ./SDK/startup/startup_mk64f12.o
                                0x35a1 (size before relaxing)
- .debug_str     0x000786ef       0x62 ./SDK/CMSIS/system_MK64F12.o
+ .debug_str     0x00078738       0x62 ./SDK/CMSIS/system_MK64F12.o
                               0x77108 (size before relaxing)
 
 .comment        0x00000000       0x7e

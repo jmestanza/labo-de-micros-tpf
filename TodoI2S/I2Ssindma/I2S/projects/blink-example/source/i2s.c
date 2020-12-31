@@ -77,7 +77,6 @@ __ISR__ I2S0_Rx_IRQHandler(void){
 
 void i2s_set_pin(pin_t pin, uint8_t mux_alt, bool irqEnabled){
 	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
-
 	sim_ptr->SCGC5 |= SIM_SCGC5_PORTB_MASK; // clk gating port B and C
 	sim_ptr->SCGC5 |= SIM_SCGC5_PORTC_MASK;
 

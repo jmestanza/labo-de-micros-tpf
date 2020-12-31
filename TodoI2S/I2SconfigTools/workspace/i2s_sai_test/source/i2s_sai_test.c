@@ -53,14 +53,104 @@
 
 uint8_t buffer[BUFFER_SIZE] = {10,15,10,15,0,15}; // af af 0f // 24 bits
 
+static I2S_Type * i2s_ptr = I2S0;
+
+
+bool isWordStartFlag(uint32_t csr){
+	return (csr & I2S_TCSR_WSF_MASK) == I2S_TCSR_WSF_MASK;
+}
+
+bool isSyncErrorFlag(uint32_t csr){
+	return (csr & I2S_TCSR_SEF_MASK) == I2S_TCSR_SEF_MASK;
+}
+
+bool isFIFOErrorFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FEF_MASK) == I2S_TCSR_FEF_MASK;
+}
+
+bool isFIFOWarningFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FWF_MASK) == I2S_TCSR_FWF_MASK;
+}
+
+bool isFIFORequestFlag(uint32_t csr){
+	return (csr & I2S_TCSR_FRF_MASK) == I2S_TCSR_FRF_MASK;
+}
+
+
+bool isFIFOFull(uint32_t tranfer_fifo_register_n){
+
+	uint32_t WFP = tranfer_fifo_register_n & I2S_TFR_WFP_MASK;
+	uint32_t RFP = tranfer_fifo_register_n & I2S_TFR_RFP_MASK;
+	uint32_t WFP_MSB = (WFP & (1<<19)) == (1<<19);
+	uint32_t RFP_MSB = (RFP & (1<<3)) == (1<<3);
+	uint32_t WFP_others = ( WFP & ~(1<<19) ) >> 16; // creo que es 16 y no 15, hay que testear
+	uint32_t RFP_others = ( RFP & ~(1<<3) );
+
+	if( (WFP_others == RFP_others) && (WFP_MSB != RFP_MSB) ){
+		return true; // fifo full
+	}else{
+		return false; // fifo not full
+	}
+}
+
+void i2s_send_data(uint32_t msg){
+
+
+//	Transmit Data Register
+//	The corresponding TCR3[TCE] bit must be set before accessing the channel's transmit data register.
+//	Writes to this register when the transmit FIFO is not full
+//  will push the data written into the transmit data
+//	FIFO. Writes to this register when the transmit
+// 	FIFO is full are ignored.
+	uint32_t TFR0 = i2s_ptr->TFR[0];
+	if(!isFIFOFull(TFR0)){
+		i2s_ptr->TDR[0] = msg;
+	}
+
+}
+
+
 void SAI_1_SERIAL_TX_IRQHANDLER(void){
+
+
+	if(isWordStartFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
+	}
+	if(isSyncErrorFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR &= ~I2S_TCSR_SEF_MASK; //  clear the sync error flag w1c
+	}
+	if(isFIFOErrorFlag(i2s_ptr->TCSR)){
+		i2s_ptr->TCSR |= I2S_TCSR_FEF_MASK; //  clear the fifo error flag w1c
+		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
+	}
+	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
+		// Indicates that an enabled transmit FIFO is empty.
+		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
+	}
+	if(isFIFORequestFlag(i2s_ptr->TCSR)){
+		// Indicates that the number of words in an enabled transmit channel FIFO
+		//is less than or equal to the transmit FIFO watermark.
+		i2s_ptr->TCSR &= ~I2S_TCSR_FRF_MASK; //  clear the fifo request flag
+	}
 // aca estan las interrupciones de SAI
 	return;
 }
 
 
+void transferEventCallback(void){
+    PRINTF("Hubo un transfer event Callback\n");
+	return;
+}
+
+
+static SIM_Type* sim_ptr = SIM;
+
 
 int main(void) {
+
+	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
+	sim_ptr->SCGC5 |= SIM_SCGC5_PORTB_MASK; // clk gating port B and C
+	sim_ptr->SCGC5 |= SIM_SCGC5_PORTC_MASK;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
@@ -77,15 +167,13 @@ int main(void) {
     uint32_t size = BUFFER_SIZE;
     uint32_t bitWidth = 24;
 
-//    SAI_TxSoftwareReset(I2S_Type *base, sai_reset_type_t type);
-//    SAI_TxClearStatusFlags();
-//    SAI_TransferTxCreateHandle
-
 
 /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
+
     while(1) {
+    	i2s_send_data(data);
 //    	SAI_WriteBlocking(base, channel, bitWidth, buffer, size);
 //      SAI_TransferSendNonBlocking(base, handle, xfer);
 //    	SAI_WriteData(base, channel, data);

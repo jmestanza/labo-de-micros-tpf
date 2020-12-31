@@ -14,8 +14,6 @@
 #include "fsl_clock.h"
 #include "fsl_i2c.h"
 #include "fsl_uart.h"
-#include "fsl_gpio.h"
-#include "fsl_port.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -46,24 +44,6 @@ extern "C" {
 #define UART_1_PERIPHERAL UART0
 /* Definition of the clock source frequency */
 #define UART_1_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
-
-/* Definitions for BOARD_InitBUTTONsPeripheral functional group */
-/* Alias for GPIOC peripheral */
-#define BOARD_SW2_GPIO GPIOC
-/* Alias for PORTC */
-#define BOARD_SW2_PORT PORTC
-/* SW2 interrupt vector ID (number). */
-#define BOARD_SW2_IRQN PORTC_IRQn
-/* SW2 interrupt handler identifier. */
-#define BOARD_SW2_IRQHANDLER PORTC_IRQHandler
-/* Alias for GPIOA peripheral */
-#define BOARD_SW3_GPIO GPIOA
-/* Alias for PORTA */
-#define BOARD_SW3_PORT PORTA
-/* SW3 interrupt vector ID (number). */
-#define BOARD_SW3_IRQN PORTA_IRQn
-/* SW3 interrupt handler identifier. */
-#define BOARD_SW3_IRQHANDLER PORTA_IRQHandler
 
 /* Definitions for BOARD_InitDEBUG_UARTPeripheral functional group */
 /* Definition of peripheral ID */

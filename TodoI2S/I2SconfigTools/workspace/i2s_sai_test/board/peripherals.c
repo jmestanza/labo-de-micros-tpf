@@ -79,9 +79,9 @@ instance:
           - bitWidth: 'kSAI_WordWidth24bits'
           - stereo: 'kSAI_Stereo'
           - isFrameSyncCompact: 'true'
-          - watermark: '0'
+          - watermark: '4'
           - channelMask: 'kSAI_Channel0Mask'
-        - interrupt_sel: ''
+        - interrupt_sel: 'kSAI_WordStartInterruptEnable kSAI_SyncErrorInterruptEnable kSAI_FIFOWarningInterruptEnable kSAI_FIFOErrorInterruptEnable kSAI_FIFORequestInterruptEnable'
         - interrupt:
           - IRQn: 'I2S0_Tx_IRQn'
           - enable_priority: 'false'
@@ -104,7 +104,7 @@ sai_transfer_format_t SAI_1_tx_format = {
   .bitWidth = kSAI_WordWidth24bits,
   .stereo = kSAI_Stereo,
   .masterClockHz = 6144000UL,
-  .watermark = 0U,
+  .watermark = 4U,
   .channel = 0U,
   .protocol = kSAI_BusI2S,
   .isFrameSyncCompact = true
@@ -115,6 +115,8 @@ void SAI_1_init(void) {
   SAI_TxInit(SAI_1_PERIPHERAL, &SAI_1_tx_config);
   /* Initialize SAI Tx transfer format */
   SAI_TxSetFormat(SAI_1_PERIPHERAL, &SAI_1_tx_format, SAI_1_TX_MCLK_SOURCE_CLOCK_HZ, SAI_1_TX_BCLK_SOURCE_CLOCK_HZ);
+  /* Enable selected Tx interrupts */
+  SAI_TxEnableInterrupts(SAI_1_PERIPHERAL, (kSAI_WordStartInterruptEnable | kSAI_SyncErrorInterruptEnable | kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable));
   /* Enable interrupt I2S0_Tx_IRQn request in the NVIC */
   EnableIRQ(SAI_1_SERIAL_TX_IRQN);
 }
@@ -197,65 +199,6 @@ const uart_config_t UART_1_config = {
 
 void UART_1_init(void) {
   UART_Init(UART_1_PERIPHERAL, &UART_1_config, UART_1_CLOCK_SOURCE);
-}
-
-/***********************************************************************************************************************
- * BOARD_InitBUTTONsPeripheral functional group
- **********************************************************************************************************************/
-/***********************************************************************************************************************
- * SW2 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'SW2'
-- type: 'gpio'
-- mode: 'GPIO'
-- type_id: 'gpio_f970a92e447fa4793838db25a2947ed7'
-- functional_group: 'BOARD_InitBUTTONsPeripheral'
-- peripheral: 'GPIOC'
-- config_sets:
-  - fsl_gpio:
-    - enable_irq: 'true'
-    - port_interrupt:
-      - IRQn: 'PORTC_IRQn'
-      - enable_priority: 'false'
-      - enable_custom_name: 'false'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-
-void BOARD_SW2_init(void) {
-  /* Make sure, the clock gate for port C is enabled (e. g. in pin_mux.c) */
-  /* Enable interrupt PORTC_IRQn request in the NVIC */
-  EnableIRQ(PORTC_IRQn);
-}
-
-/***********************************************************************************************************************
- * SW3 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'SW3'
-- type: 'gpio'
-- mode: 'GPIO'
-- type_id: 'gpio_f970a92e447fa4793838db25a2947ed7'
-- functional_group: 'BOARD_InitBUTTONsPeripheral'
-- peripheral: 'GPIOA'
-- config_sets:
-  - fsl_gpio:
-    - enable_irq: 'true'
-    - port_interrupt:
-      - IRQn: 'PORTA_IRQn'
-      - enable_priority: 'false'
-      - enable_custom_name: 'false'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-
-void BOARD_SW3_init(void) {
-  /* Make sure, the clock gate for port A is enabled (e. g. in pin_mux.c) */
-  /* Enable interrupt PORTA_IRQn request in the NVIC */
-  EnableIRQ(PORTA_IRQn);
 }
 
 /***********************************************************************************************************************
@@ -355,9 +298,6 @@ void BOARD_InitPeripherals(void)
 
 void BOARD_InitBUTTONsPeripheral(void)
 {
-  /* Initialize components */
-  BOARD_SW2_init();
-  BOARD_SW3_init();
 }
 
 void BOARD_InitLEDsPeripheral(void)
