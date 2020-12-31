@@ -37,24 +37,39 @@ void App_Init (void)
     i2s_init();
 }
 
+#define EVENT 500
+
+// deberia tener un timer con la frecuencia de muestreo 48KHz y usar i2s_send_data cada ese tiempo
+
 /* Función que se llama constantemente en un ciclo infinito */
 void App_Run (void)
 {
-//	i2s_send_data(2947526575); // 0xafaf afaf
-//	i2s_send_data(2947485455); // 0xafaf 0f0f // 32 bits
-//	i2s_send_data(11513615); // 0x 00 afaf 0f
-//	i2s_send_data(168756736); // 0x0a 0f 06 00 // 0x0a 0f 06 xx
+	static int i = 0;
+	static int a = 0;
+	// cuando voy a enviar data tengo que habilitar el modulo y cuando termine de mandar
+	// lo deshabilito
 
-//	i2s_send_data(168169216); // 0x0a 0f 06 00 // 0x0a 06 0f 00
-	i2s_send_data(168166912); // 0x0a 06 06 00
+	if(i%EVENT == 0){
+		i2s_send_data(1894778754); // 0x70f00782 = 0x70f007xx
+		a = 5 ;
+
+	}else if((i-(EVENT/2))%EVENT == 0){
+		i2s_send_data(0); // 0x70f00782 = 0x70f007xx
+	}
+
+	i++;
+
+// dependiendo de cuanto deje durar EVENT,
+// si lo hago mas chico aparecen menos frames...?
+// si lo dejo durar mas aparecen mas frames????
+
+// no se porque aparecen tantos frames si lo unico que hice fue escribir 1 dato.
+// lo cual deberia ser exactamente 1 frame...
+
+// es como si quedara informacion en el TDR (Transfer Data register)
 
 
-//	i2s_send_data(0); // 0x0a 0f 06 00 // 0x0f 0f 0f xx
-//	i2s_send_data(0); // 0x0a 0f 06 00 // 0x0f 0f 0f xx
-
-//  toma los 24 bits mas significativos
-
-
+//  toma los 24 bits mas significativos!!!
 // el problema es que es medio random cuando se vacia la FIFO
 
 }

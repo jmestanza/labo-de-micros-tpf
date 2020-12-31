@@ -146,7 +146,7 @@ void i2s_init(void){
 	tx_set_reg_3(& tx_cfg.tx_cfg_3_reg); // dsp de esto sale warning y request fifo
 
 	tx_cfg.tx_cfg_4_reg.frame_size = WORDS_PER_FRAME-1; // (N+1) word per frame
-	tx_cfg.tx_cfg_4_reg.sync_width = 23;//((WORDS_PER_FRAME*WORD_BITS)/2) -1; // #bit_clks_deseados - 1
+	tx_cfg.tx_cfg_4_reg.sync_width = ((WORDS_PER_FRAME*WORD_BITS)/2) -1; // #bit_clks_deseados - 1
 	// esto deberia ser la mitad, para que sea L-R-L-R, pero podria ser L-L-L-R-R-R-...
 
 	// este numero cambia si:
@@ -169,8 +169,8 @@ void i2s_init(void){
 
 
 	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true; // solo es tx
-	tx_cfg.tx_cfg_0_reg.stop_enable = true; // transmitter enabled in stop mode
-	tx_cfg.tx_cfg_0_reg.debug_enable = true; // transmitter enabled in debug mode
+	tx_cfg.tx_cfg_0_reg.stop_enable = false; // transmitter enabled in stop mode
+	tx_cfg.tx_cfg_0_reg.debug_enable = false; // transmitter enabled in debug mode
 	tx_cfg.tx_cfg_0_reg.bit_clock_enable = true; // if Trans. En. is set, this too.
 	//when software clear this field the T.E remains enabled and this bit too until the end of the frame
 	tx_cfg.tx_cfg_0_reg.fifo_reset = false; // should reset when Tx is disabled or the fifo error flag is set
@@ -214,6 +214,7 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 void i2s_send_data(uint32_t msg){
 
 
+
 //	Transmit Data Register
 //	The corresponding TCR3[TCE] bit must be set before accessing the channel's transmit data register.
 //	Writes to this register when the transmit FIFO is not full
@@ -222,12 +223,17 @@ void i2s_send_data(uint32_t msg){
 // 	FIFO is full are ignored.
 	uint32_t TFR0 = i2s_ptr->TFR[0];
 
+
+
 	while(isFIFOFull(TFR0)){
 	}
+
 	if(!isFIFOFull(TFR0)){
 		i2s_ptr->TDR[0] = msg;
 	}
 
 	while(isFIFOFull(TFR0)){
 	}
+
+
 }
