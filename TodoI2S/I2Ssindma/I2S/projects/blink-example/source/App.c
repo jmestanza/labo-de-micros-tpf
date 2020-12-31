@@ -41,7 +41,22 @@ void App_Init (void)
 void App_Run (void)
 {
 //	i2s_send_data(2947526575); // 0xafaf afaf
-	i2s_send_data(2947485455); // 0xafaf 0f0f
+//	i2s_send_data(2947485455); // 0xafaf 0f0f // 32 bits
+//	i2s_send_data(11513615); // 0x 00 afaf 0f
+//	i2s_send_data(168756736); // 0x0a 0f 06 00 // 0x0a 0f 06 xx
+
+//	i2s_send_data(168169216); // 0x0a 0f 06 00 // 0x0a 06 0f 00
+	i2s_send_data(168166912); // 0x0a 06 06 00
+
+
+//	i2s_send_data(0); // 0x0a 0f 06 00 // 0x0f 0f 0f xx
+//	i2s_send_data(0); // 0x0a 0f 06 00 // 0x0f 0f 0f xx
+
+//  toma los 24 bits mas significativos
+
+
+// el problema es que es medio random cuando se vacia la FIFO
+
 }
 
 
