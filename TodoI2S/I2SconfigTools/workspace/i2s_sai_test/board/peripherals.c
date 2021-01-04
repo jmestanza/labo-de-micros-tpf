@@ -79,9 +79,9 @@ instance:
           - bitWidth: 'kSAI_WordWidth24bits'
           - stereo: 'kSAI_Stereo'
           - isFrameSyncCompact: 'true'
-          - watermark: '4'
+          - watermark: '0'
           - channelMask: 'kSAI_Channel0Mask'
-        - interrupt_sel: 'kSAI_WordStartInterruptEnable kSAI_SyncErrorInterruptEnable kSAI_FIFOWarningInterruptEnable kSAI_FIFOErrorInterruptEnable kSAI_FIFORequestInterruptEnable'
+        - interrupt_sel: ''
         - interrupt:
           - IRQn: 'I2S0_Tx_IRQn'
           - enable_priority: 'false'
@@ -104,7 +104,7 @@ sai_transfer_format_t SAI_1_tx_format = {
   .bitWidth = kSAI_WordWidth24bits,
   .stereo = kSAI_Stereo,
   .masterClockHz = 6144000UL,
-  .watermark = 4U,
+  .watermark = 0U,
   .channel = 0U,
   .protocol = kSAI_BusI2S,
   .isFrameSyncCompact = true
@@ -115,8 +115,6 @@ void SAI_1_init(void) {
   SAI_TxInit(SAI_1_PERIPHERAL, &SAI_1_tx_config);
   /* Initialize SAI Tx transfer format */
   SAI_TxSetFormat(SAI_1_PERIPHERAL, &SAI_1_tx_format, SAI_1_TX_MCLK_SOURCE_CLOCK_HZ, SAI_1_TX_BCLK_SOURCE_CLOCK_HZ);
-  /* Enable selected Tx interrupts */
-  SAI_TxEnableInterrupts(SAI_1_PERIPHERAL, (kSAI_WordStartInterruptEnable | kSAI_SyncErrorInterruptEnable | kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable));
   /* Enable interrupt I2S0_Tx_IRQn request in the NVIC */
   EnableIRQ(SAI_1_SERIAL_TX_IRQN);
 }

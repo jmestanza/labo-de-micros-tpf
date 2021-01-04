@@ -798,7 +798,7 @@
                                  <setting name="bitWidth" value="kSAI_WordWidth24bits"/>
                                  <setting name="stereo" value="kSAI_Stereo"/>
                                  <setting name="isFrameSyncCompact" value="true"/>
-                                 <setting name="watermark" value="4"/>
+                                 <setting name="watermark" value="0"/>
                                  <set name="channelMask">
                                     <selected>
                                        <id>kSAI_Channel0Mask</id>
@@ -806,13 +806,7 @@
                                  </set>
                               </struct>
                               <set name="interrupt_sel">
-                                 <selected>
-                                    <id>kSAI_WordStartInterruptEnable</id>
-                                    <id>kSAI_SyncErrorInterruptEnable</id>
-                                    <id>kSAI_FIFOWarningInterruptEnable</id>
-                                    <id>kSAI_FIFOErrorInterruptEnable</id>
-                                    <id>kSAI_FIFORequestInterruptEnable</id>
-                                 </selected>
+                                 <selected/>
                               </set>
                               <struct name="interrupt">
                                  <setting name="IRQn" value="I2S0_Tx_IRQn"/>

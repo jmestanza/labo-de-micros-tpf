@@ -49,9 +49,18 @@
  * @brief   Application entry point.
  */
 
+//SAI_XFER_QUEUE_SIZE
+
 #define BUFFER_SIZE 6
 
-uint8_t buffer[BUFFER_SIZE] = {10,15,10,15,0,15}; // af af 0f // 24 bits
+// EL TAMAÑO DE ESTE BUFFER SIZE TIENE QUE SER IGUAL AL DE SAI_XFER_QUEUE_SIZE
+// para que pueda por ejemplo, mandar en un saque todo el buffer.
+// si es distinto tamaño, cambia la cantidad de datos que manda.
+// por ejemplo si tengo que mandar 6 bytes y el SAI_XFER_QUEUE_SIZE es 4, entonces manda
+// 10 bytes, por algun motivo
+
+
+uint8_t buffer[BUFFER_SIZE] = {0,15,0,15,0,15}; // 0f 0f 0f // 24 bits
 
 static I2S_Type * i2s_ptr = I2S0;
 
@@ -76,7 +85,6 @@ bool isFIFORequestFlag(uint32_t csr){
 	return (csr & I2S_TCSR_FRF_MASK) == I2S_TCSR_FRF_MASK;
 }
 
-
 bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 
 	uint32_t WFP = tranfer_fifo_register_n & I2S_TFR_WFP_MASK;
@@ -93,22 +101,34 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 	}
 }
 
-void i2s_send_data(uint32_t msg){
 
+void cb(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
+	// write callback, here I can write userData
 
-//	Transmit Data Register
-//	The corresponding TCR3[TCE] bit must be set before accessing the channel's transmit data register.
-//	Writes to this register when the transmit FIFO is not full
-//  will push the data written into the transmit data
-//	FIFO. Writes to this register when the transmit
-// 	FIFO is full are ignored.
-	uint32_t TFR0 = i2s_ptr->TFR[0];
-	if(!isFIFOFull(TFR0)){
-		i2s_ptr->TDR[0] = msg;
+	// este callback se llama en diversas situaciones
+	if(handle->state == kStatus_SAI_TxIdle){
+		SAI_TransferTerminateSend(base, handle);
 	}
 
+
+	return;
 }
 
+int user_data;
+sai_handle_t handle = {
+	.state = kStatus_SAI_TxIdle,
+	.callback = cb,
+	.userData = (void *) &user_data,
+	.bitWidth = 24,
+	.channel = 0
+};
+
+sai_transfer_t xfer = {
+	.data = buffer,
+	.dataSize = BUFFER_SIZE
+};
+
+I2S_Type * base = SAI_1_PERIPHERAL;
 
 void SAI_1_SERIAL_TX_IRQHANDLER(void){
 
@@ -125,32 +145,20 @@ void SAI_1_SERIAL_TX_IRQHANDLER(void){
 	}
 	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
 		// Indicates that an enabled transmit FIFO is empty.
-		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
+//		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
+//		emptyFifoCallBack();
+
+		SAI_TransferTxHandleIRQ(base,&handle);
 	}
-	if(isFIFORequestFlag(i2s_ptr->TCSR)){
-		// Indicates that the number of words in an enabled transmit channel FIFO
-		//is less than or equal to the transmit FIFO watermark.
-		i2s_ptr->TCSR &= ~I2S_TCSR_FRF_MASK; //  clear the fifo request flag
-	}
+
+// (!) FIFORequestFlag se clearea automaticamente, no hay que escribirlo
+
 // aca estan las interrupciones de SAI
 	return;
 }
 
 
-void transferEventCallback(void){
-    PRINTF("Hubo un transfer event Callback\n");
-	return;
-}
-
-
-static SIM_Type* sim_ptr = SIM;
-
-
 int main(void) {
-
-	sim_ptr->SCGC6 |= SIM_SCGC6_I2S_MASK;  // module clk gating
-	sim_ptr->SCGC5 |= SIM_SCGC5_PORTB_MASK; // clk gating port B and C
-	sim_ptr->SCGC5 |= SIM_SCGC5_PORTC_MASK;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
@@ -161,22 +169,22 @@ int main(void) {
 
     PRINTF("Hello World\n");
 
-    I2S_Type * base = SAI_1_PERIPHERAL;
-    uint32_t channel = 0;
-    uint32_t data = 11472646; // 0xaf0f06
-    uint32_t size = BUFFER_SIZE;
-    uint32_t bitWidth = 24;
-
-
 /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
-
+    bool first = true;
     while(1) {
-    	i2s_send_data(data);
-//    	SAI_WriteBlocking(base, channel, bitWidth, buffer, size);
-//      SAI_TransferSendNonBlocking(base, handle, xfer);
-//    	SAI_WriteData(base, channel, data);
+    	if(first){
+        	SAI_TransferSendNonBlocking(base, &handle, &xfer);
+        	first = false;
+    	}
+    	if(first == false){
+    		SAI_TransferTerminateSend(base, &handle);
+    	}
+
+    	// constantemente hay interrupciones de que se vacia la FIFO,
+    	// TerminateSend hace que no se preste atencion a esas interrupciones
+
         i++ ;
     }
     return 0 ;

@@ -178,65 +178,65 @@ Discarded input sections
  .debug_macro   0x00000000       0x48 ./SDK/CMSIS/system_MK64F12.o
  .debug_macro   0x00000000     0xe07b ./SDK/CMSIS/system_MK64F12.o
  .debug_macro   0x00000000     0x122b ./SDK/CMSIS/system_MK64F12.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .group         0x00000000        0xc C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .text          0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .data          0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .bss           0x00000000        0x0 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .group         0x00000000        0xc C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .text          0x00000000        0x0 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .data          0x00000000        0x0 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .bss           0x00000000        0x0 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.portPtrList
-                0x00000000       0x14 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x14 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.gpioPtrList
-                0x00000000       0x14 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x14 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .rodata.mode2pcr
-                0x00000000       0x10 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x10 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioMode
-                0x00000000       0x98 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x98 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioWrite
-                0x00000000       0x5c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x5c C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioToggle
-                0x00000000       0x48 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x48 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.gpioRead
-                0x00000000       0x68 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x68 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .text.parsePin
-                0x00000000       0x42 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_info    0x00000000      0x48c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_abbrev  0x00000000      0x162 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x42 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_info    0x00000000      0x48c C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_abbrev  0x00000000      0x162 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .debug_aranges
-                0x00000000       0x40 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_ranges  0x00000000       0x60 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0xd5 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0xa5a C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0x34e C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x22 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x3a C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x10 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x5c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x1c C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x22 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0xdf C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000      0xecf C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x48 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000     0xe07b C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000     0x122b C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_macro   0x00000000       0x16 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_line    0x00000000      0x1ec C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_str     0x00000000    0x772d6 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .comment       0x00000000       0x7f C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
- .debug_frame   0x00000000       0xc8 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x40 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_ranges  0x00000000       0x60 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0xd5 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0xa5a C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0x34e C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x22 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x3a C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x10 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x5c C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x1c C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x22 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0xdf C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000      0xecf C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x48 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000     0xe07b C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000     0x122b C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_macro   0x00000000       0x16 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_line    0x00000000      0x1ec C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_str     0x00000000    0x772d6 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .comment       0x00000000       0x7f C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+ .debug_frame   0x00000000       0xc8 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
  .ARM.attributes
-                0x00000000       0x39 C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+                0x00000000       0x39 C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
 
 Memory Configuration
 
@@ -257,7 +257,7 @@ LOAD ./SDK/startup/main.o
 LOAD ./SDK/startup/semihost_hardfault.o
 LOAD ./SDK/startup/startup_mk64f12.o
 LOAD ./SDK/CMSIS/system_MK64F12.o
-LOAD C:/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
+LOAD C:/Github Repos/labo-de-micros-tpf/TodoI2S/I2Ssindma/I2S/projects/blink-example/source/gpio.o
 START GROUP
 LOAD c:/nxp/mcuxpressoide_10.2.0_759/ide/tools/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libcr_c.a
 LOAD c:/nxp/mcuxpressoide_10.2.0_759/ide/tools/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libcr_eabihelpers.a
@@ -974,23 +974,23 @@ OUTPUT(Blink.axf elf32-littlearm)
  .debug_line    0x00000a2d      0x6d8 ./SDK/startup/startup_mk64f12.o
  .debug_line    0x00001105      0x1c7 ./SDK/CMSIS/system_MK64F12.o
 
-.debug_str      0x00000000    0x7877a
- .debug_str     0x00000000    0x7701c ./source/App.o
-                              0x7719a (size before relaxing)
- .debug_str     0x0007701c      0xc70 ./source/i2s.o
-                              0x77e33 (size before relaxing)
- .debug_str     0x00077c8c       0x9c ./source/i2s_regedit.o
-                              0x70ac9 (size before relaxing)
- .debug_str     0x00077d28      0x178 ./SDK/startup/hardware.o
-                              0x771f9 (size before relaxing)
- .debug_str     0x00077ea0       0x1b ./SDK/startup/main.o
-                              0x76fcd (size before relaxing)
- .debug_str     0x00077ebb       0x36 ./SDK/startup/semihost_hardfault.o
-                               0x2d33 (size before relaxing)
- .debug_str     0x00077ef1      0x827 ./SDK/startup/startup_mk64f12.o
-                               0x35a1 (size before relaxing)
- .debug_str     0x00078718       0x62 ./SDK/CMSIS/system_MK64F12.o
-                              0x77108 (size before relaxing)
+.debug_str      0x00000000    0x78787
+ .debug_str     0x00000000    0x77029 ./source/App.o
+                              0x771a7 (size before relaxing)
+ .debug_str     0x00077029      0xc70 ./source/i2s.o
+                              0x77e40 (size before relaxing)
+ .debug_str     0x00077c99       0x9c ./source/i2s_regedit.o
+                              0x70ad6 (size before relaxing)
+ .debug_str     0x00077d35      0x178 ./SDK/startup/hardware.o
+                              0x77206 (size before relaxing)
+ .debug_str     0x00077ead       0x1b ./SDK/startup/main.o
+                              0x76fda (size before relaxing)
+ .debug_str     0x00077ec8       0x36 ./SDK/startup/semihost_hardfault.o
+                               0x2d40 (size before relaxing)
+ .debug_str     0x00077efe      0x827 ./SDK/startup/startup_mk64f12.o
+                               0x35ae (size before relaxing)
+ .debug_str     0x00078725       0x62 ./SDK/CMSIS/system_MK64F12.o
+                              0x77115 (size before relaxing)
 
 .comment        0x00000000       0x7e
  .comment       0x00000000       0x7e ./source/App.o
