@@ -168,7 +168,10 @@ void i2s_init(void){
 	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
 
 
-	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true; // solo es tx
+//	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true; // solo es tx
+	tx_cfg.tx_cfg_0_reg.rx_tx_enable = false; // solo es tx
+
+
 	tx_cfg.tx_cfg_0_reg.stop_enable = false; // transmitter enabled in stop mode
 	tx_cfg.tx_cfg_0_reg.debug_enable = false; // transmitter enabled in debug mode
 	tx_cfg.tx_cfg_0_reg.bit_clock_enable = true; // if Trans. En. is set, this too.
@@ -213,8 +216,6 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 
 void i2s_send_data(uint32_t msg){
 
-
-
 //	Transmit Data Register
 //	The corresponding TCR3[TCE] bit must be set before accessing the channel's transmit data register.
 //	Writes to this register when the transmit FIFO is not full
@@ -237,27 +238,18 @@ void i2s_send_data(uint32_t msg){
 
 }
 
-//void SAI_TxEnable(I2S_Type *base, bool enable)
-//{
-//    if (enable)
-//    {
-//        /* If clock is sync with Rx, should enable RE bit. */
-//        if (((base->TCR2 & I2S_TCR2_SYNC_MASK) >> I2S_TCR2_SYNC_SHIFT) == 0x1U)
-//        {
-//            base->RCSR = ((base->RCSR & 0xFFE3FFFFU) | I2S_RCSR_RE_MASK);
-//        }
-//        base->TCSR = ((base->TCSR & 0xFFE3FFFFU) | I2S_TCSR_TE_MASK);
-//        /* Also need to clear the FIFO error flag before start */
-//        SAI_TxClearStatusFlags(base, kSAI_FIFOErrorFlag);
-//    }
-//    else
-//    {
-//        /* If RE not sync with TE, than disable TE, otherwise, shall not disable TE */
-//        if (((base->RCR2 & I2S_RCR2_SYNC_MASK) >> I2S_RCR2_SYNC_SHIFT) != 0x1U)
-//        {
-//            /* Should not close RE even sync with Rx */
-//            base->TCSR = ((base->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
-//        }
-//    }
-//}
+
+void i2s_enable_tx(void){
+	i2s_ptr->TCSR |= I2S_TCSR_TE_MASK;
+}
+
+void i2s_disable_tx(void){
+	i2s_ptr->TCSR &= ~I2S_TCSR_TE_MASK;
+}
+
+void i2s_reset_tx_fifo(void){
+	i2s_ptr->TCSR = I2S_TCSR_FR_MASK;
+}
+
+
 

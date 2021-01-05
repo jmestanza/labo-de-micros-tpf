@@ -27,4 +27,10 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n);
 
 void i2s_send_data(uint32_t msg);
 
+void i2s_enable_tx(void);
+
+void i2s_disable_tx(void);
+
+void i2s_reset_tx_fifo(void);
+
 #endif /* I2S_H_ */
