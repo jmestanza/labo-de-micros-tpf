@@ -49,9 +49,13 @@
  * @brief   Application entry point.
  */
 
+
+
+
 //SAI_XFER_QUEUE_SIZE
 
-#define BUFFER_SIZE 6
+
+#define BUFFER_SIZE 4
 
 // EL TAMAÑO DE ESTE BUFFER SIZE TIENE QUE SER IGUAL AL DE SAI_XFER_QUEUE_SIZE
 // para que pueda por ejemplo, mandar en un saque todo el buffer.
@@ -60,7 +64,10 @@
 // 10 bytes, por algun motivo
 
 
-uint8_t buffer[BUFFER_SIZE] = {0,15,0,15,0,15}; // 0f 0f 0f // 24 bits
+uint8_t buffer[BUFFER_SIZE] = {0xA0,0xC0,0xF0,0xE0}; // words de 16 bits
+// primera word = 0xC0A0
+// segunda word = 0xE0F0
+
 
 static I2S_Type * i2s_ptr = I2S0;
 
@@ -101,26 +108,44 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 	}
 }
 
-
-void cb(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
+size_t count;
+void callback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
 	// write callback, here I can write userData
 
+	// (!) handle->state es distinto a los states de status
+
 	// este callback se llama en diversas situaciones
-	if(handle->state == kStatus_SAI_TxIdle){
-		SAI_TransferTerminateSend(base, handle);
+	if(handle->state == 0){ // sai busy
+
+//		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
+	}else if(handle->state == 1){ // sai idle
+
+	}else if(handle->state == 2){ // sai error
+
 	}
 
+	if(status == kStatus_SAI_TxError){
 
+	}
+
+	if(status == kStatus_SAI_TxIdle){
+
+		// aca deberia haber terminado de mandar todo
+		int a = 5;
+	}
 	return;
 }
 
 int user_data;
+
+
 sai_handle_t handle = {
-	.state = kStatus_SAI_TxIdle,
-	.callback = cb,
+	.state = 1, // sai idle
+	.callback = callback,
 	.userData = (void *) &user_data,
-	.bitWidth = 24,
-	.channel = 0
+	.bitWidth = 16,
+	.channel = 0,
+	.watermark = 0
 };
 
 sai_transfer_t xfer = {
@@ -130,8 +155,11 @@ sai_transfer_t xfer = {
 
 I2S_Type * base = SAI_1_PERIPHERAL;
 
+bool first_interrupt = true;
+
 void SAI_1_SERIAL_TX_IRQHANDLER(void){
 
+	SAI_TxDisableInterrupts(base, kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable);
 
 	if(isWordStartFlag(i2s_ptr->TCSR)){
 		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
@@ -145,17 +173,23 @@ void SAI_1_SERIAL_TX_IRQHANDLER(void){
 	}
 	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
 		// Indicates that an enabled transmit FIFO is empty.
-//		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
-//		emptyFifoCallBack();
-
+		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
 		SAI_TransferTxHandleIRQ(base,&handle);
+	}
+
+	if(isFIFORequestFlag(i2s_ptr->TCSR)){
+		int a = 5;
+//		SAI_TransferTerminateSend(base, &handle);
 	}
 
 // (!) FIFORequestFlag se clearea automaticamente, no hay que escribirlo
 
+	SAI_TxEnableInterrupts(base, kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable);
+
 // aca estan las interrupciones de SAI
 	return;
 }
+
 
 
 int main(void) {
@@ -172,19 +206,10 @@ int main(void) {
 /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
-    bool first = true;
     while(1) {
-    	if(first){
+    	if(i==0){
         	SAI_TransferSendNonBlocking(base, &handle, &xfer);
-        	first = false;
     	}
-    	if(first == false){
-    		SAI_TransferTerminateSend(base, &handle);
-    	}
-
-    	// constantemente hay interrupciones de que se vacia la FIFO,
-    	// TerminateSend hace que no se preste atencion a esas interrupciones
-
         i++ ;
     }
     return 0 ;

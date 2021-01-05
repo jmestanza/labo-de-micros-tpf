@@ -235,30 +235,29 @@ void i2s_send_data(uint32_t msg){
 	while(isFIFOFull(TFR0)){
 	}
 
-
 }
 
-void SAI_TxEnable(I2S_Type *base, bool enable)
-{
-    if (enable)
-    {
-        /* If clock is sync with Rx, should enable RE bit. */
-        if (((base->TCR2 & I2S_TCR2_SYNC_MASK) >> I2S_TCR2_SYNC_SHIFT) == 0x1U)
-        {
-            base->RCSR = ((base->RCSR & 0xFFE3FFFFU) | I2S_RCSR_RE_MASK);
-        }
-        base->TCSR = ((base->TCSR & 0xFFE3FFFFU) | I2S_TCSR_TE_MASK);
-        /* Also need to clear the FIFO error flag before start */
-        SAI_TxClearStatusFlags(base, kSAI_FIFOErrorFlag);
-    }
-    else
-    {
-        /* If RE not sync with TE, than disable TE, otherwise, shall not disable TE */
-        if (((base->RCR2 & I2S_RCR2_SYNC_MASK) >> I2S_RCR2_SYNC_SHIFT) != 0x1U)
-        {
-            /* Should not close RE even sync with Rx */
-            base->TCSR = ((base->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
-        }
-    }
-}
+//void SAI_TxEnable(I2S_Type *base, bool enable)
+//{
+//    if (enable)
+//    {
+//        /* If clock is sync with Rx, should enable RE bit. */
+//        if (((base->TCR2 & I2S_TCR2_SYNC_MASK) >> I2S_TCR2_SYNC_SHIFT) == 0x1U)
+//        {
+//            base->RCSR = ((base->RCSR & 0xFFE3FFFFU) | I2S_RCSR_RE_MASK);
+//        }
+//        base->TCSR = ((base->TCSR & 0xFFE3FFFFU) | I2S_TCSR_TE_MASK);
+//        /* Also need to clear the FIFO error flag before start */
+//        SAI_TxClearStatusFlags(base, kSAI_FIFOErrorFlag);
+//    }
+//    else
+//    {
+//        /* If RE not sync with TE, than disable TE, otherwise, shall not disable TE */
+//        if (((base->RCR2 & I2S_RCR2_SYNC_MASK) >> I2S_RCR2_SYNC_SHIFT) != 0x1U)
+//        {
+//            /* Should not close RE even sync with Rx */
+//            base->TCSR = ((base->TCSR & 0xFFE3FFFFU) & (~I2S_TCSR_TE_MASK));
+//        }
+//    }
+//}
 

@@ -198,7 +198,7 @@ typedef struct _sai_config
 } sai_config_t;
 
 /*!@brief SAI transfer queue size, user can refine it according to use case. */
-#define SAI_XFER_QUEUE_SIZE (6)
+#define SAI_XFER_QUEUE_SIZE (4)
 
 /*! @brief Audio sample rate */
 typedef enum _sai_sample_rate

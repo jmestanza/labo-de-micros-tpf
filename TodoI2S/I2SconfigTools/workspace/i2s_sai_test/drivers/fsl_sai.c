@@ -1096,7 +1096,7 @@ void SAI_TransferTerminateSend(I2S_Type *base, sai_handle_t *handle)
     assert(handle);
 
     /* Abort the current transfer */
-    SAI_TransferAbortSend(base, handle);
+    SAI_TransferAbortSend(base, handle); // aca por alguna razon se escribe en el TDR
 
     /* Clear all the internal information */
     memset(handle->saiQueue, 0U, sizeof(handle->saiQueue));

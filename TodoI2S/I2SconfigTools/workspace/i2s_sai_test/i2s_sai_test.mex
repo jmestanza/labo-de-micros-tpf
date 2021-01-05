@@ -795,7 +795,7 @@
                               </struct>
                               <struct name="transfer_format">
                                  <setting name="sampleRate_Hz" value="kSAI_SampleRate44100Hz"/>
-                                 <setting name="bitWidth" value="kSAI_WordWidth24bits"/>
+                                 <setting name="bitWidth" value="kSAI_WordWidth16bits"/>
                                  <setting name="stereo" value="kSAI_Stereo"/>
                                  <setting name="isFrameSyncCompact" value="true"/>
                                  <setting name="watermark" value="0"/>

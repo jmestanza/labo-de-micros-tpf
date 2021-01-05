@@ -76,7 +76,7 @@ instance:
           - bitClockSource: 'kSAI_BclkSourceMclkDiv'
         - transfer_format:
           - sampleRate_Hz: 'kSAI_SampleRate44100Hz'
-          - bitWidth: 'kSAI_WordWidth24bits'
+          - bitWidth: 'kSAI_WordWidth16bits'
           - stereo: 'kSAI_Stereo'
           - isFrameSyncCompact: 'true'
           - watermark: '0'
@@ -101,7 +101,7 @@ const sai_config_t SAI_1_tx_config = {
 /* SAI_1 Tx  transfer format */
 sai_transfer_format_t SAI_1_tx_format = {
   .sampleRate_Hz = kSAI_SampleRate44100Hz,
-  .bitWidth = kSAI_WordWidth24bits,
+  .bitWidth = kSAI_WordWidth16bits,
   .stereo = kSAI_Stereo,
   .masterClockHz = 6144000UL,
   .watermark = 0U,
