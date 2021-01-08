@@ -283,7 +283,11 @@ void SAI_TxInit(I2S_Type *base, const sai_config_t *config)
         case kSAI_BusI2S:
             base->TCR2 |= I2S_TCR2_BCP_MASK;
             base->TCR3 &= ~I2S_TCR3_WDFL_MASK;
-            base->TCR4 = I2S_TCR4_MF(1U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(1U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
+
+            /*MODIFIED*/
+//            base->TCR4 = I2S_TCR4_MF(1U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(1U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
+            base->TCR4 = I2S_TCR4_MF(1U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(0U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
+
             break;
 
         case kSAI_BusPCMA:
@@ -724,7 +728,7 @@ void SAI_TxSetFormat(I2S_Type *base,
     {
         if (base->TCR4 & I2S_TCR4_MF_MASK)
         {
-            base->TCR5 = I2S_TCR5_WNW(val) | I2S_TCR5_W0W(val) | I2S_TCR5_FBT(format->bitWidth - 1);
+            base->TCR5 = I2S_TCR5_WNW(val) | I2S_TCR5_W0W(val) | I2S_TCR5_FBT(15);
         }
         else
         {

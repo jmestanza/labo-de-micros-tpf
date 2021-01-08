@@ -717,6 +717,16 @@
                   <data type="Version">2.1.5</data>
                </feature>
             </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="PIT Driver not found in the toolchain/IDE project." problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="Unsupported version of the PIT Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="compatible">
+                  <data type="Version">2.0.0</data>
+               </feature>
+            </dependency>
          </dependencies>
          <peripherals_profile>
             <processor_version>4.0.1</processor_version>
@@ -776,6 +786,11 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="SAI_1" type="sai" type_id="sai_e171ee1d4e17db4b5b234f946b59a148" mode="interrupts" peripheral="I2S0" enabled="true">
@@ -783,7 +798,7 @@
                         <struct name="mclk_config">
                            <setting name="masterClockSource" value="kSAI_MclkSourceSysclk"/>
                            <setting name="masterClockSourceFreq" value="BOARD_BootClockRUN"/>
-                           <setting name="masterClockFrequency" value="6.144 MHz"/>
+                           <setting name="masterClockFrequency" value="12.288 MHz"/>
                         </struct>
                         <setting name="usage" value="playback"/>
                         <struct name="whole">
@@ -794,11 +809,11 @@
                                  <setting name="bitClockSource" value="kSAI_BclkSourceMclkDiv"/>
                               </struct>
                               <struct name="transfer_format">
-                                 <setting name="sampleRate_Hz" value="kSAI_SampleRate44100Hz"/>
+                                 <setting name="sampleRate_Hz" value="kSAI_SampleRate48KHz"/>
                                  <setting name="bitWidth" value="kSAI_WordWidth16bits"/>
                                  <setting name="stereo" value="kSAI_Stereo"/>
                                  <setting name="isFrameSyncCompact" value="true"/>
-                                 <setting name="watermark" value="0"/>
+                                 <setting name="watermark" value="4"/>
                                  <set name="channelMask">
                                     <selected>
                                        <id>kSAI_Channel0Mask</id>
@@ -844,6 +859,29 @@
                            <setting name="enableTx" value="true"/>
                            <setting name="enableRx" value="true"/>
                         </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="PIT_1" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true">
+                     <config_set name="fsl_pit">
+                        <setting name="enableRunInDebug" value="false"/>
+                        <struct name="timingConfig">
+                           <setting name="clockSource" value="BusInterfaceClock"/>
+                           <setting name="clockSourceFreq" value="GetFreq"/>
+                        </struct>
+                        <array name="channels">
+                           <struct name="0">
+                              <setting name="channelNumber" value="0"/>
+                              <setting name="enableChain" value="false"/>
+                              <setting name="timerPeriod" value="48000Hz"/>
+                              <setting name="startTimer" value="true"/>
+                              <setting name="enableInterrupt" value="true"/>
+                              <struct name="interrupt">
+                                 <setting name="IRQn" value="PIT0_IRQn"/>
+                                 <setting name="enable_priority" value="false"/>
+                                 <setting name="enable_custom_name" value="false"/>
+                              </struct>
+                           </struct>
+                        </array>
                      </config_set>
                   </instance>
                </instances>

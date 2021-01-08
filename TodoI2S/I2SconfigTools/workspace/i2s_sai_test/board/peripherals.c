@@ -66,7 +66,7 @@ instance:
     - mclk_config:
       - masterClockSource: 'kSAI_MclkSourceSysclk'
       - masterClockSourceFreq: 'BOARD_BootClockRUN'
-      - masterClockFrequency: '6.144 MHz'
+      - masterClockFrequency: '12.288 MHz'
     - usage: 'playback'
     - whole:
       - tx_group:
@@ -75,11 +75,11 @@ instance:
           - syncMode: 'kSAI_ModeAsync'
           - bitClockSource: 'kSAI_BclkSourceMclkDiv'
         - transfer_format:
-          - sampleRate_Hz: 'kSAI_SampleRate44100Hz'
+          - sampleRate_Hz: 'kSAI_SampleRate48KHz'
           - bitWidth: 'kSAI_WordWidth16bits'
           - stereo: 'kSAI_Stereo'
           - isFrameSyncCompact: 'true'
-          - watermark: '0'
+          - watermark: '4'
           - channelMask: 'kSAI_Channel0Mask'
         - interrupt_sel: ''
         - interrupt:
@@ -100,11 +100,11 @@ const sai_config_t SAI_1_tx_config = {
 };
 /* SAI_1 Tx  transfer format */
 sai_transfer_format_t SAI_1_tx_format = {
-  .sampleRate_Hz = kSAI_SampleRate44100Hz,
+  .sampleRate_Hz = kSAI_SampleRate48KHz,
   .bitWidth = kSAI_WordWidth16bits,
   .stereo = kSAI_Stereo,
-  .masterClockHz = 6144000UL,
-  .watermark = 0U,
+  .masterClockHz = 12288000UL,
+  .watermark = 4U,
   .channel = 0U,
   .protocol = kSAI_BusI2S,
   .isFrameSyncCompact = true
@@ -200,6 +200,54 @@ void UART_1_init(void) {
 }
 
 /***********************************************************************************************************************
+ * PIT_1 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'PIT_1'
+- type: 'pit'
+- mode: 'LPTMR_GENERAL'
+- type_id: 'pit_a4782ba5223c8a2527ba91aeb2bc4159'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'PIT'
+- config_sets:
+  - fsl_pit:
+    - enableRunInDebug: 'false'
+    - timingConfig:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'GetFreq'
+    - channels:
+      - 0:
+        - channelNumber: '0'
+        - enableChain: 'false'
+        - timerPeriod: '48000Hz'
+        - startTimer: 'true'
+        - enableInterrupt: 'true'
+        - interrupt:
+          - IRQn: 'PIT0_IRQn'
+          - enable_priority: 'false'
+          - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const pit_config_t PIT_1_config = {
+  .enableRunInDebug = false
+};
+
+void PIT_1_init(void) {
+  /* Initialize the PIT. */
+  PIT_Init(PIT_1_PERIPHERAL, &PIT_1_config);
+  /* Set channel 0 period to 20.833 µs. */
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
+  /* Enable interrupts from channel 0. */
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
+  /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_0_IRQN);
+  /* Start channel 0. */
+  PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+}
+
+/***********************************************************************************************************************
  * BOARD_InitDEBUG_UARTPeripheral functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -292,6 +340,7 @@ void BOARD_InitPeripherals(void)
   SAI_1_init();
   I2C_1_init();
   UART_1_init();
+  PIT_1_init();
 }
 
 void BOARD_InitBUTTONsPeripheral(void)

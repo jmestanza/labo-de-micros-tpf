@@ -108,7 +108,8 @@ void i2s_init(void){
 
 	tx_config_regs tx_cfg;
 
-	tx_cfg.tx_cfg_1_reg.transmit_fifo_watermark = 7; // max value just in case
+//	tx_cfg.tx_cfg_1_reg.transmit_fifo_watermark = 7; // max value just in case
+	tx_cfg.tx_cfg_1_reg.transmit_fifo_watermark = 0; // max value just in case
 
 	tx_set_reg_1(& tx_cfg.tx_cfg_1_reg);
 
@@ -124,7 +125,7 @@ void i2s_init(void){
 	tx_cfg.tx_cfg_2_reg.bit_clock_direction = true; // bit clk is gneerated internally in Master mode
 	tx_cfg.tx_cfg_2_reg.bit_clock_divide = 4; // divides by (DIV+1)*2
 	// si quiero fs = 48kHz
-	// un sample son 24 bits.
+	// un sample son 24 bits. // No! son 24*2!! ( si es Stereo )
 	// f_bit_clk/24 = fs => si fs = 48KHz => f_bit_clk = 1.152MHz
 
 	// ahora cuanto tengo que dividir mclk para obtener ese bit clk
@@ -168,8 +169,8 @@ void i2s_init(void){
 	tx_set_reg_5(& tx_cfg.tx_cfg_5_reg);
 
 
-//	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true; // solo es tx
-	tx_cfg.tx_cfg_0_reg.rx_tx_enable = false; // solo es tx
+	tx_cfg.tx_cfg_0_reg.rx_tx_enable = true; // solo es tx
+//	tx_cfg.tx_cfg_0_reg.rx_tx_enable = false; // solo es tx
 
 
 	tx_cfg.tx_cfg_0_reg.stop_enable = false; // transmitter enabled in stop mode

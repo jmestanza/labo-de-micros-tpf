@@ -43,6 +43,7 @@
 
 /* TODO: insert other include files here. */
 
+
 /* TODO: insert other definitions and declarations here. */
 
 /*
@@ -55,7 +56,6 @@
 //SAI_XFER_QUEUE_SIZE
 
 
-#define BUFFER_SIZE 4
 
 // EL TAMAÑO DE ESTE BUFFER SIZE TIENE QUE SER IGUAL AL DE SAI_XFER_QUEUE_SIZE
 // para que pueda por ejemplo, mandar en un saque todo el buffer.
@@ -64,7 +64,15 @@
 // 10 bytes, por algun motivo
 
 
-uint8_t buffer[BUFFER_SIZE] = {0xA0,0xC0,0xF0,0xE0}; // words de 16 bits
+//uint8_t buffer[BUFFER_SIZE] = {0xA0,0xC0,0xF0,0xE0}; // words de 16 bits
+
+uint8_t buffer[] = {0xA0,0xC0};
+
+uint8_t dummy_buffer[] = {0xFF,0xFF};
+
+
+//,0xF0,0xE0}; // words de 16 bits
+
 // primera word = 0xC0A0
 // segunda word = 0xE0F0
 
@@ -109,13 +117,15 @@ bool isFIFOFull(uint32_t tranfer_fifo_register_n){
 }
 
 size_t count;
-void callback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
-	// write callback, here I can write userData
+bool stop_transfer = false;
 
+void TxCallback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
+	// write callback, here I can write userData
+    i2s_tranfer_t transfer;
 	// (!) handle->state es distinto a los states de status
 
-	// este callback se llama en diversas situaciones
 	if(handle->state == 0){ // sai busy
+	// este callback se llama en diversas situaciones
 
 //		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
 	}else if(handle->state == 1){ // sai idle
@@ -125,13 +135,14 @@ void callback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userD
 	}
 
 	if(status == kStatus_SAI_TxError){
-
+		// entra aca cuando hubo un error
 	}
 
 	if(status == kStatus_SAI_TxIdle){
-
-		// aca deberia haber terminado de mandar todo
-		int a = 5;
+		// aca deberia haber terminado de mandar todo el buffer!!
+        transfer.data = buffer;
+        transfer.dataSize = sizeof(buffer);
+        I2S_TxTransferNonBlocking(base, handle, transfer);
 	}
 	return;
 }
@@ -139,55 +150,103 @@ void callback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userD
 int user_data;
 
 
-sai_handle_t handle = {
-	.state = 1, // sai idle
-	.callback = callback,
-	.userData = (void *) &user_data,
-	.bitWidth = 16,
-	.channel = 0,
-	.watermark = 0
-};
+//sai_handle_t handle = {
+//	.state = 1, // sai idle
+//	.callback = callback,
+//	.userData = (void *) &user_data,
+//	.bitWidth = 16,
+//	.channel = 0,
+//	.watermark = 4
+//};
 
-sai_transfer_t xfer = {
-	.data = buffer,
-	.dataSize = BUFFER_SIZE
-};
+
+
 
 I2S_Type * base = SAI_1_PERIPHERAL;
 
-bool first_interrupt = true;
+PIT_Type *base_pit =PIT;
 
-void SAI_1_SERIAL_TX_IRQHANDLER(void){
+uint32_t count = 0;
 
-	SAI_TxDisableInterrupts(base, kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable);
+bool sent_data = false;
 
-	if(isWordStartFlag(i2s_ptr->TCSR)){
-		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
+
+void PIT_1_0_IRQHANDLER(void){
+	static bool first = true;
+	PIT_ClearStatusFlags(base_pit,kPIT_Chnl_0, PIT_TFLG_TIF(1)); // w1c
+
+	if(first){
+		SAI_TransferSendNonBlocking(base, &handle, &xfer); // mando el buffer
+		first = false;
+		sent_data = true;
 	}
-	if(isSyncErrorFlag(i2s_ptr->TCSR)){
-		i2s_ptr->TCSR &= ~I2S_TCSR_SEF_MASK; //  clear the sync error flag w1c
-	}
-	if(isFIFOErrorFlag(i2s_ptr->TCSR)){
-		i2s_ptr->TCSR |= I2S_TCSR_FEF_MASK; //  clear the fifo error flag w1c
-		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
-	}
-	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
-		// Indicates that an enabled transmit FIFO is empty.
-		i2s_ptr->TCSR &= ~I2S_TCSR_FWF_MASK; //  clear the fifo warning flag
-		SAI_TransferTxHandleIRQ(base,&handle);
-	}
+	count +=1;
+}
 
-	if(isFIFORequestFlag(i2s_ptr->TCSR)){
-		int a = 5;
-//		SAI_TransferTerminateSend(base, &handle);
-	}
 
-// (!) FIFORequestFlag se clearea automaticamente, no hay que escribirlo
+bool first_request = true;
 
-	SAI_TxEnableInterrupts(base, kSAI_FIFOErrorInterruptEnable | kSAI_FIFORequestInterruptEnable);
+//void SAI_1_SERIAL_TX_IRQHANDLER(void){
+//
+//	static int internal_cnt = 0;
+//
+//	if(isWordStartFlag(i2s_ptr->TCSR)){
+//		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
+//	}
+//	if(isSyncErrorFlag(i2s_ptr->TCSR)){
+//		i2s_ptr->TCSR &= ~I2S_TCSR_SEF_MASK; //  clear the sync error flag w1c
+//	}
+//	if(isFIFOErrorFlag(i2s_ptr->TCSR)){
+//		i2s_ptr->TCSR |= I2S_TCSR_FEF_MASK; //  clear the fifo error flag w1c
+//		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
+//	}
+//	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
+//		// Indicates that an enabled transmit FIFO is empty. Automatic Flag.
+////		SAI_TransferTxHandleIRQ(base,&handle);
+//		// aca no la deberia llamar, porque va a saltar el RequestFlag de todas formas.
+//		// esta flag es solo una warning.
+//	}
+//	if(isFIFORequestFlag(i2s_ptr->TCSR)){
+////		Automatic Flag.Indicates that the number of words in an enabled transmit channel FIFO is less than or equal to the
+////		transmit FIFO watermark.
+//// 		Es decir, dice si la cantidad de words esta igual o por debajo del watermark.
+////		Si esta por debajo => salta la interrupcion. Pidiendo asi, mas datos.
+//
+//		if(!stop_transfer){
+//			SAI_TransferTxHandleIRQ(base,&handle);
+//		}
+//	}
+//// aca estan las interrupciones de SAI
+//	return;
+//}
 
-// aca estan las interrupciones de SAI
-	return;
+
+void startTransfer(){
+
+	//    sai_config_t config;
+	sai_transfer_t transfer;
+	sai_transfer_t someTransfer;
+
+	sai_handle_t handle;
+
+//	SAI_TxGetDefaultConfig(&config);
+	//    config.masterSlave = ;
+	//    config.divider... no existe
+	//    SAI_TxInit(base, config)
+
+
+	SAI_TransferTxCreateHandle(I2S0, &handle, TxCallback, NULL); // no user data
+
+	transfer.data = buffer;
+	transfer.dataSize = sizeof(buffer);
+
+	someTransfer.data = dummy_buffer;
+	someTransfer.dataSize = sizeof(dummy_buffer);
+
+	SAI_TransferSendNonBlocking(I2S0, &handle, &transfer);
+
+    /* Enqueue next buffer right away so there is no drop in audio data stream when the first buffer finishes */
+	SAI_TransferSendNonBlocking(I2S0, &handle, &someTransfer);
 }
 
 
@@ -200,16 +259,14 @@ int main(void) {
     BOARD_InitBootPeripherals();
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
-
     PRINTF("Hello World\n");
+
+    startTransfer();
 
 /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
     while(1) {
-    	if(i==0){
-        	SAI_TransferSendNonBlocking(base, &handle, &xfer);
-    	}
         i++ ;
     }
     return 0 ;
