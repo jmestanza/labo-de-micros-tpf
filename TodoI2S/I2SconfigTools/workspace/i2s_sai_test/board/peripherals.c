@@ -79,7 +79,7 @@ instance:
           - bitWidth: 'kSAI_WordWidth16bits'
           - stereo: 'kSAI_Stereo'
           - isFrameSyncCompact: 'true'
-          - watermark: '4'
+          - watermark: '3'
           - channelMask: 'kSAI_Channel0Mask'
         - interrupt_sel: ''
         - interrupt:
@@ -104,7 +104,7 @@ sai_transfer_format_t SAI_1_tx_format = {
   .bitWidth = kSAI_WordWidth16bits,
   .stereo = kSAI_Stereo,
   .masterClockHz = 12288000UL,
-  .watermark = 4U,
+  .watermark = 3U,
   .channel = 0U,
   .protocol = kSAI_BusI2S,
   .isFrameSyncCompact = true

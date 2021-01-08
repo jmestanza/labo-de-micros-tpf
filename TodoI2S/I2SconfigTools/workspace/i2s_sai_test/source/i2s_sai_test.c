@@ -50,23 +50,7 @@
  * @brief   Application entry point.
  */
 
-
-
-
-//SAI_XFER_QUEUE_SIZE
-
-
-
-// EL TAMAÑO DE ESTE BUFFER SIZE TIENE QUE SER IGUAL AL DE SAI_XFER_QUEUE_SIZE
-// para que pueda por ejemplo, mandar en un saque todo el buffer.
-// si es distinto tamaño, cambia la cantidad de datos que manda.
-// por ejemplo si tengo que mandar 6 bytes y el SAI_XFER_QUEUE_SIZE es 4, entonces manda
-// 10 bytes, por algun motivo
-
-
-//uint8_t buffer[BUFFER_SIZE] = {0xA0,0xC0,0xF0,0xE0}; // words de 16 bits
-
-uint8_t buffer[] = {0xA0,0xC0};
+uint8_t buffer[] = {0xA0,0xC0,0x00,0x00,0xFF,0xFF,0x00,0x00};
 
 uint8_t dummy_buffer[] = {0xFF,0xFF};
 
@@ -77,165 +61,71 @@ uint8_t dummy_buffer[] = {0xFF,0xFF};
 // segunda word = 0xE0F0
 
 
-static I2S_Type * i2s_ptr = I2S0;
-
-
-bool isWordStartFlag(uint32_t csr){
-	return (csr & I2S_TCSR_WSF_MASK) == I2S_TCSR_WSF_MASK;
-}
-
-bool isSyncErrorFlag(uint32_t csr){
-	return (csr & I2S_TCSR_SEF_MASK) == I2S_TCSR_SEF_MASK;
-}
-
-bool isFIFOErrorFlag(uint32_t csr){
-	return (csr & I2S_TCSR_FEF_MASK) == I2S_TCSR_FEF_MASK;
-}
-
-bool isFIFOWarningFlag(uint32_t csr){
-	return (csr & I2S_TCSR_FWF_MASK) == I2S_TCSR_FWF_MASK;
-}
-
-bool isFIFORequestFlag(uint32_t csr){
-	return (csr & I2S_TCSR_FRF_MASK) == I2S_TCSR_FRF_MASK;
-}
-
-bool isFIFOFull(uint32_t tranfer_fifo_register_n){
-
-	uint32_t WFP = tranfer_fifo_register_n & I2S_TFR_WFP_MASK;
-	uint32_t RFP = tranfer_fifo_register_n & I2S_TFR_RFP_MASK;
-	uint32_t WFP_MSB = (WFP & (1<<19)) == (1<<19);
-	uint32_t RFP_MSB = (RFP & (1<<3)) == (1<<3);
-	uint32_t WFP_others = ( WFP & ~(1<<19) ) >> 16; // creo que es 16 y no 15, hay que testear
-	uint32_t RFP_others = ( RFP & ~(1<<3) );
-
-	if( (WFP_others == RFP_others) && (WFP_MSB != RFP_MSB) ){
-		return true; // fifo full
-	}else{
-		return false; // fifo not full
-	}
-}
-
-size_t count;
-bool stop_transfer = false;
+int count = 0;
+uint8_t * buff_pnt = &buffer[0];
 
 void TxCallback(I2S_Type *base, sai_handle_t *handle, status_t status, void *userData){
-	// write callback, here I can write userData
-    i2s_tranfer_t transfer;
-	// (!) handle->state es distinto a los states de status
 
-	if(handle->state == 0){ // sai busy
-	// este callback se llama en diversas situaciones
+//	// write callback, here I can write userData
+//	sai_transfer_t transfer;
+//	if(status == kStatus_SAI_TxIdle){
+//		// aca deberia haber terminado de mandar todo el buffer!! (//https://mcuxpresso.nxp.com/api_doc/dev/1418/a00104.html)
+//
+//		transfer.data = buffer;
+//		transfer.dataSize = sizeof(buffer);
+//
+//		SAI_TransferSendNonBlocking(I2S0, handle, &transfer);
+//	}
+//	count++;
 
-//		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
-	}else if(handle->state == 1){ // sai idle
-
-	}else if(handle->state == 2){ // sai error
-
-	}
-
-	if(status == kStatus_SAI_TxError){
-		// entra aca cuando hubo un error
-	}
-
-	if(status == kStatus_SAI_TxIdle){
-		// aca deberia haber terminado de mandar todo el buffer!!
-        transfer.data = buffer;
-        transfer.dataSize = sizeof(buffer);
-        I2S_TxTransferNonBlocking(base, handle, transfer);
-	}
 	return;
 }
 
 int user_data;
 
 
-//sai_handle_t handle = {
-//	.state = 1, // sai idle
-//	.callback = callback,
-//	.userData = (void *) &user_data,
-//	.bitWidth = 16,
-//	.channel = 0,
-//	.watermark = 4
-//};
-
-
-
-
 I2S_Type * base = SAI_1_PERIPHERAL;
 
-PIT_Type *base_pit =PIT;
+PIT_Type *base_pit = PIT;
 
-uint32_t count = 0;
+sai_handle_t *global_handle;
+
+
 
 bool sent_data = false;
 
 
 void PIT_1_0_IRQHANDLER(void){
-	static bool first = true;
 	PIT_ClearStatusFlags(base_pit,kPIT_Chnl_0, PIT_TFLG_TIF(1)); // w1c
-
-	if(first){
-		SAI_TransferSendNonBlocking(base, &handle, &xfer); // mando el buffer
-		first = false;
-		sent_data = true;
+	if(global_handle){
+		sai_transfer_t transfer;
+		transfer.data = buffer;
+		transfer.dataSize = sizeof(buffer);
+		SAI_TransferSendNonBlocking(I2S0, global_handle, &transfer);
+		count++;
 	}
-	count +=1;
 }
 
-
-bool first_request = true;
-
-//void SAI_1_SERIAL_TX_IRQHANDLER(void){
-//
-//	static int internal_cnt = 0;
-//
-//	if(isWordStartFlag(i2s_ptr->TCSR)){
-//		i2s_ptr->TCSR &= ~I2S_TCSR_WSF_MASK; //  clear the flag, w1c
-//	}
-//	if(isSyncErrorFlag(i2s_ptr->TCSR)){
-//		i2s_ptr->TCSR &= ~I2S_TCSR_SEF_MASK; //  clear the sync error flag w1c
-//	}
-//	if(isFIFOErrorFlag(i2s_ptr->TCSR)){
-//		i2s_ptr->TCSR |= I2S_TCSR_FEF_MASK; //  clear the fifo error flag w1c
-//		i2s_ptr->TCSR |= I2S_TCSR_FR_MASK; // FIFO RESET!
-//	}
-//	if(isFIFOWarningFlag(i2s_ptr->TCSR)){
-//		// Indicates that an enabled transmit FIFO is empty. Automatic Flag.
-////		SAI_TransferTxHandleIRQ(base,&handle);
-//		// aca no la deberia llamar, porque va a saltar el RequestFlag de todas formas.
-//		// esta flag es solo una warning.
-//	}
-//	if(isFIFORequestFlag(i2s_ptr->TCSR)){
-////		Automatic Flag.Indicates that the number of words in an enabled transmit channel FIFO is less than or equal to the
-////		transmit FIFO watermark.
-//// 		Es decir, dice si la cantidad de words esta igual o por debajo del watermark.
-////		Si esta por debajo => salta la interrupcion. Pidiendo asi, mas datos.
-//
-//		if(!stop_transfer){
-//			SAI_TransferTxHandleIRQ(base,&handle);
-//		}
-//	}
-//// aca estan las interrupciones de SAI
-//	return;
-//}
+void configTools_format_to_handle(sai_handle_t * handle){
+	handle->state = 1 ; // sai state
+	handle->bitWidth = SAI_1_tx_format.bitWidth;
+    handle->watermark = SAI_1_tx_format.watermark;
+    handle->channel = SAI_1_tx_format.channel;
+}
 
 
 void startTransfer(){
 
-	//    sai_config_t config;
 	sai_transfer_t transfer;
 	sai_transfer_t someTransfer;
-
 	sai_handle_t handle;
-
-//	SAI_TxGetDefaultConfig(&config);
-	//    config.masterSlave = ;
-	//    config.divider... no existe
-	//    SAI_TxInit(base, config)
 
 
 	SAI_TransferTxCreateHandle(I2S0, &handle, TxCallback, NULL); // no user data
+
+	configTools_format_to_handle(&handle);
+
+	global_handle = &handle;
 
 	transfer.data = buffer;
 	transfer.dataSize = sizeof(buffer);

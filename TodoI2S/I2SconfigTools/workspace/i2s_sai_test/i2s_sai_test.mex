@@ -813,7 +813,7 @@
                                  <setting name="bitWidth" value="kSAI_WordWidth16bits"/>
                                  <setting name="stereo" value="kSAI_Stereo"/>
                                  <setting name="isFrameSyncCompact" value="true"/>
-                                 <setting name="watermark" value="4"/>
+                                 <setting name="watermark" value="3"/>
                                  <set name="channelMask">
                                     <selected>
                                        <id>kSAI_Channel0Mask</id>
