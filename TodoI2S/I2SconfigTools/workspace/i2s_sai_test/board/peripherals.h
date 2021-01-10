@@ -14,7 +14,6 @@
 #include "fsl_clock.h"
 #include "fsl_i2c.h"
 #include "fsl_uart.h"
-#include "fsl_pit.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -45,19 +44,6 @@ extern "C" {
 #define UART_1_PERIPHERAL UART0
 /* Definition of the clock source frequency */
 #define UART_1_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
-/* BOARD_InitPeripherals defines for PIT */
-/* Definition of peripheral ID. */
-#define PIT_1_PERIPHERAL PIT
-/* Definition of clock source. */
-#define PIT_1_CLOCK_SOURCE kCLOCK_BusClk
-/* Definition of clock source frequency. */
-#define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
-/* Definition of ticks count for channel 0. */
-#define PIT_1_0_TICKS USEC_TO_COUNT(20U, PIT_1_CLK_FREQ) - 1U
-/* PIT_1 interrupt vector ID (number). */
-#define PIT_1_0_IRQN PIT0_IRQn
-/* PIT_1 interrupt handler identifier. */
-#define PIT_1_0_IRQHANDLER PIT0_IRQHandler
 
 /* Definitions for BOARD_InitDEBUG_UARTPeripheral functional group */
 /* Definition of peripheral ID */
@@ -81,7 +67,6 @@ extern const sai_config_t SAI_1_tx_config;
 extern sai_transfer_format_t SAI_1_tx_format;
 extern const i2c_master_config_t I2C_1_config;
 extern const uart_config_t UART_1_config;
-extern const pit_config_t PIT_1_config;
 extern const uart_config_t BOARD_DEBUG_UART_config;
 extern const i2c_master_config_t BOARD_ACCEL_I2C_config;
 

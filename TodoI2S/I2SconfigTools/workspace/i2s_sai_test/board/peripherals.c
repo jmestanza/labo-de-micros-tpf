@@ -200,54 +200,6 @@ void UART_1_init(void) {
 }
 
 /***********************************************************************************************************************
- * PIT_1 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'PIT_1'
-- type: 'pit'
-- mode: 'LPTMR_GENERAL'
-- type_id: 'pit_a4782ba5223c8a2527ba91aeb2bc4159'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'PIT'
-- config_sets:
-  - fsl_pit:
-    - enableRunInDebug: 'false'
-    - timingConfig:
-      - clockSource: 'BusInterfaceClock'
-      - clockSourceFreq: 'GetFreq'
-    - channels:
-      - 0:
-        - channelNumber: '0'
-        - enableChain: 'false'
-        - timerPeriod: '48000Hz'
-        - startTimer: 'true'
-        - enableInterrupt: 'true'
-        - interrupt:
-          - IRQn: 'PIT0_IRQn'
-          - enable_priority: 'false'
-          - enable_custom_name: 'false'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-const pit_config_t PIT_1_config = {
-  .enableRunInDebug = false
-};
-
-void PIT_1_init(void) {
-  /* Initialize the PIT. */
-  PIT_Init(PIT_1_PERIPHERAL, &PIT_1_config);
-  /* Set channel 0 period to 20.833 µs. */
-  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
-  /* Enable interrupts from channel 0. */
-  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
-  /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
-  EnableIRQ(PIT_1_0_IRQN);
-  /* Start channel 0. */
-  PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
-}
-
-/***********************************************************************************************************************
  * BOARD_InitDEBUG_UARTPeripheral functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -340,7 +292,6 @@ void BOARD_InitPeripherals(void)
   SAI_1_init();
   I2C_1_init();
   UART_1_init();
-  PIT_1_init();
 }
 
 void BOARD_InitBUTTONsPeripheral(void)
