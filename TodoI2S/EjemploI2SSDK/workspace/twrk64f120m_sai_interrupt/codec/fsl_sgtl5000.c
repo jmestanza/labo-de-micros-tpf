@@ -57,7 +57,8 @@ status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
 
 //    handle->slaveAddress = SGTL5000_I2C_ADDR;
 //    handle->slaveAddress = 0x30U;
-    handle->slaveAddress = 0x18U; // en vez de 30, es 18
+    handle->slaveAddress = 0x18U; // en vez de 30, es 18, pongo A1 = 0
+//    handle->slaveAddress = 0x1AU; // PONGO A1 = 1
 
 // write reg (handle,reg,value)
 

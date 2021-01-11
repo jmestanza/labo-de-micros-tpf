@@ -244,19 +244,17 @@ int main(void)
 //    format.isFrameSyncCompact = false;
     format.isFrameSyncCompact = true;
 
-//#if defined(CODEC_CYCLE)
-//	delayCycle = CODEC_CYCLE;
-//#endif
-//	while (delayCycle)
-//	{
-//		__ASM("nop");
-//		delayCycle--;
-//	}
-//    /* Use default setting to init codec */
-//    CODEC_Init(&codecHandle, &boardCodecConfig);
-//    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
-
-
+#if defined(CODEC_CYCLE)
+	delayCycle = CODEC_CYCLE;
+#endif
+	while (delayCycle)
+	{
+		__ASM("nop");
+		delayCycle--;
+	}
+    /* Use default setting to init codec */
+    CODEC_Init(&codecHandle, &boardCodecConfig);
+    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TxSetFormat(DEMO_SAI, &format, mclkSourceClockHz, format.masterClockHz);
@@ -266,18 +264,6 @@ int main(void)
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable);
     SAI_TxEnable(DEMO_SAI, true);
 
-	#if defined(CODEC_CYCLE)
-		delayCycle = CODEC_CYCLE;
-	#endif
-		while (delayCycle)
-		{
-			__ASM("nop");
-			delayCycle--;
-		}
-
-	/* Use default setting to init codec */
-	CODEC_Init(&codecHandle, &boardCodecConfig);
-	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
     /* Wait until finished */
     while (isFinished != true)
