@@ -457,7 +457,8 @@ uint32_t CLOCK_GetCoreSysClkFreq(void)
 uint32_t CLOCK_GetFreq(clock_name_t clockName)
 {
     uint32_t freq;
-
+    uint32_t clk_div_val;
+    uint32_t out_clk_freq;
     switch (clockName)
     {
         case kCLOCK_CoreSysClk:
@@ -465,6 +466,8 @@ uint32_t CLOCK_GetFreq(clock_name_t clockName)
             freq = CLOCK_GetOutClkFreq() / (SIM_CLKDIV1_OUTDIV1_VAL + 1);
             break;
         case kCLOCK_BusClk:
+        	out_clk_freq = CLOCK_GetOutClkFreq();
+        	clk_div_val =SIM_CLKDIV1_OUTDIV2_VAL + 1;
             freq = CLOCK_GetOutClkFreq() / (SIM_CLKDIV1_OUTDIV2_VAL + 1);
             break;
         case kCLOCK_FlexBusClk:

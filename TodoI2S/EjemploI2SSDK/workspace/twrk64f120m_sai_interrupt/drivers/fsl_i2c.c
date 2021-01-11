@@ -534,6 +534,7 @@ void I2C_MasterInit(I2C_Type *base, const i2c_master_config_t *masterConfig, uin
     I2C_MasterClearStatusFlags(base, kClearFlags);
 
     /* Configure baud rate. */
+    // esto cambia el ICR del registro I2C->F.
     I2C_MasterSetBaudRate(base, masterConfig->baudRate_Bps, srcClock_Hz);
 
     /* Read out the FLT register. */
@@ -558,6 +559,7 @@ void I2C_MasterInit(I2C_Type *base, const i2c_master_config_t *masterConfig, uin
     base->S2 = s2Reg | I2C_S2_DFEN(masterConfig->enableDoubleBuffering);
 #endif
 
+
     /* Enable the I2C peripheral based on the configuration. */
     base->C1 = I2C_C1_IICEN(masterConfig->enableMaster);
 }
@@ -578,7 +580,9 @@ void I2C_MasterGetDefaultConfig(i2c_master_config_t *masterConfig)
     assert(masterConfig);
 
     /* Default baud rate at 100kbps. */
-    masterConfig->baudRate_Bps = 100000U;
+//    masterConfig->baudRate_Bps = 100000U;
+    masterConfig->baudRate_Bps = 400000U;
+
 
 /* Default stop hold enable is disabled. */
 #if defined(FSL_FEATURE_I2C_HAS_STOP_HOLD_OFF) && FSL_FEATURE_I2C_HAS_STOP_HOLD_OFF
@@ -699,6 +703,10 @@ void I2C_MasterSetBaudRate(I2C_Type *base, uint32_t baudRate_Bps, uint32_t srcCl
 
     /* Set frequency register based on best settings. */
     base->F = I2C_F_MULT(bestMult) | I2C_F_ICR(bestIcr);
+    // mult2 => div por 2
+//    base->F = I2C_F_MULT(1) | I2C_F_ICR(0);
+
+    // la que me hizo fue 1C => SCL = 144, SDA_hold_val = 25, SCL_hold_start_value = 70, SCL_hold_stop_value = 73
 }
 
 status_t I2C_MasterStart(I2C_Type *base, uint8_t address, i2c_direction_t direction)

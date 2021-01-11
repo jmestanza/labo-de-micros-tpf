@@ -71,6 +71,9 @@ void BOARD_I2C_Init(I2C_Type *base, uint32_t clkSrc_Hz)
     i2c_master_config_t i2cConfig = {0};
 
     I2C_MasterGetDefaultConfig(&i2cConfig);
+
+
+
     I2C_MasterInit(base, &i2cConfig, clkSrc_Hz);
 }
 

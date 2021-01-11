@@ -265,6 +265,7 @@ void SAI_TxInit(I2S_Type *base, const sai_config_t *config)
 
     SAI_TxReset(base);
 
+
     /* Configure audio protocol */
     switch (config->protocol)
     {

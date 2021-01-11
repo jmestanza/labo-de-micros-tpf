@@ -58,12 +58,12 @@
 #define SAI_TxIRQHandler I2S0_Tx_IRQHandler
 
 
-#define I2C_RELEASE_SDA_PORT PORTD
-#define I2C_RELEASE_SCL_PORT PORTD
-#define I2C_RELEASE_SDA_GPIO GPIOD
-#define I2C_RELEASE_SDA_PIN 9U
-#define I2C_RELEASE_SCL_GPIO GPIOD
-#define I2C_RELEASE_SCL_PIN 8U
+#define I2C_RELEASE_SDA_PORT PORTE//PORTD
+#define I2C_RELEASE_SCL_PORT PORTE//PORTD
+#define I2C_RELEASE_SDA_GPIO GPIOE //D
+#define I2C_RELEASE_SDA_PIN 25U//9U
+#define I2C_RELEASE_SCL_GPIO GPIOE//D
+#define I2C_RELEASE_SCL_PIN 24U//8U
 #define I2C_RELEASE_BUS_COUNT 100U
 //#define OVER_SAMPLE_RATE (384U)
 #define OVER_SAMPLE_RATE (256U)
@@ -94,7 +94,7 @@ static void i2c_release_bus_delay(void)
     }
 }
 
-void BOARD_I2C_ReleaseBus(void)
+void BOARD_I2C_ReleaseBus(void) // de aca viene el 0x7F
 {
     uint8_t i = 0;
     gpio_pin_config_t pin_config;
@@ -106,7 +106,9 @@ void BOARD_I2C_ReleaseBus(void)
 
     pin_config.pinDirection = kGPIO_DigitalOutput;
     pin_config.outputLogic = 1U;
-    CLOCK_EnableClock(kCLOCK_PortD);
+//    CLOCK_EnableClock(kCLOCK_PortD);
+    CLOCK_EnableClock(kCLOCK_PortE);
+
     PORT_SetPinConfig(I2C_RELEASE_SCL_PORT, I2C_RELEASE_SCL_PIN, &i2c_pin_config);
     PORT_SetPinConfig(I2C_RELEASE_SCL_PORT, I2C_RELEASE_SDA_PIN, &i2c_pin_config);
 
@@ -189,12 +191,18 @@ void SAI_TxIRQHandler(void)
 /*!
  * @brief Main function
  */
+
+I2S_Type * base = I2S0;
+SIM_Type * sim = SIM;
+
 int main(void)
 {
+
     sai_config_t config;
     uint32_t mclkSourceClockHz = 0U;
     sai_transfer_format_t format;
-    uint32_t delayCycle = 500000;
+    uint32_t delayCycle = 50000000;
+
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -213,13 +221,17 @@ int main(void)
      * config.mclkOutputEnable = true;
      */
     SAI_TxGetDefaultConfig(&config);
+
     SAI_TxInit(DEMO_SAI, &config);
+
+    base->MCR |= I2S_MCR_MOE(1); // siganme para mas consejos => mclk output enable
+
 
     /* Configure the audio format */
     format.bitWidth = DEMO_SAI_BITWIDTH;
     format.channel = DEMO_SAI_CHANNEL;
-//    format.sampleRate_Hz = kSAI_SampleRate16KHz;
     format.sampleRate_Hz = kSAI_SampleRate16KHz;
+
 
 #if (defined FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER && FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER) || \
     (defined FSL_FEATURE_PCC_HAS_SAI_DIVIDER && FSL_FEATURE_PCC_HAS_SAI_DIVIDER)
@@ -232,19 +244,19 @@ int main(void)
 //    format.isFrameSyncCompact = false;
     format.isFrameSyncCompact = true;
 
+//#if defined(CODEC_CYCLE)
+//	delayCycle = CODEC_CYCLE;
+//#endif
+//	while (delayCycle)
+//	{
+//		__ASM("nop");
+//		delayCycle--;
+//	}
+//    /* Use default setting to init codec */
+//    CODEC_Init(&codecHandle, &boardCodecConfig);
+//    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
-    /* Use default setting to init codec */
-    CODEC_Init(&codecHandle, &boardCodecConfig);
-    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
-#if defined(CODEC_CYCLE)
-    delayCycle = CODEC_CYCLE;
-#endif
-    while (delayCycle)
-    {
-        __ASM("nop");
-        delayCycle--;
-    }
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TxSetFormat(DEMO_SAI, &format, mclkSourceClockHz, format.masterClockHz);
@@ -253,6 +265,19 @@ int main(void)
     EnableIRQ(DEMO_SAI_IRQ);
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable);
     SAI_TxEnable(DEMO_SAI, true);
+
+	#if defined(CODEC_CYCLE)
+		delayCycle = CODEC_CYCLE;
+	#endif
+		while (delayCycle)
+		{
+			__ASM("nop");
+			delayCycle--;
+		}
+
+	/* Use default setting to init codec */
+	CODEC_Init(&codecHandle, &boardCodecConfig);
+	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
     /* Wait until finished */
     while (isFinished != true)

@@ -53,6 +53,7 @@ processor_version: 2.0.0
 #define PIN3_IDX                         3u   /*!< Pin number for pin 3 in a port */
 #define PIN4_IDX                         4u   /*!< Pin number for pin 4 in a port */
 #define PIN6_IDX                         6u   /*!< Pin number for pin 6 in a port */
+#define PIN8_IDX                         8u   /*!< Pin number for pin 6 in a port */
 #define PIN18_IDX                       18u   /*!< Pin number for pin 18 in a port */
 #define PIN19_IDX                       19u   /*!< Pin number for pin 19 in a port */
 #define SOPT5_UART1TXSRC_UART_TX      0x00u   /*!< UART 1 transmit data source select: UART1_TX pin */
@@ -86,7 +87,9 @@ void BOARD_InitPins(void) {
   PORT_SetPinMux(PORTC, PIN1_IDX, kPORT_MuxAlt6);            /* PORTC1 (pin B11) is configured as I2S0_TXD0 */
   PORT_SetPinMux(PORTC, PIN3_IDX, kPORT_MuxAlt3);            /* PORTC3 (pin A11) is configured as UART1_RX */
   PORT_SetPinMux(PORTC, PIN4_IDX, kPORT_MuxAlt3);            /* PORTC4 (pin A9) is configured as UART1_TX */
-  PORT_SetPinMux(PORTC, PIN6_IDX, kPORT_MuxAlt6);            /* PORTC6 (pin C8) is configured as I2S0_MCLK */
+//  PORT_SetPinMux(PORTC, PIN6_IDX, kPORT_MuxAlt6);            /* PORTC6 (pin C8) is configured as I2S0_MCLK */
+  PORT_SetPinMux(PORTC, PIN8_IDX, kPORT_MuxAlt4);            /* PORTC6 (pin C8) is configured as I2S0_MCLK */
+// C8 => ALT 4 PARA I2S0_MCLK
   SIM->SOPT5 = ((SIM->SOPT5 &
     (~(SIM_SOPT5_UART1TXSRC_MASK)))                          /* Mask bits to zero which are setting */
       | SIM_SOPT5_UART1TXSRC(SOPT5_UART1TXSRC_UART_TX)       /* UART 1 transmit data source select: UART1_TX pin */
@@ -94,10 +97,14 @@ void BOARD_InitPins(void) {
 }
 
 
-#define PIN8_IDX                         8u   /*!< Pin number for pin 8 in a port */
-#define PIN9_IDX                         9u   /*!< Pin number for pin 9 in a port */
-#define PORT_DFER_DFE_8_MASK        0x0100u   /*!< Digital Filter Enable Mask for item 8. */
-#define PORT_DFER_DFE_9_MASK        0x0200u   /*!< Digital Filter Enable Mask for item 9. */
+//#define PIN8_IDX                         8u   /*!< Pin number for pin 8 in a port */
+//#define PIN9_IDX                         9u   /*!< Pin number for pin 9 in a port */
+//#define PORT_DFER_DFE_8_MASK        0x0100u   /*!< Digital Filter Enable Mask for item 8. */
+//#define PORT_DFER_DFE_9_MASK        0x0200u   /*!< Digital Filter Enable Mask for item 9. */
+
+#define PIN24_IDX                       24u   /*!< Pin number for pin 24 in a port */
+#define PIN25_IDX                       25u   /*!< Pin number for pin 25 in a port */
+#define SOPT5_UART0TXSRC_UART_TX      0x00u   /*!< UART 0 transmit data source select: UART0_TX pin */
 
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
@@ -118,34 +125,61 @@ BOARD_I2C_ConfigurePins:
  *
  *END**************************************************************************/
 void BOARD_I2C_ConfigurePins(void) {
-  CLOCK_EnableClock(kCLOCK_PortD);                           /* Port D Clock Gate Control: Clock enabled */
+//  CLOCK_EnableClock(kCLOCK_PortD);                           /* Port D Clock Gate Control: Clock enabled */
+  CLOCK_EnableClock(kCLOCK_PortE);                           /* Port E Clock Gate Control: Clock enabled */
 
-  PORT_EnablePinsDigitalFilter(                              /* Configure digital filter */
-    PORTD,                                                   /* Digital filter is configured on port D */
-      PORT_DFER_DFE_8_MASK                                   /* Digital filter is configured for PORTD0 */
-    | PORT_DFER_DFE_9_MASK,                                  /* Digital filter is configured for PORTD1 */
-    false                                                    /* Disable digital filter */
-  );
-  const port_pin_config_t portd8_pinC9_config = {
+//  PORT_EnablePinsDigitalFilter(                              /* Configure digital filter */
+//    PORTD,                                                   /* Digital filter is configured on port D */
+//      PORT_DFER_DFE_8_MASK                                   /* Digital filter is configured for PORTD0 */
+//    | PORT_DFER_DFE_9_MASK,                                  /* Digital filter is configured for PORTD1 */
+//    false                                                    /* Disable digital filter */
+//  );
+//  const port_pin_config_t portd8_pinC9_config = {
+//    kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
+//    kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
+//    kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
+//    kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
+//    kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
+//    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SCL */
+//    kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
+//  };
+//  PORT_SetPinConfig(PORTD, PIN8_IDX, &portd8_pinC9_config);  /* PORTD8 (pin C9) is configured as I2C0_SCL */
+//  const port_pin_config_t portd9_pinB9_config = {
+//    kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
+//    kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
+//    kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
+//    kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
+//    kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
+//    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SDA */
+//    kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
+//  };
+//  PORT_SetPinConfig(PORTD, PIN9_IDX, &portd9_pinB9_config);  /* PORTD9 (pin B9) is configured as I2C0_SDA */
+
+  const port_pin_config_t porte24_pin31_config = {
     kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
     kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
     kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
     kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
     kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
-    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SCL */
+    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SCL */
     kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
   };
-  PORT_SetPinConfig(PORTD, PIN8_IDX, &portd8_pinC9_config);  /* PORTD8 (pin C9) is configured as I2C0_SCL */
-  const port_pin_config_t portd9_pinB9_config = {
+  PORT_SetPinConfig(PORTE, PIN24_IDX, &porte24_pin31_config); /* PORTE24 (pin 31) is configured as I2C0_SCL */
+  const port_pin_config_t porte25_pin32_config = {
     kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
     kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
     kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
     kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
     kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
-    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SDA */
+    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SDA */
     kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
   };
-  PORT_SetPinConfig(PORTD, PIN9_IDX, &portd9_pinB9_config);  /* PORTD9 (pin B9) is configured as I2C0_SDA */
+  PORT_SetPinConfig(PORTE, PIN25_IDX, &porte25_pin32_config); /* PORTE25 (pin 32) is configured as I2C0_SDA */
+  SIM->SOPT5 = ((SIM->SOPT5 &
+    (~(SIM_SOPT5_UART0TXSRC_MASK)))                          /* Mask bits to zero which are setting */
+      | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX)       /* UART 0 transmit data source select: UART0_TX pin */
+    );
+
 }
 
 /*******************************************************************************
