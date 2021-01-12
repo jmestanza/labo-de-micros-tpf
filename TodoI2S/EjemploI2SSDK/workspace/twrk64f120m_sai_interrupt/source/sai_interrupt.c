@@ -201,7 +201,7 @@ int main(void)
     sai_config_t config;
     uint32_t mclkSourceClockHz = 0U;
     sai_transfer_format_t format;
-    uint32_t delayCycle = 50000000;
+    uint32_t delayCycle = 8000000; // con este anda bien
 
 
     BOARD_InitPins();
@@ -213,7 +213,8 @@ int main(void)
 
     PRINTF("SAI functional interrupt example started!\n\r");
 
-    /*
+
+	/*
      * config.masterSlave = kSAI_Master;
      * config.mclkSource = kSAI_MclkSourceSysclk;
      * config.protocol = kSAI_BusLeftJustified;
@@ -231,30 +232,21 @@ int main(void)
     format.bitWidth = DEMO_SAI_BITWIDTH;
     format.channel = DEMO_SAI_CHANNEL;
     format.sampleRate_Hz = kSAI_SampleRate16KHz;
-
-
-#if (defined FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER && FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER) || \
-    (defined FSL_FEATURE_PCC_HAS_SAI_DIVIDER && FSL_FEATURE_PCC_HAS_SAI_DIVIDER)
     format.masterClockHz = OVER_SAMPLE_RATE * format.sampleRate_Hz;
-#else
-    format.masterClockHz = DEMO_SAI_CLK_FREQ;
-#endif
     format.protocol = config.protocol;
     format.stereo = kSAI_Stereo;
 //    format.isFrameSyncCompact = false;
     format.isFrameSyncCompact = true;
 
-#if defined(CODEC_CYCLE)
-	delayCycle = CODEC_CYCLE;
-#endif
+
+    // Delay despues de haber hecho el init del Tx!!!! (para que este disponible el clock)
 	while (delayCycle)
 	{
 		__ASM("nop");
 		delayCycle--;
 	}
-    /* Use default setting to init codec */
-    CODEC_Init(&codecHandle, &boardCodecConfig);
-    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+	CODEC_Init(&codecHandle, &boardCodecConfig);
+	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TxSetFormat(DEMO_SAI, &format, mclkSourceClockHz, format.masterClockHz);
@@ -264,11 +256,23 @@ int main(void)
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable);
     SAI_TxEnable(DEMO_SAI, true);
 
+//    PRINTF("Entering delayCycle\n");
+//    // no se si es necesario el delay
+
+
+	/* Use default setting to init codec */
+	CODEC_Init(&codecHandle, &boardCodecConfig);
+	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+
+    PRINTF("Codec initialized\n");
+
+
 
     /* Wait until finished */
     while (isFinished != true)
     {
     }
+    // el shift!!
 
     PRINTF("\n\r SAI functional interrupt example finished!\n\r ");
     while (1)

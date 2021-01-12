@@ -285,6 +285,9 @@ void SAI_TxInit(I2S_Type *base, const sai_config_t *config)
             base->TCR2 |= I2S_TCR2_BCP_MASK;
             base->TCR3 &= ~I2S_TCR3_WDFL_MASK;
             base->TCR4 = I2S_TCR4_MF(1U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(1U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
+            // puedo cambiar frame sync early o MF que es MSByte First si es 1
+//            base->TCR4 = I2S_TCR4_MF(1U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(0U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
+//            base->TCR4 = I2S_TCR4_MF(0U) | I2S_TCR4_SYWD(31U) | I2S_TCR4_FSE(0U) | I2S_TCR4_FSP(1U) | I2S_TCR4_FRSZ(1U);
             break;
 
         case kSAI_BusPCMA:

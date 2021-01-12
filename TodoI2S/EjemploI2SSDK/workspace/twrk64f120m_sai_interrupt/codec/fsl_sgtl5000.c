@@ -60,38 +60,39 @@ status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
     handle->slaveAddress = 0x18U; // en vez de 30, es 18, pongo A1 = 0
 //    handle->slaveAddress = 0x1AU; // PONGO A1 = 1
 
-// write reg (handle,reg,value)
-
-//    g_master_buff[0] = 0x00; // evaluation modes
+//   write reg (handle,reg,value)
 
 //	//00H evaluation modes, WSPLL settings, clock divider and clock selectors
-//    g_master_buff[1] = 0x03; // MSByte
-//    g_master_buff[2] = 0x02; // LSByte
-    SGTL_WriteReg(handle, 0x00, 0x0302);
+//    SGTL_WriteReg(handle, 0x00, 0x0312);
+    SGTL_WriteReg(handle, 0x00, 0x0F31); // ACTIVO TODO, WSPLL => cuando es de 16 bits (como el del ejemplo ejemplo) => PPL1 = 0 PLL0=1 (entre 12 y 25KHz) (era 16k)
 
-//	//autoincrement
 //	//01H I2S-bus I/O settings
-//    g_master_buff[3] = 0x00; // MSByte
-//    g_master_buff[4] = 0x00; // LSByte
-
-    SGTL_WriteReg(handle, 0x01, 0x0000);
+    SGTL_WriteReg(handle, 0x01, 0x0000); // creo que no deberia joder
 //	//02H power control settings!!
-//    g_master_buff[5] = 0x25; // MSByte
-//    g_master_buff[6] = 0x00; // LSByte
-    SGTL_WriteReg(handle, 0x02, 0x2500);
+//    SGTL_WriteReg(handle, 0x02, 0x2500);
+    SGTL_WriteReg(handle, 0x02, 0xA5DF); // prendo todo
 
 //	//03H analog mixer settings
-//    g_master_buff[7] = 0x00; // MSByte
-//    g_master_buff[8] = 0x00; // LSByte
-
-    SGTL_WriteReg(handle, 0x03, 0x0000);
+    SGTL_WriteReg(handle, 0x03, 0x0000); // max vol para todo
 //	//04H headphone amplifier settings
-//    g_master_buff[9] = 0x00; // MSByte
-//    g_master_buff[10] = 0x00; // LSByte
+    SGTL_WriteReg(handle, 0x04, 0x0202); // habia modificado este no se xq
 
-    SGTL_WriteReg(handle, 0x04, 0x0000);
+    //10H Master Volume Control
+    SGTL_WriteReg(handle, 0x10, 0x0000);
 
-    //
+    //11H Mixer Volume Control
+    SGTL_WriteReg(handle, 0x11, 0x0000); // def es 0xFF00
+
+    //12H Mode, Bass boost and treble
+    SGTL_WriteReg(handle, 0x12, 0x0000); // def es 0x0000 wtf
+
+    //13H Master mute, channel de-emphasis and mute
+    SGTL_WriteReg(handle, 0x13, 0x0000); // saque master mute y mutes de channels
+    //q carajo es filtro de de-emphasis (tiene que ver con fs creo)
+
+    SGTL_WriteReg(handle, 0x14, 0x0000); // saque master mute y mutes de channels
+
+
 //    SGTL_ReadReg(handle, 0x02, 0x2500);
 //    SGTL_WriteReg(handle, 0x04, 0x0000);
     /* NULL pointer means default setting. */
