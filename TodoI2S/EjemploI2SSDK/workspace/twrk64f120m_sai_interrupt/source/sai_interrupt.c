@@ -199,7 +199,7 @@ int main(void)
 {
 
     sai_config_t config;
-    uint32_t mclkSourceClockHz = 0U;
+     uint32_t mclkSourceClockHz = 0U;
     sai_transfer_format_t format;
     uint32_t delayCycle = 8000000; // con este anda bien
 
@@ -239,14 +239,7 @@ int main(void)
     format.isFrameSyncCompact = true;
 
 
-    // Delay despues de haber hecho el init del Tx!!!! (para que este disponible el clock)
-	while (delayCycle)
-	{
-		__ASM("nop");
-		delayCycle--;
-	}
-	CODEC_Init(&codecHandle, &boardCodecConfig);
-	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TxSetFormat(DEMO_SAI, &format, mclkSourceClockHz, format.masterClockHz);
@@ -256,23 +249,17 @@ int main(void)
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOWarningInterruptEnable | kSAI_FIFOErrorInterruptEnable);
     SAI_TxEnable(DEMO_SAI, true);
 
-//    PRINTF("Entering delayCycle\n");
-//    // no se si es necesario el delay
+    // Delay despues de haber habilitado el Tx!!!! (para que este disponible el clock)
+    PRINTF("Este printf hace un delay hermoso, justo lo que el codec necesita para tener un MCLK disponible");
 
-
-	/* Use default setting to init codec */
-	CODEC_Init(&codecHandle, &boardCodecConfig);
+    CODEC_Init(&codecHandle, &boardCodecConfig);
 	CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
-
-    PRINTF("Codec initialized\n");
-
 
 
     /* Wait until finished */
     while (isFinished != true)
     {
     }
-    // el shift!!
 
     PRINTF("\n\r SAI functional interrupt example finished!\n\r ");
     while (1)
