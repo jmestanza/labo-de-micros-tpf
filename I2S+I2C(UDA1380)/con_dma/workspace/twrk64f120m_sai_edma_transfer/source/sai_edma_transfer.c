@@ -169,12 +169,6 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
 /*!
  * @brief Main function
  */
-
-I2S_Type * base = I2S0;
-
-
-
-
 int main(void)
 {
     sai_config_t config;
@@ -184,10 +178,7 @@ int main(void)
     edma_config_t dmaConfig = {0};
     uint32_t cpy_index = 0U, tx_index=0U;
 //    uint32_t delayCycle = 500000U;
-//    uint32_t delayCycle = 0U;
-
-    uint32_t delayCycle = 8000000;
-
+//    uint32_t delayCycle = 8000000U;
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -223,7 +214,6 @@ int main(void)
      * config.syncMode = kSAI_ModeAsync;
      * config.mclkOutputEnable = true;
      */
-
     SAI_TxGetDefaultConfig(&config);
     config.mclkOutputEnable = true;
 //#if defined DEMO_CODEC_WM8524
@@ -231,32 +221,36 @@ int main(void)
 //#endif
     SAI_TxInit(DEMO_SAI, &config);
 
-//    /* Configure the audio format */
-//    format.bitWidth = kSAI_WordWidth16bits;
-//    format.channel = 0U;
-//    format.sampleRate_Hz = kSAI_SampleRate16KHz;
-//#if (defined FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER && FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER) || \
-//    (defined FSL_FEATURE_PCC_HAS_SAI_DIVIDER && FSL_FEATURE_PCC_HAS_SAI_DIVIDER)
-//    format.masterClockHz = OVER_SAMPLE_RATE * format.sampleRate_Hz;
-//#else
-//    format.masterClockHz = DEMO_SAI_CLK_FREQ;
-//#endif
-//    format.protocol = config.protocol;
-//    format.stereo = kSAI_Stereo;
-//    format.isFrameSyncCompact = true;
-//#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
-//    format.watermark = FSL_FEATURE_SAI_FIFO_COUNT / 2U;
-//#endif
-
     /* Configure the audio format */
     format.bitWidth = kSAI_WordWidth16bits;
     format.channel = 0U;
     format.sampleRate_Hz = kSAI_SampleRate16KHz;
+#if (defined FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER && FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER) || \
+    (defined FSL_FEATURE_PCC_HAS_SAI_DIVIDER && FSL_FEATURE_PCC_HAS_SAI_DIVIDER)
     format.masterClockHz = OVER_SAMPLE_RATE * format.sampleRate_Hz;
+#else
+    format.masterClockHz = DEMO_SAI_CLK_FREQ;
+#endif
     format.protocol = config.protocol;
     format.stereo = kSAI_Stereo;
-    format.isFrameSyncCompact = true;
+    format.isFrameSyncCompact = false;
+#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
     format.watermark = FSL_FEATURE_SAI_FIFO_COUNT / 2U;
+#endif
+
+//    /* Use default setting to init codec */
+//    CODEC_Init(&codecHandle, &boardCodecConfig);
+//    CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+//
+//#if defined(DEMO_CODEC_WM8524)
+//    wm8524_config_t codecConfig = {0};
+//    codecConfig.busPinNum = CODEC_BUS_PIN_NUM;
+//    codecConfig.busPin = CODEC_BUS_PIN;
+//    codecConfig.mutePin = CODEC_MUTE_PIN;
+//    codecConfig.mutePinNum = CODEC_MUTE_PIN_NUM;
+//    codecConfig.protocol = kWM8524_ProtocolI2S;
+//    WM8524_Init(&codecHandle, &codecConfig);
+//#endif
 
 
 /* If need to handle audio error, enable sai interrupt */
@@ -265,28 +259,36 @@ int main(void)
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
 #endif
 
-
+#if defined(CODEC_CYCLE)
+    delayCycle = CODEC_CYCLE;
+#endif
+//    while (delayCycle)
+//    {
+//        __ASM("nop");
+//        delayCycle--;
+//    }
 
     SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
 
-
-
-
-
     /* Waiting until finished. */
+//    bool first_time = true;
     while(!isFinished)
     {
-        while (delayCycle)
-        {
-            __ASM("nop");
-            delayCycle--;
-        }
-        /* Use default setting to init codec */
-        CODEC_Init(&codecHandle, &boardCodecConfig);
-        CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+//    	if(first_time == true){
+//            while (delayCycle)
+//            {
+//                __ASM("nop");
+//                delayCycle--;
+//            }
+            /* Use default setting to init codec */
+            CODEC_Init(&codecHandle, &boardCodecConfig);
+            CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
+//            first_time = false;
+//    	}
+
 
         if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
         {
@@ -317,3 +319,18 @@ int main(void)
     }
 }
 
+#if defined(SAI_ErrorIRQHandler)
+void SAI_ErrorIRQHandler(void)
+{
+    /* Clear the FIFO error flag */
+    SAI_TxClearStatusFlags(DEMO_SAI, kSAI_FIFOErrorFlag);
+
+    /* Reset FIFO */
+    SAI_TxSoftwareReset(DEMO_SAI, kSAI_ResetTypeFIFO);
+/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+  exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+#endif

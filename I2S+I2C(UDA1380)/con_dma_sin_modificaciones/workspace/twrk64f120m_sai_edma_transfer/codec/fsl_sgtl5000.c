@@ -49,126 +49,86 @@
 /*******************************************************************************
  * Code
  ******************************************************************************/
-
-
 status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
 {
     sgtl_config_t *config = (sgtl_config_t *)codec_config;
 
-//    handle->slaveAddress = SGTL5000_I2C_ADDR;
-//    handle->slaveAddress = 0x30U;
-    handle->slaveAddress = 0x18U; // en vez de 30, es 18, pongo A1 = 0
-//    handle->slaveAddress = 0x1AU; // PONGO A1 = 1
+    handle->slaveAddress = SGTL5000_I2C_ADDR;
 
-//   write reg (handle,reg,value)
-
-//	//00H evaluation modes, WSPLL settings, clock divider and clock selectors
-//    SGTL_WriteReg(handle, 0x00, 0x0312);
-    SGTL_WriteReg(handle, 0x00, 0x0F31); // ACTIVO TODO, WSPLL => cuando es de 16 bits (como el del ejemplo ejemplo) => PPL1 = 0 PLL0=1 (entre 12 y 25KHz) (era 16k)
-
-//	//01H I2S-bus I/O settings
-    SGTL_WriteReg(handle, 0x01, 0x0000); // creo que no deberia joder
-//	//02H power control settings!!
-//    SGTL_WriteReg(handle, 0x02, 0x2500);
-    SGTL_WriteReg(handle, 0x02, 0xA5DF); // prendo todo
-
-//	//03H analog mixer settings
-    SGTL_WriteReg(handle, 0x03, 0x0000); // max vol para todo
-//	//04H headphone amplifier settings
-    SGTL_WriteReg(handle, 0x04, 0x0202); // habia modificado este no se xq
-
-    //10H Master Volume Control
-    SGTL_WriteReg(handle, 0x10, 0x0000);
-
-    //11H Mixer Volume Control
-    SGTL_WriteReg(handle, 0x11, 0x0000); // def es 0xFF00
-
-    //12H Mode, Bass boost and treble
-    SGTL_WriteReg(handle, 0x12, 0x0000); // def es 0x0000 wtf
-
-    //13H Master mute, channel de-emphasis and mute
-    SGTL_WriteReg(handle, 0x13, 0x0000); // saque master mute y mutes de channels
-    //q carajo es filtro de de-emphasis (tiene que ver con fs creo)
-
-    SGTL_WriteReg(handle, 0x14, 0x0000); // saque master mute y mutes de channels
-
-
-//    SGTL_ReadReg(handle, 0x02, 0x2500);
-//    SGTL_WriteReg(handle, 0x04, 0x0000);
     /* NULL pointer means default setting. */
-//    if (config == NULL)
-//    {
-//        /* Power up Inputs/Outputs/Digital Blocks
-//           Power up LINEOUT, HP, ADC, DAC. */
-//        SGTL_WriteReg(handle, CHIP_ANA_POWER, 0x6AFFU);
-//
-//        /* Power up desired digital blocks.
-//        I2S_IN (bit 0), I2S_OUT (bit 1), DAP (bit 4), DAC (bit 5), ADC (bit 6) are powered on */
-//        SGTL_WriteReg(handle, CHIP_DIG_POWER, 0x0063U);
-//
-//        /* Configure SYS_FS clock to 48kHz, MCLK_FREQ to 256*Fs. */
-//        SGTL_ModifyReg(handle, CHIP_CLK_CTRL, 0xFFC8U, 0x0008U);
-//
-//        /* Configure the I2S clocks in slave mode.
-//           I2S LRCLK is same as the system sample clock.
-//           Data length = 16 bits. */
-//        SGTL_WriteReg(handle, CHIP_I2S_CTRL, 0x0170U);
-//
-//        /* I2S_IN -> DAC -> HP_OUT, Route I2S_IN to DAC */
-//        SGTL_ModifyReg(handle, CHIP_SSS_CTRL, 0xFFDFU, 0x0010U);
-//
-//        /* Select DAC as the input to HP_OUT */
-//        SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFBFU, 0x0000U);
-//
-//        /* LINE_IN -> ADC -> I2S_OUT. Set ADC input to LINE_IN. */
-//        SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFFFU, 0x0004U);
-//
-//        /* Route ADC to I2S_OUT */
-//        SGTL_ModifyReg(handle, CHIP_SSS_CTRL, 0xFFFCU, 0x0000U);
-//
-//        /* Default using I2S left format. */
-//        SGTL_SetProtocol(handle, kSGTL_BusI2S);
-//    }
-//    else
-//    {
-//        SGTL_WriteReg(handle, CHIP_ANA_POWER, 0x6AFF);
-//
-//        /* Set the data route */
-//        SGTL_SetDataRoute(handle, config->route);
-//
-//        /* Set the audio format */
-//        SGTL_SetProtocol(handle, config->bus);
-//
-//        /* Set sgtl5000 to master or slave */
-//        SGTL_SetMasterSlave(handle, config->master_slave);
-//    }
-//
-//    /* Input Volume Control
-//    Configure ADC left and right analog volume to desired default.
-//    Example shows volume of 0dB. */
-//    SGTL_WriteReg(handle, CHIP_ANA_ADC_CTRL, 0x0000U);
-//
-//    /* Volume and Mute Control
-//       Configure HP_OUT left and right volume to minimum, unmute.
-//       HP_OUT and ramp the volume up to desired volume.*/
-//    SGTL_WriteReg(handle, CHIP_ANA_HP_CTRL, 0x1818U);
-//    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFEFU, 0x0000U);
-//
-//    /* LINEOUT and DAC volume control */
-//    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFEFFU, 0x0000U);
-//
-//    /* Configure DAC left and right digital volume */
-//    SGTL_WriteReg(handle, CHIP_DAC_VOL, 0x5C5CU);
-//
-//    /* Configure ADC volume, reduce 6db. */
-//    SGTL_WriteReg(handle, CHIP_ANA_ADC_CTRL, 0x0100U);
-//
-//    /* Unmute DAC */
-//    SGTL_ModifyReg(handle, CHIP_ADCDAC_CTRL, 0xFFFBU, 0x0000U);
-//    SGTL_ModifyReg(handle, CHIP_ADCDAC_CTRL, 0xFFF7U, 0x0000U);
-//
-//    /* Unmute ADC */
-//    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFFEU, 0x0000U);
+    if (config == NULL)
+    {
+        /* Power up Inputs/Outputs/Digital Blocks
+           Power up LINEOUT, HP, ADC, DAC. */
+        SGTL_WriteReg(handle, CHIP_ANA_POWER, 0x6AFFU);
+
+        /* Power up desired digital blocks.
+        I2S_IN (bit 0), I2S_OUT (bit 1), DAP (bit 4), DAC (bit 5), ADC (bit 6) are powered on */
+        SGTL_WriteReg(handle, CHIP_DIG_POWER, 0x0063U);
+
+        /* Configure SYS_FS clock to 48kHz, MCLK_FREQ to 256*Fs. */
+        SGTL_ModifyReg(handle, CHIP_CLK_CTRL, 0xFFC8U, 0x0008U);
+
+        /* Configure the I2S clocks in slave mode.
+           I2S LRCLK is same as the system sample clock.
+           Data length = 16 bits. */
+        SGTL_WriteReg(handle, CHIP_I2S_CTRL, 0x0170U);
+
+        /* I2S_IN -> DAC -> HP_OUT, Route I2S_IN to DAC */
+        SGTL_ModifyReg(handle, CHIP_SSS_CTRL, 0xFFDFU, 0x0010U);
+
+        /* Select DAC as the input to HP_OUT */
+        SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFBFU, 0x0000U);
+
+        /* LINE_IN -> ADC -> I2S_OUT. Set ADC input to LINE_IN. */
+        SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFFFU, 0x0004U);
+
+        /* Route ADC to I2S_OUT */
+        SGTL_ModifyReg(handle, CHIP_SSS_CTRL, 0xFFFCU, 0x0000U);
+
+        /* Default using I2S left format. */
+        SGTL_SetProtocol(handle, kSGTL_BusI2S);
+    }
+    else
+    {
+        SGTL_WriteReg(handle, CHIP_ANA_POWER, 0x6AFF);
+
+        /* Set the data route */
+        SGTL_SetDataRoute(handle, config->route);
+
+        /* Set the audio format */
+        SGTL_SetProtocol(handle, config->bus);
+
+        /* Set sgtl5000 to master or slave */
+        SGTL_SetMasterSlave(handle, config->master_slave);
+    }
+
+    /* Input Volume Control
+    Configure ADC left and right analog volume to desired default.
+    Example shows volume of 0dB. */
+    SGTL_WriteReg(handle, CHIP_ANA_ADC_CTRL, 0x0000U);
+
+    /* Volume and Mute Control
+       Configure HP_OUT left and right volume to minimum, unmute.
+       HP_OUT and ramp the volume up to desired volume.*/
+    SGTL_WriteReg(handle, CHIP_ANA_HP_CTRL, 0x1818U);
+    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFEFU, 0x0000U);
+
+    /* LINEOUT and DAC volume control */
+    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFEFFU, 0x0000U);
+
+    /* Configure DAC left and right digital volume */
+    SGTL_WriteReg(handle, CHIP_DAC_VOL, 0x5C5CU);
+
+    /* Configure ADC volume, reduce 6db. */
+    SGTL_WriteReg(handle, CHIP_ANA_ADC_CTRL, 0x0100U);
+
+    /* Unmute DAC */
+    SGTL_ModifyReg(handle, CHIP_ADCDAC_CTRL, 0xFFFBU, 0x0000U);
+    SGTL_ModifyReg(handle, CHIP_ADCDAC_CTRL, 0xFFF7U, 0x0000U);
+
+    /* Unmute ADC */
+    SGTL_ModifyReg(handle, CHIP_ANA_CTRL, 0xFFFEU, 0x0000U);
 
     return kStatus_Success;
 }
@@ -629,9 +589,7 @@ status_t SGTL_WriteReg(codec_handle_t *handle, uint16_t reg, uint16_t val)
 {
     status_t retval = 0;
 
-//    retval = CODEC_I2C_WriteReg(handle->slaveAddress, kCODEC_RegAddr16Bit, reg, kCODEC_RegWidth16Bit, val,
-//                                handle->I2C_SendFunc);
-    retval = CODEC_I2C_WriteReg(handle->slaveAddress, kCODEC_RegAddr8Bit, reg, kCODEC_RegWidth16Bit, val,
+    retval = CODEC_I2C_WriteReg(handle->slaveAddress, kCODEC_RegAddr16Bit, reg, kCODEC_RegWidth16Bit, val,
                                 handle->I2C_SendFunc);
 
     return retval;
