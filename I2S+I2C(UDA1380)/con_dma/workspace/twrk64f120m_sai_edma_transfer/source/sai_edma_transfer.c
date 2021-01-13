@@ -188,8 +188,8 @@ void PIT_1_0_IRQHANDLER(void){
 	assert(codec_handle_pit && codec_config_pit && sai_xfer_format_pit);
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
 	// si pongo un breakpoint aca funciona el codigo // si le pongo menos de 10ms al PIT, entra dos veces a este handler
-//    CODEC_Init(codec_handle_pit, codec_config_pit);
-//    CODEC_SetFormat(codec_handle_pit, sai_xfer_format_pit->masterClockHz, sai_xfer_format_pit->sampleRate_Hz, sai_xfer_format_pit->bitWidth);
+    CODEC_Init(codec_handle_pit, codec_config_pit);
+    CODEC_SetFormat(codec_handle_pit, sai_xfer_format_pit->masterClockHz, sai_xfer_format_pit->sampleRate_Hz, sai_xfer_format_pit->bitWidth);
     PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 }
 
@@ -211,10 +211,10 @@ int main(void)
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitBootPeripherals();
-//    BOARD_I2C_ReleaseBus(); // probe sin esto y anda pero lo dejo por las dudas
-//    BOARD_I2C_ConfigurePins();
+    BOARD_I2C_ReleaseBus(); // probe sin esto y anda pero lo dejo por las dudas
+    BOARD_I2C_ConfigurePins();
     BOARD_InitDebugConsole();
-//    BOARD_Codec_I2C_Init();
+    BOARD_Codec_I2C_Init();
 
     PRINTF("SAI example started!\n\r");
 
@@ -301,7 +301,7 @@ int main(void)
 
     PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 
-    bool first_time = true;
+
     /* Waiting until finished. */
 
     while(!isFinished)
