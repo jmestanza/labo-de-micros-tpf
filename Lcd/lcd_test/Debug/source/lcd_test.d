@@ -8,8 +8,7 @@ source/lcd_test.o source/lcd_test.d: ../source/lcd_test.c \
  ../drivers/fsl_clock.h ../drivers/fsl_port.h ../drivers/fsl_pit.h \
  ../drivers/fsl_i2c.h ../board/pin_mux.h ../board/clock_config.h \
  ../CMSIS/MK64F12.h ../utilities/fsl_debug_console.h \
- ../source/GFX_Lib_K64F.h ../source/ILI9341_K64F.h ../source/sonic.h \
- ../source/carp.h
+ ../source/GFX_Lib_K64F.h ../source/ILI9341_K64F.h
 
 ../board/board.h:
 
@@ -64,7 +63,3 @@ source/lcd_test.o source/lcd_test.d: ../source/lcd_test.c \
 ../source/GFX_Lib_K64F.h:
 
 ../source/ILI9341_K64F.h:
-
-../source/sonic.h:
-
-../source/carp.h:

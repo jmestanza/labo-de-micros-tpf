@@ -209,6 +209,16 @@ instance:
           - IRQn: 'PIT0_IRQn'
           - enable_priority: 'false'
           - enable_custom_name: 'false'
+      - 1:
+        - channelNumber: '1'
+        - enableChain: 'false'
+        - timerPeriod: '0.025s'
+        - startTimer: 'false'
+        - enableInterrupt: 'true'
+        - interrupt:
+          - IRQn: 'PIT1_IRQn'
+          - enable_priority: 'false'
+          - enable_custom_name: 'false'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const pit_config_t PIT_1_config = {
@@ -220,10 +230,16 @@ void PIT_1_init(void) {
   PIT_Init(PIT_1_PERIPHERAL, &PIT_1_config);
   /* Set channel 0 period to 150 ms. */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
+  /* Set channel 1 period to 25 ms. */
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_1_1_TICKS);
   /* Enable interrupts from channel 0. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
+  /* Enable interrupts from channel 1. */
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_1, kPIT_TimerInterruptEnable);
   /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
   EnableIRQ(PIT_1_0_IRQN);
+  /* Enable interrupt PIT_1_1_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_1_IRQN);
 }
 
 /***********************************************************************************************************************

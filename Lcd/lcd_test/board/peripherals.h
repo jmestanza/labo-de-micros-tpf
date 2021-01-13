@@ -48,10 +48,16 @@ extern "C" {
 #define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
 /* Definition of ticks count for channel 0. */
 #define PIT_1_0_TICKS USEC_TO_COUNT(150000U, PIT_1_CLK_FREQ) - 1U
+/* Definition of ticks count for channel 1. */
+#define PIT_1_1_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_0_IRQN PIT0_IRQn
 /* PIT_1 interrupt handler identifier. */
 #define PIT_1_0_IRQHANDLER PIT0_IRQHandler
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_1_IRQN PIT1_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_1_IRQHANDLER PIT1_IRQHandler
 
 /* Definitions for BOARD_InitBUTTONsPeripheral functional group */
 /* Alias for GPIOC peripheral */

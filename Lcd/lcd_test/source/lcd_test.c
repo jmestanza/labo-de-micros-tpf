@@ -41,8 +41,6 @@
 #include "fsl_debug_console.h"
 /* TODO: insert other include files here. */
 #include "GFX_Lib_K64F.h"
-#include "sonic.h"
-#include "carp.h"
 /* TODO: insert other definitions and declarations here. */
 
 /*
@@ -61,14 +59,9 @@ void testFilledTriangles(void);
 void testRoundRects(void);
 void testFilledRoundRects(void);
 
-/*
- * Test variables
- */
-uint16_t sonicParsed[240][320];
-uint16_t colorSet[19] = {ILI9341_BLACK,ILI9341_NAVY,ILI9341_DARKGREEN,ILI9341_DARKCYAN,ILI9341_MAROON,
-							ILI9341_PURPLE,ILI9341_OLIVE,ILI9341_LIGHTGREY,ILI9341_DARKGREY,ILI9341_BLUE,
-							ILI9341_GREEN,ILI9341_CYAN,ILI9341_RED,ILI9341_MAGENTA,ILI9341_YELLOW,ILI9341_WHITE,
-							ILI9341_ORANGE,ILI9341_GREENYELLOW,ILI9341_PINK};
+uint16_t i,j;
+uint16_t bpm[160];
+uint16_t oxy[160];
 /*
  * @brief   Application entry point.
  */
@@ -82,106 +75,51 @@ int main(void) {
     BOARD_InitDebugConsole();
 
     PRINTF("Hello World\n");
-    /* Testing steps*/
 
-    tft_begin();
+    /*
+     * Test code for monitor
+     */
+    lcdGFX_init();
 
-//    testFillScreen();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//
-//    testText();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
+    // Test graphics vectors (generated manually)
 
-//    testLines(ILI9341_CYAN);
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//
-//    testFastLines(ILI9341_RED, ILI9341_BLUE);
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//
-//    testRects(ILI9341_GREEN);
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-
-//    testFilledRects(ILI9341_YELLOW, ILI9341_MAGENTA);
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-
-//    testFilledCircles(10, ILI9341_MAGENTA);
-//
-//    testCircles(10, ILI9341_WHITE);
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//
-//    testTriangles();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-//    delay_ms_150();
-
-//    testFilledTriangles();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//
-//	  testRoundRects();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-
-//    testFilledRoundRects();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-//	  delay_ms_150();
-
-    for(uint8_t rotation=0; rotation<4; rotation++)
+    for(uint16_t i=0;i<160;i++)
     {
-		display_setRotation(rotation);
-		testText();
-		delay_ms_150();
-		delay_ms_150();
-		delay_ms_150();
-		delay_ms_150();
-		delay_ms_150();
-		delay_ms_150();
+    	oxy[i] = 20*sin(2*PI*i/30)+40;
     }
 
-
-    display_setRotation(3);
-    for(uint16_t i=0;i<320;i++)
+    for(uint16_t i=0;i<160;i++)
     {
-    	for(uint16_t j=0;j<240;j++)
-    	{
-    		display_drawPixel(i,j,sonic[j][i]);
-    	}
+    	bpm[i] = 40;
     }
+    for(uint16_t i=0;i<10;i++)
+    {
+    	bpm[i+40] = 40+(i*40/10);
+    	bpm[i+40+80] = 40+(i*40/10);
+    }
+    for(uint16_t i=0;i<15;i++)
+    {
+    	bpm[i+50] = 80-(i*60/15);
+    	bpm[i+50+80] = 80-(i*60/15);
+    }
+    for(uint16_t i=0;i<5;i++)
+    {
+    	bpm[i+65] = 20+(i*60/15);
+    	bpm[i+65+80] = 20+(i*60/15);
+    }
+
+	/*
+	 * End code for monitor
+	 * Then update periodic as efficiently as it can be made
+	 */
 
     /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
+
     /* Enter an infinite loop, just incrementing a counter. */
+    i = 0;
+    j = 0;
     while(1) {
-        i++ ;
+
     }
     return 0 ;
 }
@@ -189,10 +127,21 @@ int main(void) {
 void PIT0_IRQHandler(void)
 {
     /* Clear interrupt flag.*/
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-    pit_callback();
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+	pit_callback();
 }
 
+void PIT1_IRQHandler(void)
+{
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_1, kPIT_TimerFlag);
+	i++;
+	j++;
+	lcdGFX_updateGFX(bpm[i%160], oxy[i%160]);
+	if(!(j%20))
+	{
+ 		lcdGFX_updateDATA(i%99, 82.34, 36.8);
+	}
+}
 /*
  * Test functions
  */

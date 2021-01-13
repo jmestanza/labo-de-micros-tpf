@@ -5,21 +5,34 @@
  *      Author: Marcelo
  */
 #include "GFX_Lib_K64F.h"
-
+#include "board.h"
+#include "peripherals.h"
+#include "pin_mux.h"
 /*
  * Other includes
  */
 #include <stdlib.h>
+#include "sonic.h"
+#include "carp.h"
+#include "heart.h"
+#include "termo.h"
+#include "oxygen.h"
 /*
  * Private declarations
  */
 void writeLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+
 /*
  * Private defines
  */
 #ifndef _swap_int16_t
 #define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
 #endif
+
+#define GRID_COLOR 	0x3186
+#define GRID_W 160
+#define GRID_H 100
+#define GRID_RES 20
 /*
  * Internal variables
  */
@@ -33,6 +46,21 @@ uint8_t
   textsize = 1;          ///< Desired magnification of text to print()
 _Bool
   wrap = true;           ///< If set, 'wrap' text at right edge of display
+uint16_t				 ///< Grid start references (initialize in lcdGFX_init)
+  gridECG_x = 0,
+  gridECG_y = 0,
+  gridSPO2_x = 0,
+  gridSPO2_y = 0;
+uint16_t				 ///< Counters for data and grid plot update
+  data_cont = 0,
+  space_cont = GRID_RES;
+uint16_t				 ///< Coordenates for number values
+  bpm_x = 0,
+  bpm_y = 0,
+  temp_x = 0,
+  temp_y = 0,
+  oxy_x = 0,
+  oxy_y = 0;
 
 // Standard ASCII 5x7 font
 #ifndef FONT5X7_H
@@ -671,6 +699,36 @@ uint16_t display_color565(uint8_t red, uint8_t green, uint8_t blue)
     return ((uint16_t)(red & 0xF8) << 8) | ((uint16_t)(green & 0xFC) << 3) | (blue >> 3);
 }
 
+uint16_t display_getCursorX(void)
+{
+    return cursor_x;
+}
+
+uint16_t display_getCursorY(void)
+{
+    return cursor_y;
+}
+
+void display_drawChar(uint16_t x, uint16_t y, uint8_t c, uint16_t color, uint8_t size)
+{
+	uint16_t prev_x     = cursor_x,
+	   prev_y     = cursor_y,
+	   prev_color = textcolor,
+	   prev_bg    = textbgcolor;
+	uint8_t  prev_size  = textsize;
+
+	display_setCursor(x, y);
+	display_setTextSize(size);
+	display_setTextColor(color);
+	display_print(c);
+
+	cursor_x    = prev_x;
+	cursor_y    = prev_y;
+	textcolor   = prev_color;
+	textbgcolor = prev_bg;
+	textsize    = prev_size;
+}
+
 void display_drawRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t color)
 {
     int16_t max_radius = ((w < h) ? w : h) / 2; // 1/2 minor axis
@@ -698,4 +756,284 @@ void display_fillRoundRect(uint16_t x, uint16_t y, uint16_t w,
     display_fillCircleHelper(x+w-r-1, y+r, r, 1, h-2*r-1, color);
     //display_fillCircleHelper(94, 18, 8, 1, 43, color);
     display_fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
+}
+
+/*
+ * Function definitios for final user
+ */
+
+void lcdGFX_init(void)
+{
+	tft_begin();
+
+    display_setRotation(3);
+    display_fillScreen(ILI9341_BLACK);
+    int16_t w, h;
+    w = get_display_width();
+    h = get_display_height();
+
+    gridECG_x = 10;
+    gridECG_y = 110;
+    gridSPO2_x = 10;
+    gridSPO2_y = 10+110+(h/2);
+    // Border lines
+    display_drawHLine(0, 0, w, ILI9341_WHITE);
+    display_drawHLine(0, h/2, w, ILI9341_WHITE);
+    display_drawHLine(0, h-1, w, ILI9341_WHITE);
+
+    display_drawVLine(0, 0, h, ILI9341_WHITE);
+    display_drawVLine(w-1, 0, h, ILI9341_WHITE);
+
+    // Grid for graphics
+    // Grid dimensions: 160x100, separated by 20x20 squares
+    display_drawHLine(10, 10, 160, GRID_COLOR);
+    display_drawHLine(10, 30, 160, GRID_COLOR);
+    display_drawHLine(10, 50, 160, GRID_COLOR);
+    display_drawHLine(10, 70, 160, GRID_COLOR);
+    display_drawHLine(10, 90, 160, GRID_COLOR);
+    display_drawHLine(10, 110, 160, GRID_COLOR);
+    display_drawVLine(10, 10, 100, GRID_COLOR);
+    display_drawVLine(30, 10, 100, GRID_COLOR);
+    display_drawVLine(50, 10, 100, GRID_COLOR);
+    display_drawVLine(70, 10, 100, GRID_COLOR);
+    display_drawVLine(90, 10, 100, GRID_COLOR);
+    display_drawVLine(110, 10, 100, GRID_COLOR);
+    display_drawVLine(130, 10, 100, GRID_COLOR);
+    display_drawVLine(150, 10, 100, GRID_COLOR);
+    display_drawVLine(170, 10, 100, GRID_COLOR);
+
+    display_drawHLine(10, 10+(h/2), 160, GRID_COLOR);
+    display_drawHLine(10, 30+(h/2), 160, GRID_COLOR);
+    display_drawHLine(10, 50+(h/2), 160, GRID_COLOR);
+    display_drawHLine(10, 70+(h/2), 160, GRID_COLOR);
+    display_drawHLine(10, 90+(h/2), 160, GRID_COLOR);
+    display_drawHLine(10, 110+(h/2), 160, GRID_COLOR);
+    display_drawVLine(10, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(30, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(50, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(70, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(90, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(110, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(130, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(150, 10+(h/2), 100, GRID_COLOR);
+    display_drawVLine(170, 10+(h/2), 100, GRID_COLOR);
+
+
+    uint8_t numSize = 5;
+	bpm_x = (3*w/4) - (numSize*5);
+	bpm_y = (h/4) - (numSize*3.5) -20;
+    display_setCursor(bpm_x, bpm_y);
+	display_setTextColor(ILI9341_GREEN);
+	display_setTextSize(numSize);
+	display_printString("60\r\n");
+
+
+    for(uint16_t i=0;i<30;i++)
+    {
+    	for(uint16_t j=0;j<30;j++)
+    	{
+    		display_drawPixel(i+280,j+(h/4)-15-20,heart[j][i]);
+    	}
+    }
+
+    numSize = 1;
+    display_setCursor(280+7.5, 10);
+	display_setTextColor(ILI9341_GREEN);
+	display_setTextSize(numSize);
+	display_printString("bpm\r\n");
+
+    numSize = 1;
+    display_setCursor(280-65, 10);
+	display_setTextColor(ILI9341_GREEN);
+	display_setTextSize(numSize);
+	display_printString("HR\r\n");
+
+	int16_t tempRef = 10;
+    numSize = 1;
+    display_setCursor(280-65, (h/4)+tempRef);
+	display_setTextColor(ILI9341_YELLOW);
+	display_setTextSize(numSize);
+	display_printString("Temperature\r\n");
+
+    for(uint16_t i=0;i<15;i++)
+    {
+    	for(uint16_t j=0;j<33;j++)
+    	{
+    		display_drawPixel(i+297,j+(h/4)+10,termo[j][i]);
+    	}
+    }
+
+    numSize = 2;
+    temp_x = 280-65;
+    temp_y = display_getCursorY()+10;
+    display_setCursor(temp_x, temp_y);
+	display_setTextColor(ILI9341_YELLOW);
+	display_setTextSize(numSize);
+	display_printString("36.5");
+	int16_t txtRef_x, txtRef_y;
+	txtRef_x = display_getCursorX();
+	txtRef_y = display_getCursorY();
+
+	display_drawCircle(display_getCursorX()+10, display_getCursorY()+2, 2, ILI9341_YELLOW);
+
+    display_setCursor(txtRef_x +15, txtRef_y);
+	display_setTextColor(ILI9341_YELLOW);
+	display_setTextSize(numSize);
+	display_printString("C");
+
+	int16_t rect_w,rect_h;
+	rect_w = 16;
+	rect_h = (h/2)-2;
+	display_fillRect(280-65-(2*rect_w), 1, rect_w, rect_h, ILI9341_BLUE);
+	display_fillRect(280-65-(2*rect_w), (h/2)+1, rect_w, rect_h, ILI9341_BLUE);
+	display_drawVLine(280-65-(2*rect_w), 0, 240, ILI9341_WHITE);
+	display_drawVLine(280-65-(rect_w), 0, 240, ILI9341_WHITE);
+
+    numSize = 2;
+    display_setCursor(280-65-(2*rect_w)+3.5, 30);
+	display_setTextColor(ILI9341_WHITE);
+	display_setTextSize(numSize);
+	display_printString("E\n");
+	display_setCursor(280-65-(2*rect_w)+3.5, display_getCursorY()+7);
+	display_printString("C\n");
+	display_setCursor(280-65-(2*rect_w)+3.5, display_getCursorY()+7);
+	display_printString("G\n");
+
+    numSize = 6;
+    oxy_x = 280-65;
+    oxy_y = (3*h/4) - (numSize*3.5)+10;
+    display_setCursor(oxy_x, oxy_y);
+	display_setTextColor(ILI9341_WHITE);
+	display_setTextSize(numSize);
+	display_printString("98");
+	txtRef_x = display_getCursorX();
+	txtRef_y = display_getCursorY();
+	display_drawChar(txtRef_x, txtRef_y+27, '%', ILI9341_WHITE, 2);
+	numSize = 2;
+	display_setCursor(txtRef_x, txtRef_y);
+	display_setTextSize(numSize);
+	display_printString("89");
+
+    numSize = 1;
+    display_setCursor(280-65, (h/2)+20);
+	display_setTextColor(ILI9341_WHITE);
+	display_setTextSize(numSize);
+	display_printString("PR\r\n");
+
+    for(uint16_t i=0;i<30;i++)
+    {
+    	for(uint16_t j=0;j<30;j++)
+    	{
+    		display_drawPixel(i+(3*w/4)+5,j+(h/2)+7,oxygen[j][i]);
+    	}
+    }
+
+    display_setCursor(280+7.5, (h/2)+20);
+	display_printString("bpm\r\n");
+
+    numSize = 2;
+    display_setCursor(280-65-(2*rect_w)+3.5, (h/2) +20);
+	display_setTextColor(ILI9341_WHITE);
+	display_setTextSize(numSize);
+	display_printString("S\n");
+	display_setCursor(280-65-(2*rect_w)+3.5, display_getCursorY()+7);
+	display_printString("P\n");
+	display_setCursor(280-65-(2*rect_w)+3.5, display_getCursorY()+7);
+	display_printString("O\n");
+	display_setCursor(280-65-(2*rect_w)+3.5, display_getCursorY()+7);
+	display_printString("2\n");
+
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
+}
+
+void lcdGFX_updateGFX(uint16_t dataECG, uint16_t dataSPO2)
+{
+	uint16_t h = get_display_height();
+    if(!(space_cont%GRID_RES)) // Limit of squares
+    {
+    	display_drawVLine(10+space_cont, 10, GRID_H, GRID_COLOR);
+    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, GRID_COLOR);
+    }
+    else
+    {
+    	display_drawVLine(10+space_cont, 10, GRID_H, ILI9341_BLACK);
+        display_drawPixel(10+space_cont, 10, GRID_COLOR);
+        display_drawPixel(10+space_cont, 30, GRID_COLOR);
+        display_drawPixel(10+space_cont, 50, GRID_COLOR);
+        display_drawPixel(10+space_cont, 70, GRID_COLOR);
+        display_drawPixel(10+space_cont, 90, GRID_COLOR);
+        display_drawPixel(10+space_cont, 110, GRID_COLOR);
+
+    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, ILI9341_BLACK);
+        display_drawPixel(10+space_cont, 10+(h/2), GRID_COLOR);
+        display_drawPixel(10+space_cont, 30+(h/2), GRID_COLOR);
+        display_drawPixel(10+space_cont, 50+(h/2), GRID_COLOR);
+        display_drawPixel(10+space_cont, 70+(h/2), GRID_COLOR);
+        display_drawPixel(10+space_cont, 90+(h/2), GRID_COLOR);
+        display_drawPixel(10+space_cont, 110+(h/2), GRID_COLOR);
+    }
+    // Drawing graphics
+    display_drawPixel(gridECG_x+data_cont, gridECG_y-dataECG, ILI9341_GREEN);
+    display_drawPixel(gridSPO2_x+data_cont, gridSPO2_y-dataSPO2, ILI9341_WHITE);
+
+    if(space_cont == GRID_W)
+    	space_cont = 0;
+    else
+    	space_cont++;
+
+    if(data_cont == GRID_W)
+    	data_cont = 0;
+    else
+    	data_cont++;
+}
+
+void lcdGFX_updateDATA(uint16_t dataECG, float dataSPO2, float dataTEMP)
+{
+    // Transcode numbers and print
+    uint8_t numSize;
+    char dec, uni, dec1, dec2;
+
+	// Update ECG Value
+	numSize = 5;
+	display_setCursor(bpm_x, bpm_y);
+	display_setTextColor(ILI9341_GREEN);
+	display_setTextSize(numSize);
+	dec = (dataECG/10) + '0';
+	uni = (dataECG%10) + '0';
+	display_fillRect(bpm_x, bpm_y, 60, 35, ILI9341_BLACK); // Erase previous value
+	display_print(dec);
+	display_print(uni);
+
+	// Update Temperature Values
+	numSize = 2;
+	display_fillRect(temp_x, temp_y, 55, 15, ILI9341_BLACK); // Erase previous value
+	display_setCursor(temp_x, temp_y);
+	display_setTextColor(ILI9341_YELLOW);
+	display_setTextSize(numSize);
+	dec = dataTEMP/10 + '0';
+	uni = ((uint16_t)(dataTEMP))%10 + '0';
+	dec1 = ((uint16_t)(dataTEMP*10))%10 + '0';
+	display_print(dec);
+	display_print(uni);
+	display_print('.');
+	display_print(dec1);
+
+	// Update SPO2 Value
+	numSize = 6; // Text size 3.5x5
+	display_fillRect(oxy_x, oxy_y, 67, 50 , ILI9341_BLACK); // Erase previous value
+	display_fillRect(oxy_x+67, oxy_y, 30, 15, ILI9341_BLACK); // Erase previous value
+	display_setCursor(oxy_x, oxy_y);
+	display_setTextColor(ILI9341_WHITE);
+	display_setTextSize(numSize);
+	dec = dataSPO2/10 + '0';
+	uni = ((uint16_t)(dataSPO2))%10 + '0';
+	dec1 = ((uint16_t)(dataSPO2*10))%10 + '0';
+	dec2 = ((uint16_t)(dataSPO2*100))%10 + '0';
+	display_print(dec);
+	display_print(uni);
+	numSize = 2;
+	display_setTextSize(numSize);
+	display_print(dec1);
+	display_print(dec2);
+
 }
