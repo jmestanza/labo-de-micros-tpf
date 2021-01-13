@@ -65,6 +65,8 @@
 #define EXAMPLE_CHANNEL (0U)
 #define EXAMPLE_SAI_TX_SOURCE kDmaRequestMux0I2S0Tx
 
+//#define DEMO_SAI_IRQ I2S0_Tx_IRQn
+
 #define I2C_RELEASE_SDA_PORT PORTE
 #define I2C_RELEASE_SCL_PORT PORTE
 #define I2C_RELEASE_SDA_GPIO GPIOE
@@ -185,14 +187,16 @@ sai_transfer_format_t * sai_xfer_format_pit = NULL;
 void PIT_1_0_IRQHANDLER(void){
 	assert(codec_handle_pit && codec_config_pit && sai_xfer_format_pit);
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
-    CODEC_Init(codec_handle_pit, codec_config_pit);
-    CODEC_SetFormat(codec_handle_pit, sai_xfer_format_pit->masterClockHz, sai_xfer_format_pit->sampleRate_Hz, sai_xfer_format_pit->bitWidth);
+	// si pongo un breakpoint aca funciona el codigo // si le pongo menos de 10ms al PIT, entra dos veces a este handler
+//    CODEC_Init(codec_handle_pit, codec_config_pit);
+//    CODEC_SetFormat(codec_handle_pit, sai_xfer_format_pit->masterClockHz, sai_xfer_format_pit->sampleRate_Hz, sai_xfer_format_pit->bitWidth);
     PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 }
 
 
 int main(void)
 {
+
 	PRINTF("len del arreglo music = %d \n",sizeof(music));
 	PRINTF("MUSIC_LEN (el define)= %d \n",MUSIC_LEN);
     sai_config_t config;
@@ -202,13 +206,15 @@ int main(void)
     edma_config_t dmaConfig = {0};
     uint32_t cpy_index = 0U, tx_index=0U;
 
+    uint32_t delayCycle = 5000000U;
+
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitBootPeripherals();
-    BOARD_I2C_ReleaseBus(); // probe sin esto y anda pero lo dejo por las dudas
-    BOARD_I2C_ConfigurePins();
+//    BOARD_I2C_ReleaseBus(); // probe sin esto y anda pero lo dejo por las dudas
+//    BOARD_I2C_ConfigurePins();
     BOARD_InitDebugConsole();
-    BOARD_Codec_I2C_Init();
+//    BOARD_Codec_I2C_Init();
 
     PRINTF("SAI example started!\n\r");
 
@@ -243,13 +249,6 @@ int main(void)
     config.protocol = kSAI_BusI2S;
 //#endif
     SAI_TxInit(DEMO_SAI, &config);
-
-	codec_handle_pit = &codecHandle;
-	codec_config_pit =  &boardCodecConfig;
-	sai_xfer_format_pit = &format;
-
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
-
 
 
     /* Configure the audio format */
@@ -296,12 +295,13 @@ int main(void)
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
 
-//    codec_handle_pit = &codecHandle;
-//    codec_config_pit =  &boardCodecConfig;
-//    sai_xfer_format_pit = &format;
-//
-//    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+    codec_handle_pit = &codecHandle;
+    codec_config_pit =  &boardCodecConfig;
+    sai_xfer_format_pit = &format;
 
+    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+
+    bool first_time = true;
     /* Waiting until finished. */
 
     while(!isFinished)
@@ -315,6 +315,7 @@ int main(void)
         }
         if(emptyBlock < BUFFER_NUM)
         {
+
             /*  xfer structure */
             xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
             xfer.dataSize = BUFFER_SIZE;
@@ -323,6 +324,12 @@ int main(void)
             {
                 tx_index++;
             }
+
+			while (delayCycle)
+			{
+				__ASM("nop");
+				delayCycle--;
+			}
         }
     }
 
