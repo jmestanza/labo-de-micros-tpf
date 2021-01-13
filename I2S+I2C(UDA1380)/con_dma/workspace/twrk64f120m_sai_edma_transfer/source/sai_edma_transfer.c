@@ -172,7 +172,7 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
         /* Judge whether the music array is completely transfered. */
         if(MUSIC_LEN/BUFFER_SIZE == finishIndex)
         {
-            isFinished = true;
+            isFinished = true; // hay que resetear los indices
         }
     }
 }
@@ -184,6 +184,21 @@ codec_handle_t *codec_handle_pit = NULL;
 codec_config_t *codec_config_pit = NULL;
 sai_transfer_format_t * sai_xfer_format_pit = NULL;
 
+uint32_t cpy_index = 0U, tx_index=0U;
+
+sai_transfer_t xfer;
+
+sai_config_t config;
+
+uint32_t delayCycle = 5000000U;
+
+edma_config_t dmaConfig = {0};
+
+uint32_t mclkSourceClockHz = 0U;
+sai_transfer_format_t format;
+
+
+
 void PIT_1_0_IRQHANDLER(void){
 	assert(codec_handle_pit && codec_config_pit && sai_xfer_format_pit);
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
@@ -193,20 +208,142 @@ void PIT_1_0_IRQHANDLER(void){
     PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 }
 
+void PIT_1_1_IRQHANDLER(void){
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
+	if(!isFinished)
+	{
+		if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
+		{
+			 /* Fill in the buffers. */
+			 memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&music[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
+			 emptyBlock--;
+			 cpy_index++;
+		}
+		if(emptyBlock < BUFFER_NUM)
+		{
+
+			/*  xfer structure */
+			xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
+			xfer.dataSize = BUFFER_SIZE;
+			/* Wait for available queue. */
+			if(kStatus_Success == SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer))
+			{
+				tx_index++;
+			}
+		}
+	}else{ // termino!
+//		SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
+//		SAI_Deinit(DEMO_SAI);
+	    PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
+
+	    isFinished = false;
+	    finishIndex = 0U;
+	    emptyBlock = BUFFER_NUM;
+	    cpy_index = 0U;
+	    tx_index=0U;
+	}
+}
+void PIT_1_2_IRQHANDLER(void){
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // cada 5 segundos vuelvo a prender el PIT del DMA
+////	I2S_Type * base = I2S0;
+////	bool tce_enabled = base->TCSR; // no puedo acceder al periferico? wtf
+//
+//	EDMA_GetDefaultConfig(&dmaConfig);
+//	EDMA_Init(EXAMPLE_DMA, &dmaConfig);
+//	EDMA_CreateHandle(&dmaHandle, EXAMPLE_DMA, EXAMPLE_CHANNEL);
+//
+//	#if defined(FSL_FEATURE_SOC_DMAMUX_COUNT) && FSL_FEATURE_SOC_DMAMUX_COUNT
+//		DMAMUX_Init(DMAMUX0);
+//		DMAMUX_SetSource(DMAMUX0, EXAMPLE_CHANNEL, EXAMPLE_SAI_TX_SOURCE);
+//		DMAMUX_EnableChannel(DMAMUX0, EXAMPLE_CHANNEL);
+//	#endif
+//
+//	    SAI_TxGetDefaultConfig(&config);
+//	    config.mclkOutputEnable = true;
+//	//#if defined DEMO_CODEC_WM8524
+//	    config.protocol = kSAI_BusI2S;
+//	//#endif
+//	    SAI_TxInit(DEMO_SAI, &config);
+//
+//
+//	    /* Configure the audio format */
+//	    format.bitWidth = kSAI_WordWidth16bits;
+//	    format.channel = 0U;
+//	    format.sampleRate_Hz = kSAI_SampleRate16KHz;
+//	#if (defined FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER && FSL_FEATURE_SAI_HAS_MCLKDIV_REGISTER) || \
+//	    (defined FSL_FEATURE_PCC_HAS_SAI_DIVIDER && FSL_FEATURE_PCC_HAS_SAI_DIVIDER)
+//	    format.masterClockHz = OVER_SAMPLE_RATE * format.sampleRate_Hz;
+//	#else
+//	    format.masterClockHz = DEMO_SAI_CLK_FREQ;
+//	#endif
+//	    format.protocol = config.protocol;
+//	    format.stereo = kSAI_Stereo;
+//	    format.isFrameSyncCompact = false;
+//	#if defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1)
+//	    format.watermark = FSL_FEATURE_SAI_FIFO_COUNT / 2U;
+//	#endif
+//
+//	/* If need to handle audio error, enable sai interrupt */
+//	#if defined(DEMO_SAI_IRQ)
+//		EnableIRQ(DEMO_SAI_IRQ);
+//		SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
+//	#endif
+//
+//
+//		SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
+//
+//		mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
+//		SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
+//
+//		codec_handle_pit = &codecHandle;
+//		codec_config_pit =  &boardCodecConfig;
+//		sai_xfer_format_pit = &format;
+//
+//    while(!isFinished)
+//    {
+//        if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
+//        {
+//             /* Fill in the buffers. */
+//             memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&music[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
+//             emptyBlock--;
+//             cpy_index++;
+//        }
+//        if(emptyBlock < BUFFER_NUM)
+//        {
+//
+//            /*  xfer structure */
+//            xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
+//            xfer.dataSize = BUFFER_SIZE;
+//            /* Wait for available queue. */
+//            if(kStatus_Success == SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer))
+//            {
+//                tx_index++;
+//            }
+//			while (delayCycle)
+//			{
+//				__ASM("nop");
+//				delayCycle--;
+//			}
+//        }
+//    }
+//
+//    isFinished = false;
+//    finishIndex = 0U;
+//    emptyBlock = BUFFER_NUM;
+//    cpy_index = 0U;
+//    tx_index=0U;
+//    delayCycle = 5000000U;
+}
+
+I2S_Type * sai_base = I2S0;
 
 int main(void)
 {
 
 	PRINTF("len del arreglo music = %d \n",sizeof(music));
 	PRINTF("MUSIC_LEN (el define)= %d \n",MUSIC_LEN);
-    sai_config_t config;
-    uint32_t mclkSourceClockHz = 0U;
-    sai_transfer_format_t format;
-    sai_transfer_t xfer;
-    edma_config_t dmaConfig = {0};
-    uint32_t cpy_index = 0U, tx_index=0U;
 
-    uint32_t delayCycle = 5000000U;
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -217,6 +354,9 @@ int main(void)
     BOARD_Codec_I2C_Init();
 
     PRINTF("SAI example started!\n\r");
+
+
+    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 
     /* Create EDMA handle */
     /*
@@ -324,7 +464,6 @@ int main(void)
             {
                 tx_index++;
             }
-
 			while (delayCycle)
 			{
 				__ASM("nop");
@@ -334,9 +473,24 @@ int main(void)
     }
 
     /* Once transfer finish, disable SAI instance. */
-    SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
-    SAI_Deinit(DEMO_SAI);
-    PRINTF("\n\r SAI EDMA example finished!\n\r ");
+//    SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
+//    SAI_Deinit(DEMO_SAI);
+
+//	SAI_TxReset(I2S0); // esto deberia escribirse cuando esta la flag de fifo error o cuando esta desactivado el tx
+//    sai_base->TCR3 |= I2S_TCR3_TCE_MASK; // reactivo la fifo
+
+    isFinished = false;
+    finishIndex = 0U;
+    emptyBlock = BUFFER_NUM;
+    cpy_index = 0U;
+    tx_index=0U;
+    delayCycle = 5000000U;
+
+
+
+//    PRINTF("\n\r SAI EDMA example finished!\n\r ");
+    PRINTF("Loopeando");
+
     while (1)
     {
     }
