@@ -1,0 +1,13 @@
+Desconecto la placa, corro el ejemplo de dma y anda.
+Vuelvo a correr lo mismo y no anda.
+Voy a hacer otro archivo donde no se inicialice el codec, a ver si es un tema de la placa o del codigo.
+
+Probe con la placa ya inicializada, no realizando el init del codec y no anda.
+
+Voy a probar poniendo un reset a default (power on) de la placa cada vez que la voy a usar.
+
+Algo que si verifique es que despues de un power on, siempre anda. Pero solo es una vez.
+
+Comentario final: 
+
+Agregue un software reset en el init antes de empezar a configurar todo y ANDA!!

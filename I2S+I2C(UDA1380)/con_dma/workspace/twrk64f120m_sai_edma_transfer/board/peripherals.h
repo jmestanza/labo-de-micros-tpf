@@ -38,10 +38,68 @@
 #ifndef _PERIPHERALS_H_
 #define _PERIPHERALS_H_
 
+#include "fsl_pit.h"
+
+
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
 
+
+/* Definitions for BOARD_InitPeripherals functional group */
+/* BOARD_InitPeripherals defines for PIT */
+/* Definition of peripheral ID. */
+#define PIT_1_PERIPHERAL PIT
+/* Definition of clock source. */
+#define PIT_1_CLOCK_SOURCE kCLOCK_BusClk
+/* Definition of clock source frequency. */
+#define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
+/* Definition of ticks count for channel 0. */
+#define PIT_1_0_TICKS USEC_TO_COUNT(10000U, PIT_1_CLK_FREQ) - 1U
+/* Definition of ticks count for channel 1. */
+//#define PIT_1_1_TICKS USEC_TO_COUNT(33333U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(27000U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(20000U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(40000U, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(27000U, PIT_1_CLK_FREQ) - 1U // este funciona mas o menos
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(26000U, PIT_1_CLK_FREQ) - 1U // no funciona
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(28000U, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(27100U, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(26900U, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(13500U, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(27010, PIT_1_CLK_FREQ) - 1U
+
+//#define PIT_1_1_TICKS USEC_TO_COUNT(27050, PIT_1_CLK_FREQ) - 1U
+
+#define PIT_1_1_TICKS USEC_TO_COUNT(27080, PIT_1_CLK_FREQ) - 1U
+
+
+
+/* Definition of ticks count for channel 2. */
+#define PIT_1_2_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U // 5 segs
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_0_IRQN PIT0_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_0_IRQHANDLER PIT0_IRQHandler
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_1_IRQN PIT1_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_1_IRQHANDLER PIT1_IRQHandler
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_2_IRQN PIT2_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_2_IRQHANDLER PIT2_IRQHandler
+
+
+
+void BOARD_InitPeripherals(void);
 /**
  * @brief 	Initialize peripherals specific settings.
  */
