@@ -53,7 +53,7 @@
 
 status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
 {
-    sgtl_config_t *config = (sgtl_config_t *)codec_config;
+//    sgtl_config_t *config = (sgtl_config_t *)codec_config;
 
 //    handle->slaveAddress = SGTL5000_I2C_ADDR;
 //    handle->slaveAddress = 0x30U;

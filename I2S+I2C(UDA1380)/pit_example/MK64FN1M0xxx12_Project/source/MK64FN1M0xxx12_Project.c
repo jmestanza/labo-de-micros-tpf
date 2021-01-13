@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 NXP
+ * Copyright 2016-2018 NXP Semiconductor, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -27,51 +27,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-/**
- * @file    peripherals.h
- * @brief   Peripherals initialization header file.
- */
  
-/* This is a template for board specific configuration created by MCUXpresso IDE Project Wizard.*/
-
-#ifndef _PERIPHERALS_H_
-#define _PERIPHERALS_H_
-
-#include "fsl_pit.h"
-
-
-#if defined(__cplusplus)
-extern "C" {
-#endif /* __cplusplus */
-
-
-/* Definitions for BOARD_InitPeripherals functional group */
-/* BOARD_InitPeripherals defines for PIT */
-/* Definition of peripheral ID. */
-#define PIT_1_PERIPHERAL PIT
-/* Definition of clock source. */
-#define PIT_1_CLOCK_SOURCE kCLOCK_BusClk
-/* Definition of clock source frequency. */
-#define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
-/* Definition of ticks count for channel 0. */
-#define PIT_1_0_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U
-/* PIT_1 interrupt vector ID (number). */
-#define PIT_1_0_IRQN PIT0_IRQn
-/* PIT_1 interrupt handler identifier. */
-#define PIT_1_0_IRQHANDLER PIT0_IRQHandler
-
-
-void BOARD_InitPeripherals(void);
 /**
- * @brief 	Initialize peripherals specific settings.
+ * @file    MK64FN1M0xxx12_Project.c
+ * @brief   Application entry point.
  */
-void BOARD_InitBootPeripherals(void);
+#include <stdio.h>
+#include "board.h"
+#include "peripherals.h"
+#include "pin_mux.h"
+#include "clock_config.h"
+#include "MK64F12.h"
+#include "fsl_debug_console.h"
+/* TODO: insert other include files here. */
 
-#if defined(__cplusplus)
+/* TODO: insert other definitions and declarations here. */
+
+/*
+ * @brief   Application entry point.
+ */
+
+void PIT_1_0_IRQHANDLER(void){
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
 }
-#endif /* __cplusplus */
-
-#endif /* _PERIPHERALS_H_ */
 
 
+int main(void) {
+
+  	/* Init board hardware. */
+    BOARD_InitBootPins();
+    BOARD_InitBootClocks();
+    BOARD_InitBootPeripherals();
+  	/* Init FSL debug console. */
+    BOARD_InitDebugConsole();
+
+    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+    PRINTF("Hello World\n");
+
+    /* Force the counter to be placed into memory. */
+    volatile static int i = 0 ;
+    /* Enter an infinite loop, just incrementing a counter. */
+    while(1) {
+        i++ ;
+    }
+    return 0 ;
+}

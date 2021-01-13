@@ -33,6 +33,7 @@
  */
 
 #include "board.h"
+#include "peripherals.h"
 #include "music.h"
 #if defined(FSL_FEATURE_SOC_DMAMUX_COUNT) && FSL_FEATURE_SOC_DMAMUX_COUNT
 #include "fsl_dmamux.h"
@@ -40,11 +41,16 @@
 #include "fsl_sai_edma.h"
 #include "fsl_debug_console.h"
 
+#include "fsl_pit.h"
+
 #include "fsl_sgtl5000.h"
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
+
+
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -149,10 +155,13 @@ void BOARD_I2C_ReleaseBus(void)
     GPIO_PinWrite(I2C_RELEASE_SDA_GPIO, I2C_RELEASE_SDA_PIN, 1U);
     i2c_release_bus_delay();
 }
+
 static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status, void *userData)
 {
-    if(kStatus_SAI_RxError == status)
+//    if(kStatus_SAI_RxError == status) // estaba esto pero
+    if(kStatus_SAI_TxError == status)   // me parece que deberia ser con Tx
     {
+    	PRINTF("Hubo un error en el SAI");
     }
     else
     {
@@ -169,20 +178,34 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
 /*!
  * @brief Main function
  */
+codec_handle_t *codec_handle_pit = NULL;
+codec_config_t *codec_config_pit = NULL;
+sai_transfer_format_t * sai_xfer_format_pit = NULL;
+
+void PIT_1_0_IRQHANDLER(void){
+	assert(codec_handle_pit && codec_config_pit && sai_xfer_format_pit);
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
+    CODEC_Init(codec_handle_pit, codec_config_pit);
+    CODEC_SetFormat(codec_handle_pit, sai_xfer_format_pit->masterClockHz, sai_xfer_format_pit->sampleRate_Hz, sai_xfer_format_pit->bitWidth);
+    PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+}
+
+
 int main(void)
 {
+	PRINTF("len del arreglo music = %d \n",sizeof(music));
+	PRINTF("MUSIC_LEN (el define)= %d \n",MUSIC_LEN);
     sai_config_t config;
     uint32_t mclkSourceClockHz = 0U;
     sai_transfer_format_t format;
     sai_transfer_t xfer;
     edma_config_t dmaConfig = {0};
     uint32_t cpy_index = 0U, tx_index=0U;
-//    uint32_t delayCycle = 500000U;
-//    uint32_t delayCycle = 8000000U;
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
-    BOARD_I2C_ReleaseBus();
+    BOARD_InitBootPeripherals();
+    BOARD_I2C_ReleaseBus(); // probe sin esto y anda pero lo dejo por las dudas
     BOARD_I2C_ConfigurePins();
     BOARD_InitDebugConsole();
     BOARD_Codec_I2C_Init();
@@ -220,6 +243,14 @@ int main(void)
     config.protocol = kSAI_BusI2S;
 //#endif
     SAI_TxInit(DEMO_SAI, &config);
+
+	codec_handle_pit = &codecHandle;
+	codec_config_pit =  &boardCodecConfig;
+	sai_xfer_format_pit = &format;
+
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+
+
 
     /* Configure the audio format */
     format.bitWidth = kSAI_WordWidth16bits;
@@ -259,37 +290,22 @@ int main(void)
     SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
 #endif
 
-#if defined(CODEC_CYCLE)
-    delayCycle = CODEC_CYCLE;
-#endif
-//    while (delayCycle)
-//    {
-//        __ASM("nop");
-//        delayCycle--;
-//    }
 
     SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
 
     mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
     SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
 
+//    codec_handle_pit = &codecHandle;
+//    codec_config_pit =  &boardCodecConfig;
+//    sai_xfer_format_pit = &format;
+//
+//    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+
     /* Waiting until finished. */
-//    bool first_time = true;
+
     while(!isFinished)
     {
-//    	if(first_time == true){
-//            while (delayCycle)
-//            {
-//                __ASM("nop");
-//                delayCycle--;
-//            }
-            /* Use default setting to init codec */
-            CODEC_Init(&codecHandle, &boardCodecConfig);
-            CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
-//            first_time = false;
-//    	}
-
-
         if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
         {
              /* Fill in the buffers. */
