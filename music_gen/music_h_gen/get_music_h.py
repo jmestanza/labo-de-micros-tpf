@@ -14,7 +14,7 @@ def get_string_from_16bit_value(val):
 # samplerate, data = wavfile.read('sonic_16bit_16khz.wav')
 file_name = 'music_16bit_16khz'
 
-samplerate, data = wavfile.read(file_name+".wav")
+samplerate, data = wavfile.read("wav_files/"+file_name+".wav")
 
 left_channel = data[:,0]
 right_channel = data[:,1]
@@ -53,7 +53,7 @@ N_BUFFERS = len(int_values)//BUFFER_SIZE
 print("Entran exactamente ", N_BUFFERS , "BUFFERS")
 
 
-f = open("music.h", "r")
+f = open("template_music_h/music.h", "r")
 
 line_list = []
 idx_llave = -10000
@@ -81,9 +81,9 @@ for i in range(len(middle_string)):
 
 line_list.insert(idx_llave+1,middle_string_modified+'\n')
 
-f = open(file_name+"_generated.h","w")
+f = open("generated_music_h/generated_"+file_name+".h","w")
 for i in range(len(line_list)):
         f.write(line_list[i])
 f.close()
 
-print("Se copio el arreglo al archivo music llamado "+file_name+"generated.h")
+print("Se copio el arreglo a generated_music_h/generated_"+file_name+".h")
