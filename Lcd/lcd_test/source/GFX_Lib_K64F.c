@@ -61,6 +61,8 @@ uint16_t				 ///< Coordenates for number values
   temp_y = 0,
   oxy_x = 0,
   oxy_y = 0;
+uint16_t ECG_graph[160];
+uint16_t SPO2_graph[160];
 
 // Standard ASCII 5x7 font
 #ifndef FONT5X7_H
@@ -775,7 +777,7 @@ void lcdGFX_init(void)
     gridECG_x = 10;
     gridECG_y = 110;
     gridSPO2_x = 10;
-    gridSPO2_y = 10+110+(h/2);
+    gridSPO2_y = 10+100+(h/2);
     // Border lines
     display_drawHLine(0, 0, w, ILI9341_WHITE);
     display_drawHLine(0, h/2, w, ILI9341_WHITE);
@@ -949,32 +951,47 @@ void lcdGFX_init(void)
 void lcdGFX_updateGFX(uint16_t dataECG, uint16_t dataSPO2)
 {
 	uint16_t h = get_display_height();
-    if(!(space_cont%GRID_RES)) // Limit of squares
+
+    if((!(ECG_graph[space_cont]%GRID_RES))||(!(space_cont%GRID_RES))) // Limit of squares
     {
-    	display_drawVLine(10+space_cont, 10, GRID_H, GRID_COLOR);
-    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, GRID_COLOR);
+    	display_drawPixel(10+space_cont, 10+100-ECG_graph[space_cont], GRID_COLOR);
+//    	display_drawVLine(10+space_cont, 10, GRID_H, GRID_COLOR);
+//    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, GRID_COLOR);
     }
     else
     {
-    	display_drawVLine(10+space_cont, 10, GRID_H, ILI9341_BLACK);
-        display_drawPixel(10+space_cont, 10, GRID_COLOR);
-        display_drawPixel(10+space_cont, 30, GRID_COLOR);
-        display_drawPixel(10+space_cont, 50, GRID_COLOR);
-        display_drawPixel(10+space_cont, 70, GRID_COLOR);
-        display_drawPixel(10+space_cont, 90, GRID_COLOR);
-        display_drawPixel(10+space_cont, 110, GRID_COLOR);
-
-    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, ILI9341_BLACK);
-        display_drawPixel(10+space_cont, 10+(h/2), GRID_COLOR);
-        display_drawPixel(10+space_cont, 30+(h/2), GRID_COLOR);
-        display_drawPixel(10+space_cont, 50+(h/2), GRID_COLOR);
-        display_drawPixel(10+space_cont, 70+(h/2), GRID_COLOR);
-        display_drawPixel(10+space_cont, 90+(h/2), GRID_COLOR);
-        display_drawPixel(10+space_cont, 110+(h/2), GRID_COLOR);
+    	display_drawPixel(10+space_cont, 10+100-ECG_graph[space_cont], ILI9341_BLACK);
+//    	display_drawVLine(10+space_cont, 10, GRID_H, ILI9341_BLACK);
+//        display_drawPixel(10+space_cont, 10, GRID_COLOR);
+//        display_drawPixel(10+space_cont, 30, GRID_COLOR);
+//        display_drawPixel(10+space_cont, 50, GRID_COLOR);
+//        display_drawPixel(10+space_cont, 70, GRID_COLOR);
+//        display_drawPixel(10+space_cont, 90, GRID_COLOR);
+//        display_drawPixel(10+space_cont, 110, GRID_COLOR);
+//
+//    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, ILI9341_BLACK);
+//        display_drawPixel(10+space_cont, 10+(h/2), GRID_COLOR);
+//        display_drawPixel(10+space_cont, 30+(h/2), GRID_COLOR);
+//        display_drawPixel(10+space_cont, 50+(h/2), GRID_COLOR);
+//        display_drawPixel(10+space_cont, 70+(h/2), GRID_COLOR);
+//        display_drawPixel(10+space_cont, 90+(h/2), GRID_COLOR);
+//        display_drawPixel(10+space_cont, 110+(h/2), GRID_COLOR);
+    }
+    if((!(SPO2_graph[space_cont]%GRID_RES))||(!(space_cont%GRID_RES))) // Limit of squares
+    {
+    	display_drawPixel(10+space_cont, (h/2)+10+100-SPO2_graph[space_cont], GRID_COLOR);
+//    	display_drawVLine(10+space_cont, 10, GRID_H, GRID_COLOR);
+//    	display_drawVLine(10+space_cont, 10+(h/2), GRID_H, GRID_COLOR);
+    }
+    else
+    {
+    	display_drawPixel(10+space_cont, (h/2)+10+100-SPO2_graph[space_cont], ILI9341_BLACK);
     }
     // Drawing graphics
     display_drawPixel(gridECG_x+data_cont, gridECG_y-dataECG, ILI9341_GREEN);
+    ECG_graph[data_cont] = dataECG;
     display_drawPixel(gridSPO2_x+data_cont, gridSPO2_y-dataSPO2, ILI9341_WHITE);
+    SPO2_graph[data_cont] = dataSPO2;
 
     if(space_cont == GRID_W)
     	space_cont = 0;

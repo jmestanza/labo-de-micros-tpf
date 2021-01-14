@@ -130,6 +130,7 @@ uint8_t initcmd[] = {
 _Bool pitIsrFlag = false;
 dspi_transfer_t masterXfer;
 uint8_t masterBuffer[] = {0};
+uint8_t buffer[2*320*240];
 
 /*
  * Function definitios
@@ -235,15 +236,36 @@ void setAddrWindow(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h)
     uint16_t x2 = (x1 + w - 1),
              y2 = (y1 + h - 1);
     writeCommand(ILI9341_CASET); // Column address set
-    writeData(x1 >> 8);
-    writeData(x1);
-    writeData(x2 >> 8);
-    writeData(x2);
+    buffer[0] = x1 >> 8;
+    buffer[1] = x1;
+    buffer[2] = x2 >> 8;
+    buffer[3] = x2;
+	masterXfer.txData = buffer;
+	masterXfer.rxData = NULL;
+	masterXfer.dataSize = 4;
+	masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+	DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+//    writeData(x1 >> 8);
+//    writeData(x1);
+//    writeData(x2 >> 8);
+//    writeData(x2);
+
     writeCommand(ILI9341_PASET); // Row address set
-    writeData(y1 >> 8);
-    writeData(y1);
-    writeData(y2 >> 8);
-    writeData(y2);
+    buffer[0] = y1 >> 8;
+    buffer[1] = y1;
+    buffer[2] = y2 >> 8;
+    buffer[3] = y2;
+	masterXfer.txData = buffer;
+	masterXfer.rxData = NULL;
+	masterXfer.dataSize = 4;
+	masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+	DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+//    writeData(y1 >> 8);
+//    writeData(y1);
+//    writeData(y2 >> 8);
+//    writeData(y2);
+
     writeCommand(ILI9341_RAMWR); // Write to RAM
 }
 
@@ -259,10 +281,28 @@ void fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 		  h = _height - y;
 		setAddrWindow(x, y, w, h);
 		uint32_t px = (uint32_t)w * h;
-		while (px--) {
-		  writeData(hi);
-		  writeData(lo);
+
+		for(uint32_t i=0;i<((2*px)-1);i++)
+		{
+			if(!(i%2))
+			{
+				buffer[i] = hi;
+			}
+			else
+			{
+				buffer[i] = lo;
+			}
 		}
+		masterXfer.txData = buffer;
+		masterXfer.rxData = NULL;
+		masterXfer.dataSize = (2*px);
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+		DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+//		while (px--) {
+//		  writeData(hi);
+//		  writeData(lo);
+//		}
 	}
 }
 
@@ -276,8 +316,16 @@ void drawPixel(uint16_t x, uint16_t y, uint16_t color)
 	if((x < _width) && (y < _height))
 	{
 		setAddrWindow(x, y, 1, 1);
-		writeData(color >> 8);
-		writeData(color & 0xFF);
+		buffer[0] = color >> 8;
+		buffer[1] = color & 0xFF;
+		masterXfer.txData = buffer;
+		masterXfer.rxData = NULL;
+		masterXfer.dataSize = 2;
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+		DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+//		writeData(color >> 8);
+//		writeData(color & 0xFF);
 	}
 }
 
@@ -289,11 +337,29 @@ void drawVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color)
 		if((y + h - 1) >= _height)
 			h = _height - y;
 		setAddrWindow(x, y, 1, h);
-		while (h--)
+
+		for(uint32_t i=0;i<((2*h)-1);i++)
 		{
-			writeData(hi);
-			writeData(lo);
+			if(!(i%2))
+			{
+				buffer[i] = hi;
+			}
+			else
+			{
+				buffer[i] = lo;
+			}
 		}
+		masterXfer.txData = buffer;
+		masterXfer.rxData = NULL;
+		masterXfer.dataSize = 2*h;
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+		DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+//		while (h--)
+//		{
+//			writeData(hi);
+//			writeData(lo);
+//		}
 	}
 }
 
@@ -305,11 +371,29 @@ void drawHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color)
 		if((x + w - 1) >= _width)
 			w = _width  - x;
 		setAddrWindow(x, y, w, 1);
-		while (w--)
+
+		for(uint32_t i=0;i<((2*w)-1);i++)
 		{
-		  writeData(hi);
-		  writeData(lo);
+			if(!(i%2))
+			{
+				buffer[i] = hi;
+			}
+			else
+			{
+				buffer[i] = lo;
+			}
 		}
+		masterXfer.txData = buffer;
+		masterXfer.rxData = NULL;
+		masterXfer.dataSize = 2*w;
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+		DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+//		while (w--)
+//		{
+//		  writeData(hi);
+//		  writeData(lo);
+//		}
 
 	}
 }
