@@ -368,6 +368,8 @@ int main(void)
     uint32_t destAdrss; /* Address of the target location */
     uint32_t i, failAddr, failDat;
 
+    uint32_t * aux_pnt = NULL;
+
     uint32_t pflashBlockBase = 0;
     uint32_t pflashTotalSize = 0;
     uint32_t pflashSectorSize = 0;
@@ -520,6 +522,10 @@ with width of 2 sectors ...
                 error_trap();
             }
         }
+
+        aux_pnt = destAdrss;
+
+        PRINTF("\r\n Value  = 0x %02x \r\n", *aux_pnt);
 
         PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", destAdrss,
                (destAdrss + sizeof(s_buffer)));

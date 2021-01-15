@@ -1,0 +1,5 @@
+﻿  main.c
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\main.c(314,28): warning C4018: '<': signed/unsigned mismatch
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\main.c(272,11): warning C4101: 'wavIn': unreferenced local variable
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\main.c(272,20): warning C4101: 'wavOut': unreferenced local variable
+  MP3_test_PC.vcxproj -> C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\Debug\MP3_test_PC.exe
