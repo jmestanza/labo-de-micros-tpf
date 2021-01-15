@@ -45,6 +45,7 @@ void delay_ms_150(void);
 
 void tft_begin(void);
 
+void drawImg(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t *img);
 void drawPixel(uint16_t x, uint16_t y, uint16_t color);
 void drawHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color);
 void drawVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color);

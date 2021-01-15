@@ -51,6 +51,13 @@ void BOARD_InitBootPins(void);
 #define BOARD_ILI9341_RST_PIN 3U     /*!<@brief PORTC pin index: 3 */
                                      /* @} */
 
+/*! @name PORTC10 (number 82), J4[12]
+  @{ */
+#define BOARD_TEST_PIN_GPIO GPIOC /*!<@brief GPIO device name: GPIOC */
+#define BOARD_TEST_PIN_PORT PORTC /*!<@brief PORT device name: PORTC */
+#define BOARD_TEST_PIN_PIN 10U    /*!<@brief PORTC pin index: 10 */
+                                  /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

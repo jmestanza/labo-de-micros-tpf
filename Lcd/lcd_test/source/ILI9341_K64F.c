@@ -10,8 +10,6 @@
 #include "peripherals.h"
 #include "pin_mux.h"
 #include "fsl_dspi.h"
-
-
 /*
  * Other defines
  */
@@ -130,7 +128,7 @@ uint8_t initcmd[] = {
 _Bool pitIsrFlag = false;
 dspi_transfer_t masterXfer;
 uint8_t masterBuffer[] = {0};
-uint8_t buffer[2*320*240];
+uint8_t buffer[2*ILI9341_TFTWIDTH*ILI9341_TFTHEIGHT];
 
 /*
  * Function definitios
@@ -427,3 +425,37 @@ void setRotation(uint8_t m)
     writeCommand(ILI9341_MADCTL);
     writeData(m);
 }
+
+void drawImg(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t *img)
+{
+	if(w && h) {                            // Nonzero width and height?
+		uint8_t hi, lo;
+		if((x >= _width) || (y >= _height))
+		  return;
+		if((x + w - 1) >= _width)
+		  w = _width  - x;
+		if((y + h - 1) >= _height)
+		  h = _height - y;
+		setAddrWindow(x, y, w, h);
+
+		uint32_t px = (uint32_t)w * h;
+		uint32_t j=0;
+		for(uint32_t i=0;i<(px-1);i++)
+		{
+			hi = img[i] >> 8;
+			lo = img[i];
+			buffer[j] = hi;
+			buffer[j+1] = lo;
+			j+=2;
+		}
+
+		masterXfer.txData = buffer;
+		masterXfer.rxData = NULL;
+		masterXfer.dataSize = (2*px);
+		masterXfer.configFlags = kDSPI_MasterCtar0 | kDSPI_MasterPcs0 | kDSPI_MasterPcsContinuous;
+		DSPI_MasterTransferBlocking(SPI_0_PERIPHERAL, &masterXfer);
+
+	}
+}
+
+

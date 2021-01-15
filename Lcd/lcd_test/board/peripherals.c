@@ -212,7 +212,7 @@ instance:
       - 1:
         - channelNumber: '1'
         - enableChain: 'false'
-        - timerPeriod: '0.025s'
+        - timerPeriod: '0.0125s'
         - startTimer: 'false'
         - enableInterrupt: 'true'
         - interrupt:
@@ -230,7 +230,7 @@ void PIT_1_init(void) {
   PIT_Init(PIT_1_PERIPHERAL, &PIT_1_config);
   /* Set channel 0 period to 150 ms. */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
-  /* Set channel 1 period to 25 ms. */
+  /* Set channel 1 period to 12.5 ms. */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_1_1_TICKS);
   /* Enable interrupts from channel 0. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);

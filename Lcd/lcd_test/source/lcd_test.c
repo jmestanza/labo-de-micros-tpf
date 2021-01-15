@@ -76,9 +76,6 @@ int main(void) {
 
     PRINTF("Hello World\n");
 
-    /*
-     * Test code for monitor
-     */
     lcdGFX_init();
 
     // Test graphics vectors (generated manually)
@@ -133,14 +130,18 @@ void PIT0_IRQHandler(void)
 
 void PIT1_IRQHandler(void)
 {
+//	GPIO_PortSet(BOARD_TEST_PIN_GPIO, 1U << BOARD_TEST_PIN_PIN);
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_1, kPIT_TimerFlag);
 	i++;
 	j++;
 	lcdGFX_updateGFX(bpm[i%160], oxy[i%160]);
-	if(!(j%20))
+	if(!(j%40))
 	{
+		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
  		lcdGFX_updateDATA(i%99, 82.34, 36.8);
+ 		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
 	}
+//	GPIO_PortClear(BOARD_TEST_PIN_GPIO, 1U << BOARD_TEST_PIN_PIN);
 }
 /*
  * Test functions

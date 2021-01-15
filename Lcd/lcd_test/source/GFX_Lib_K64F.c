@@ -774,6 +774,7 @@ void lcdGFX_init(void)
     w = get_display_width();
     h = get_display_height();
 
+    display_fillScreen(ILI9341_BLACK);
     gridECG_x = 10;
     gridECG_y = 110;
     gridSPO2_x = 10;
@@ -1037,8 +1038,8 @@ void lcdGFX_updateDATA(uint16_t dataECG, float dataSPO2, float dataTEMP)
 
 	// Update SPO2 Value
 	numSize = 6; // Text size 3.5x5
-	display_fillRect(oxy_x, oxy_y, 67, 50 , ILI9341_BLACK); // Erase previous value
-	display_fillRect(oxy_x+67, oxy_y, 30, 15, ILI9341_BLACK); // Erase previous value
+	display_fillRect(oxy_x, oxy_y, 67+30, 50 , ILI9341_BLACK); // Erase previous value
+//	display_fillRect(oxy_x+67, oxy_y, 30, 15, ILI9341_BLACK); // Erase previous value
 	display_setCursor(oxy_x, oxy_y);
 	display_setTextColor(ILI9341_WHITE);
 	display_setTextSize(numSize);
@@ -1048,8 +1049,13 @@ void lcdGFX_updateDATA(uint16_t dataECG, float dataSPO2, float dataTEMP)
 	dec2 = ((uint16_t)(dataSPO2*100))%10 + '0';
 	display_print(dec);
 	display_print(uni);
+	int16_t txtRef_x, txtRef_y;
+	txtRef_x = display_getCursorX();
+	txtRef_y = display_getCursorY();
 	numSize = 2;
 	display_setTextSize(numSize);
+	display_drawChar(txtRef_x, txtRef_y+27, '%', ILI9341_WHITE, 2);
+	display_setCursor(txtRef_x, txtRef_y);
 	display_print(dec1);
 	display_print(dec2);
 

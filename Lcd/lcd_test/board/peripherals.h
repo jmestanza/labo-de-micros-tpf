@@ -49,7 +49,7 @@ extern "C" {
 /* Definition of ticks count for channel 0. */
 #define PIT_1_0_TICKS USEC_TO_COUNT(150000U, PIT_1_CLK_FREQ) - 1U
 /* Definition of ticks count for channel 1. */
-#define PIT_1_1_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U
+#define PIT_1_1_TICKS USEC_TO_COUNT(12500U, PIT_1_CLK_FREQ) - 1U
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_0_IRQN PIT0_IRQn
 /* PIT_1 interrupt handler identifier. */
