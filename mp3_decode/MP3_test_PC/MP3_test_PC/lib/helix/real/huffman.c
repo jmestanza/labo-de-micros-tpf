@@ -375,7 +375,10 @@ static int DecodeHuffmanQuads(int *vwxy, int nVals, int tabIdx, int bitsLeft, un
  *                out of bits prematurely (invalid bitstream)
  **************************************************************************************/
 int DecodeHuffman(MP3DecInfo *mp3DecInfo, unsigned char *buf, int *bitOffset, int huffBlockBits, int gr, int ch)
-{
+{	
+	static int counter = 0; 
+	counter++;
+
 	int r1Start, r2Start, rEnd[4];	/* region boundaries */
 	int i, w, bitsUsed, bitsLeft;
 	unsigned char *startBuf = buf;
@@ -430,6 +433,9 @@ int DecodeHuffman(MP3DecInfo *mp3DecInfo, unsigned char *buf, int *bitOffset, in
 	/* decode Huffman pairs (rEnd[i] are always even numbers) */
 	bitsLeft = huffBlockBits;
 	for (i = 0; i < 3; i++) {
+		if (i == 1 && counter == 0x26) {
+			int z = 10;
+		}
 		bitsUsed = DecodeHuffmanPairs(hi->huffDecBuf[ch] + rEnd[i], rEnd[i+1] - rEnd[i], sis->tableSelect[i], bitsLeft, buf, *bitOffset);
 		if (bitsUsed < 0 || bitsUsed > bitsLeft)	/* error - overran end of bitstream */
 			return -1;

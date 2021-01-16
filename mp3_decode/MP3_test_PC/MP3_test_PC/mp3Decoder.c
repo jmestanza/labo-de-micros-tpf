@@ -23,7 +23,6 @@
 #define DEFAULT_ID3_FIELD       "Unknown"
 #define MAX_DEPTH       3
 
-
   /*******************************************************************************
    * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
    ******************************************************************************/
@@ -54,14 +53,119 @@ typedef struct
     bool                  has_ID3_Tag;                              // True if the file has valid ID3 tag
     mp3_decoder_tag_data_t ID3_data;                                // Parsed data from ID3 tag
 
-    uint8_t* flash_buffer;
-    uint8_t  flash_idx;
+     uint8_t * flash_buffer;
+     uint32_t  flash_idx;
 
 
 }mp3_decoder_context_t;
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
+
+uint16_t ret_buffer[1000] = {
+6913, 298, 360, 648, 360, 360, 432, 432, 360, 360,
+360, 360, 360, 288, 360, 360, 360, 360, 360, 432,
+360, 360, 360, 360, 360, 360, 360, 360, 360, 360,
+360, 360, 360, 360, 432, 360, 360, 432, 360, 360,
+432, 432, 360, 360, 360, 360, 360, 360, 360, 360,
+360, 360, 432, 360, 360, 360, 360, 360, 360, 360,
+360, 360, 360, 432, 360, 360, 360, 360, 360, 360,
+432, 360, 360, 360, 360, 360, 360, 360, 360, 360,
+360, 360, 360, 360, 360, 360, 360, 432, 360, 360,
+432, 360, 360, 360, 432, 360, 360, 360, 432, 360,
+288, 360, 360, 360, 360, 360, 432, 360, 35, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+};
+
 
  //File management functions
 static bool open_file(char* file_name);
@@ -127,20 +231,6 @@ bool  MP3LoadFile(const char* file_name, uint8_t * audio, uint32_t audio_len) {
 
 }
 
-bool MP3GetTagData(mp3_decoder_tag_data_t* data) {
-    bool res = false;
-    if (context_data.has_ID3_Tag)
-    {
-        strcpy(data->album, context_data.ID3_data.album);
-        strcpy(data->artist, context_data.ID3_data.artist);
-        strcpy(data->title, context_data.ID3_data.title);
-        strcpy(data->trackNum, context_data.ID3_data.trackNum);
-        strcpy(data->year, context_data.ID3_data.year);
-        res = true;
-    }
-    return res;
-}
-
 bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data) {
     bool ret = false;
     if (context_data.bytes_remaining < context_data.f_size)
@@ -151,12 +241,10 @@ bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data) {
     return ret;
 }
 
-bool MP3GetNextFrameData(mp3_decoder_frame_data_t* data) {
-    printf("\r\nNOT IMPLEMENTED YET HET NEXT FRAME DATA!!\r\n");
-    return true;
-}
-
 mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, uint16_t* samples_decoded, uint8_t depth) {
+
+    static int counter = 0;
+
     mp3_decoder_result_t ret = MP3DECODER_NO_ERROR;    // Return value of the function
 
 #ifdef DEBUG
@@ -209,6 +297,10 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
             // Read encoded data from file
             copyDataAndMovePointer();
 
+            counter++;
+
+            
+
             // seek mp3 header beginning 
             int offset = MP3FindSyncWord(context_data.encoded_frame_buffer + context_data.top_index, context_data.bottom_index);
 
@@ -240,10 +332,12 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 }
             }
 
+
             // with array organized, lets decode a frame
             uint8_t* decPointer = context_data.encoded_frame_buffer + context_data.top_index;
             int bytesLeft = context_data.bottom_index - context_data.top_index;
-            int res = MP3Decode(context_data.Decoder, &decPointer, &(bytesLeft), outBuffer, MP3DECODER_MODE_NORMAL); //! autodecrements fileSize with bytes decoded. updated inbuf pointer, updated bytesLeft
+            int res = MP3Decode(context_data.Decoder, &decPointer, &(bytesLeft), outBuffer, MP3DECODER_MODE_NORMAL); 
+            //! autodecrements fileSize with bytes decoded. updated inbuf pointer, updated bytesLeft
 
             if (res == ERR_MP3_NONE) // if decoding successful
             {
@@ -298,11 +392,14 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                     context_data.top_index++;
                     context_data.bytes_remaining--;
 #ifdef DEBUG
-                    printf("Error: %d\n", res);
-#endif
-
+                    printf("Error: %d\n", res); // ERR_MP3_INVALID_HUFFCODES
+#endif              
+//                    return MP3DECODER_FILE_END;
                     // If invalid header, try with next frame
-                    return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
+
+                    mp3_decoder_result_t aux = MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
+
+                    return aux; //! H-quearlo
                 }
             }
         }
@@ -385,9 +482,12 @@ void fileRewind(void) {
 }
 
 uint16_t readFile(void* buf, uint16_t cnt) {
+    static int count = 0;
+    static int index = 0;
+    int buffer_size_to_write = -1;
     static bool first_time = true;
-    uint16_t ret = 0;
-    uint16_t read;
+    int ret = 0;
+
     if (context_data.file_opened)
     {
 #ifdef __arm__
@@ -397,27 +497,32 @@ uint16_t readFile(void* buf, uint16_t cnt) {
             ret = read;
         }
 #else
-            
+       
 
-//        printf("puntero_init = %d", ftell(context_data.mp3File));
+        uint8_t * pointer = NULL; // ojo puede hacer overflow sumando (me parece)
+        uint8_t* pointer2 = NULL; // ojo puede hacer overflow sumando (me parece)
 
-//        ret = fread(buf, 1, cnt, context_data.mp3File);
+        uint8_t aux_val = 0;
+        ret = ret_buffer[index];
+        for (uint32_t i = 0; i < ret; i++) {
 
-//        printf("puntero_init = %d", ftell(context_data.mp3File));
+            if (count == 19 && i == 184) {
+                printf("posible iteracion");
 
-        // esto incrementa el puntero :c
-        
-        if (first_time) {
-            for (int i = 0; i < 6568; i++) {
-                *((uint8_t*)buf + i) = *(context_data.flash_buffer + i + context_data.flash_idx);
+                printf("(uint8_t*)buf+i = %p", (uint8_t*)buf + i);
             }
-            ret = 6568;
-            first_time = false;
+
+            pointer = context_data.flash_buffer + context_data.flash_idx; // este no se puede pasar me parece
+            pointer2 = (uint8_t*)buf; // este si se puede pasar, quiza hace falta un modulo
+
+  //          *(((uint8_t*)buf+i)% MP3_FRAME_BUFFER_BYTES) = *(pointer);
+            
+            aux_val = *(pointer + i);
+            *(pointer2 + i) = aux_val;
+
         }
-        else {
-            ret = 0;
-        }
-        
+        index++;
+        count++;
 #endif
     }
     return ret;
@@ -435,49 +540,27 @@ void readID3Tag(void)
     {*/
         context_data.has_ID3_Tag = true;
 
-        //if (!read_ID3_info(TITLE_ID3, context_data.ID3_data.title, ID3_MAX_FIELD_SIZE, context_data.mp3File))
-        //    strcpy(context_data.ID3_data.title, DEFAULT_ID3_FIELD);
+        //unsigned int tagSize = 160;// get_ID3_size(context_data.mp3File); // con sonic es 160 puede cambiar con otro MP3
+        unsigned int tagSize = 123;// thomas mp3
 
-        //if (!read_ID3_info(ALBUM_ID3, context_data.ID3_data.album, ID3_MAX_FIELD_SIZE, context_data.mp3File))
-        //    strcpy(context_data.ID3_data.album, DEFAULT_ID3_FIELD);
-
-        //if (!read_ID3_info(ARTIST_ID3, context_data.ID3_data.artist, ID3_MAX_FIELD_SIZE, context_data.mp3File))
-        //    strcpy(context_data.ID3_data.artist, DEFAULT_ID3_FIELD);
-
-        //if (!read_ID3_info(YEAR_ID3, context_data.ID3_data.year, 10, context_data.mp3File))
-        //    strcpy(context_data.ID3_data.year, DEFAULT_ID3_FIELD);
-
-        //if (!read_ID3_info(TRACK_NUM_ID3, context_data.ID3_data.trackNum, 10, context_data.mp3File))
-        //    strcpy(context_data.ID3_data.trackNum, DEFAULT_ID3_FIELD);
-
-
-        unsigned int tagSize = 160;// get_ID3_size(context_data.mp3File); // con sonic es 160 puede cambiar con otro MP3
 
 #ifdef DEBUG
         printf("ID3 Track found.\n");
         printf("ID3 Tag is %d bytes long\n", tagSize);
 #endif  
 
-//        printf("puntero_init = %d", ftell(context_data.mp3File));
-
-//        fileSeek(tagSize); // avanza, despues del tag? si! verlo con ftell
-
-//        printf("puntero_init = %d", ftell(context_data.mp3File)); 
-
-
         context_data.bytes_remaining -= tagSize;
         context_data.flash_idx += tagSize;
-    //}
-    //else
-    //{
-    //    fileRewind();
-    //}
+
 }
 
 void copyDataAndMovePointer() {
     uint16_t bytes_read;
 
     // Fill buffer with info in mp3 file
+    if (context_data.bottom_index == 6912) {
+        printf("wtff"); // llega a aca, NO DEBERIA
+    }
     uint8_t* dst = context_data.encoded_frame_buffer + context_data.bottom_index;
 
     bytes_read = readFile(dst, (MP3_FRAME_BUFFER_BYTES - context_data.bottom_index));

@@ -1,5 +1,2 @@
-﻿  main.c
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\original\MP3_test_PC\main.c(84,28): warning C4018: '<': signed/unsigned mismatch
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\original\MP3_test_PC\main.c(42,11): warning C4101: 'wavIn': unreferenced local variable
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\original\MP3_test_PC\main.c(42,20): warning C4101: 'wavOut': unreferenced local variable
+﻿  huffman.c
   MP3_test_PC.vcxproj -> C:\Github_Repos\labo-de-micros-tpf\mp3_decode\original\Debug\MP3_test_PC.exe

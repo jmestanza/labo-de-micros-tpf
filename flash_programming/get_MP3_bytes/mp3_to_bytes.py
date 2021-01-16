@@ -2,7 +2,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 import io
 
-filename = "sonic_16k"
+filename = "thomas_16k"
 data = open(filename+'.mp3', 'rb').read()
 
 # hex_arr = [el for el in data]

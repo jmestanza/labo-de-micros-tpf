@@ -104,7 +104,9 @@ void MP3FreeDecoder(HMP3Decoder hMP3Decoder)
 int MP3FindSyncWord(unsigned char *buf, int nBytes)
 {
 	int i;
-
+	for (i = 0; i < 11 - 1; i++) {
+		printf("buff[0]=%d , buff[1]=%d ", buf[i + 0], buf[i + 1]);
+	}
 	/* find byte-aligned syncword - need 12 (MPEG 1,2) or 11 (MPEG 2.5) matching bits */
 	for (i = 0; i < nBytes - 1; i++) {
 		if ( (buf[i+0] & SYNCWORDH) == SYNCWORDH && (buf[i+1] & SYNCWORDL) == SYNCWORDL )
@@ -279,6 +281,11 @@ static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf)
  **************************************************************************************/
 int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, short *outbuf, int useSize)
 {
+	static int counter = 0;
+
+	counter++;
+
+
 	int offset, bitOffset, mainBits, gr, ch, fhBytes, siBytes, freeFrameBytes;
 	int prevBitOffset, sfBlockBits, huffBlockBits;
 	unsigned char *mainPtr;
@@ -368,6 +375,12 @@ int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, sh
 	mainBits = mp3DecInfo->mainDataBytes * 8;
 
 	/* decode one complete frame */
+
+
+	// ACA ESTA LA DIFERENCIA!! no se en que momento pero ahi esta
+
+
+
 	for (gr = 0; gr < mp3DecInfo->nGrans; gr++) {
 		for (ch = 0; ch < mp3DecInfo->nChans; ch++) {
 			/* unpack scale factors and compute size of scale factor block */
@@ -386,7 +399,16 @@ int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, sh
 
 			/* decode Huffman code words */
 			prevBitOffset = bitOffset;
+			if (counter == 0x00000013 && gr == 0 && ch == 1) {
+				int z = 0;
+			}
+
 			offset = DecodeHuffman(mp3DecInfo, mainPtr, &bitOffset, huffBlockBits, gr, ch);
+
+			if (offset == -1) {
+				int z = 0;
+			}
+
 			if (offset < 0) {
 				MP3ClearBadFrame(mp3DecInfo, outbuf);
 				return ERR_MP3_INVALID_HUFFCODES;
@@ -415,5 +437,6 @@ int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, sh
 			return ERR_MP3_INVALID_SUBBAND;			
 		}
 	}
+
 	return ERR_MP3_NONE;
 }

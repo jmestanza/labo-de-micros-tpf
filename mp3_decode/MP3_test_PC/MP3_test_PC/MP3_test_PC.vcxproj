@@ -159,6 +159,7 @@
     <ClCompile Include="wav.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="music.h" />
     <ClInclude Include="lib\helix\platform.h" />
     <ClInclude Include="lib\helix\pub\mp3common.h" />
     <ClInclude Include="lib\helix\pub\mp3dec.h" />

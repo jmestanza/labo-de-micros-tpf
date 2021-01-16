@@ -53,6 +53,8 @@ typedef struct
     bool                  has_ID3_Tag;                              // True if the file has valid ID3 tag
     mp3_decoder_tag_data_t ID3_data;                                // Parsed data from ID3 tag
 
+    uint32_t    buffer_ret[1000];
+    uint32_t    buffer_ret_idx;
 
 }mp3_decoder_context_t;
 /*******************************************************************************
@@ -151,6 +153,7 @@ bool MP3GetNextFrameData(mp3_decoder_frame_data_t* data) {
 }
 
 mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, uint16_t* samples_decoded, uint8_t depth) {
+    static int counter = 0;
     mp3_decoder_result_t ret = MP3DECODER_NO_ERROR;    // Return value of the function
 
 #ifdef DEBUG
@@ -203,6 +206,11 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
             // Read encoded data from file
             copyDataAndMovePointer();
 
+            counter++;
+
+            
+
+
             // seek mp3 header beginning 
             int offset = MP3FindSyncWord(context_data.encoded_frame_buffer + context_data.top_index, context_data.bottom_index);
 
@@ -233,6 +241,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                     return MP3DECODER_BUFFER_OVERFLOW;
                 }
             }
+
 
             // with array organized, lets decode a frame
             uint8_t* decPointer = context_data.encoded_frame_buffer + context_data.top_index;
@@ -379,10 +388,11 @@ void fileRewind(void) {
 }
 
 uint16_t readFile(void* buf, uint16_t cnt) {
+
     uint16_t ret = 0;
     uint16_t read;
-    if (context_data.file_opened)
-    {
+ //   if (context_data.file_opened)
+ //   {
 #ifdef __arm__
         fr = f_read(context_data.mp3File, ((uint8_t*)buf) + ret, cnt, &read);
         if (fr == FR_OK)
@@ -391,8 +401,10 @@ uint16_t readFile(void* buf, uint16_t cnt) {
         }
 #else
         ret = fread(buf, 1, cnt, context_data.mp3File);
+        context_data.buffer_ret[context_data.buffer_ret_idx] = ret;
+        context_data.buffer_ret_idx++;
 #endif
-    }
+ //   }
     return ret;
 }
 
@@ -441,7 +453,9 @@ void readID3Tag(void)
 
 void copyDataAndMovePointer() {
     uint16_t bytes_read;
-
+    if (context_data.bottom_index == 6912) {
+        printf("wtff"); // en este no llega nunca
+    }
     // Fill buffer with info in mp3 file
     uint8_t* dst = context_data.encoded_frame_buffer + context_data.bottom_index;
 
@@ -473,4 +487,5 @@ void resetContextData(void) {
     context_data.top_index = 0;
     context_data.bytes_remaining = 0;
     context_data.f_size = 0;
+    context_data.buffer_ret_idx = 0;
 }
