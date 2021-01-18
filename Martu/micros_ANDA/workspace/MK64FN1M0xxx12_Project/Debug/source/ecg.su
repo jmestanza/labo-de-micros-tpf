@@ -1,0 +1,2 @@
+ecg.c:14:6:ecg_init	8	static
+ecg.c:28:6:pit_func	8	static

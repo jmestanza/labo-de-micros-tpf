@@ -10,40 +10,53 @@
 #include "clock_config.h"
 
 
-pfunc this_callback;
 
-void init_pit (uint32_t timeInUSEC, pfunc callback)
+pfunc callback_0;
+pfunc callback_1;
+pfunc callback_2;
+
+void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback)
 {
     pit_config_t pitConfig;
-    this_callback = callback;
-
     /*
      * pitConfig.enableRunInDebug = false;
      */
     PIT_GetDefaultConfig(&pitConfig);
 
     /* Init pit module */
-    PIT_Init(DEMO_PIT_BASEADDR, &pitConfig);
+    PIT_Init(PIT_BASEADDR, &pitConfig);
 
-    /* Set timer period for channel 0 */
-    PIT_SetTimerPeriod(DEMO_PIT_BASEADDR, DEMO_PIT_CHANNEL, USEC_TO_COUNT(timeInUSEC, PIT_SOURCE_CLOCK));
+    /* Set timer period for channel */
+    PIT_SetTimerPeriod(PIT_BASEADDR, ch, USEC_TO_COUNT(timeInUSEC, PIT_SOURCE_CLOCK));
 
-    /* Enable timer interrupts for channel 0 */
-    PIT_EnableInterrupts(DEMO_PIT_BASEADDR, DEMO_PIT_CHANNEL, kPIT_TimerInterruptEnable);
+    /* Enable timer interrupts for channel  */
+    PIT_EnableInterrupts(PIT_BASEADDR, ch, kPIT_TimerInterruptEnable);
 
-    /* Enable at the NVIC */
-    EnableIRQ(PIT_IRQ_ID);
+	switch (ch) {
+		case 0:
+			NVIC_EnableIRQ(PIT0_IRQn);
+			callback_0 = callback;
+			break;
+		case 1:
+			NVIC_EnableIRQ(PIT1_IRQn);
+			callback_1 = callback;
+			break;
+		case 2:
+			NVIC_EnableIRQ(PIT2_IRQn);
+			callback_2 = callback;
+			break;
+	}
 
-    /* Start channel 0 */
-    PIT_StartTimer(DEMO_PIT_BASEADDR, DEMO_PIT_CHANNEL);
+    /* Start channel */
+    PIT_StartTimer(PIT_BASEADDR, ch);
 
 }
 
-void PIT_LED_HANDLER(void)
+void PIT0_IRQHandler(void)
 {
     /* Clear interrupt flag.*/
-    PIT_ClearStatusFlags(DEMO_PIT_BASEADDR, DEMO_PIT_CHANNEL, kPIT_TimerFlag);
-    this_callback();
+    PIT_ClearStatusFlags(PIT_BASEADDR, 0, kPIT_TimerFlag);
+    callback_0();
 
     /* Added for, and affects, all PIT handlers. For CPU clock which is much larger than the IP bus clock,
      * CPU can run out of the interrupt handler before the interrupt flag being cleared, resulting in the
@@ -51,5 +64,37 @@ void PIT_LED_HANDLER(void)
      */
     __DSB();
 }
+
+void PIT1_IRQHandler(void)
+{
+    /* Clear interrupt flag.*/
+    PIT_ClearStatusFlags(PIT_BASEADDR, 1, kPIT_TimerFlag);
+    callback_1();
+
+    /* Added for, and affects, all PIT handlers. For CPU clock which is much larger than the IP bus clock,
+     * CPU can run out of the interrupt handler before the interrupt flag being cleared, resulting in the
+     * CPU's entering the handler again and again. Adding DSB can prevent the issue from happening.
+     */
+    __DSB();
+}
+
+
+void PIT2_IRQHandler(void)
+{
+    /* Clear interrupt flag.*/
+    PIT_ClearStatusFlags(PIT_BASEADDR, 2, kPIT_TimerFlag);
+    callback_2();
+
+    /* Added for, and affects, all PIT handlers. For CPU clock which is much larger than the IP bus clock,
+     * CPU can run out of the interrupt handler before the interrupt flag being cleared, resulting in the
+     * CPU's entering the handler again and again. Adding DSB can prevent the issue from happening.
+     */
+    __DSB();
+}
+
+
+
+
+
 
 

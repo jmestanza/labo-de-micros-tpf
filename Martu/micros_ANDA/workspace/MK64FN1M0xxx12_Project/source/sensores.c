@@ -39,10 +39,8 @@
 #include "pin_mux.h"
 #include "fsl_debug_console.h"
 #include "gpio.h"
-
 #include "pit.h"
 #include "i2c_config.h"
-
 #include "fever.h"
 #include "algorithm.h"
 #include "o2.h"
@@ -53,7 +51,7 @@
 
 /* TODO: insert other definitions and declarations here. */
 
-#define PIN_SPO2    PORTNUM2PIN(PB,2) // PTB2
+#define PIN_SPO2    PORTNUM2PIN(PB,18) // PTB18
 
 void callback_pin (void);
 void callback_pit(void);
@@ -94,7 +92,8 @@ int main(void) {
     gpioIRQ(PIN_SPO2, GPIO_IRQ_MODE_FALLING_EDGE, callback_pin);
     NVIC_EnableIRQ(PORTB_IRQn);
 
-    init_pit(1000000U, callback_pit);
+
+    init_pit(0, 1000000U, callback_pit);
 
     PRINTF("Hello World\n");
 

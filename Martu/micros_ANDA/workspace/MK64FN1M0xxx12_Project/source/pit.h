@@ -11,19 +11,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
-#define DEMO_PIT_BASEADDR PIT
-#define DEMO_PIT_CHANNEL  kPIT_Chnl_0
-#define PIT_LED_HANDLER   PIT0_IRQHandler
-#define PIT_IRQ_ID        PIT0_IRQn
+#define PIT_BASEADDR PIT
 /* Get source clock for PIT driver */
 #define PIT_SOURCE_CLOCK CLOCK_GetFreq(kCLOCK_BusClk)
-#define LED_INIT()       LED_RED_INIT(LOGIC_LED_ON)
-#define LED_TOGGLE()     LED_RED_TOGGLE()
+
 
 typedef void (* pfunc) (void);
 
-void init_pit (uint32_t timeInUSEC, pfunc callback);
+void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback);
 
 
 #endif /* PIT_H_ */

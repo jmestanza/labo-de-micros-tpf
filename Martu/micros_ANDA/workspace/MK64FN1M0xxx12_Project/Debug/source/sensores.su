@@ -1,4 +1,4 @@
 core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static
-sensores.c:74:5:main	16	static
-sensores.c:115:6:callback_pin	40	static
-sensores.c:143:6:callback_pit	8	static
+sensores.c:72:5:main	16	static
+sensores.c:114:6:callback_pin	40	static
+sensores.c:142:6:callback_pit	8	static
