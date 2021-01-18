@@ -2,10 +2,6 @@
 #include "o2.h"
 
 
-bool maxim_max30102_read_block(uint8_t uch_addr, uint8_t *puch_data, uint8_t size);
-
-
-
 bool maxim_max30102_write_reg(uint8_t uch_addr, uint8_t uch_data)
 {
 	i2cWriteMsg(I2C_WRITE_ADDR, &uch_data, 1, uch_addr);
@@ -13,15 +9,15 @@ bool maxim_max30102_write_reg(uint8_t uch_addr, uint8_t uch_data)
 
 }
 
-bool maxim_max30102_write_reg_blocking(uint8_t uch_addr, uint8_t uch_data)
-{
-	return i2cWriteMsgBlocking(I2C_WRITE_ADDR, &uch_data, 1, uch_addr);
-}
-
 bool maxim_max30102_read_reg(uint8_t uch_addr, uint8_t *puch_data)
 {
 	i2cReadMsg(I2C_READ_ADDR, puch_data, 1, uch_addr);
   	return i2cgetCompletition();
+}
+
+bool maxim_max30102_write_reg_blocking(uint8_t uch_addr, uint8_t uch_data)
+{
+	return i2cWriteMsgBlocking(I2C_WRITE_ADDR, &uch_data, 1, uch_addr);
 }
 
 bool maxim_max30102_read_reg_blocking(uint8_t uch_addr, uint8_t *puch_data)
@@ -79,18 +75,16 @@ bool maxim_max30102_reset()
         return true;
 }
 
-bool maxim_max30102_read_fifoNB(uint32_t *pun_red_led, uint32_t *pun_ir_led)
+bool maxim_max30102_read_fifo(uint32_t *pun_red_led, uint32_t *pun_ir_led)
 {
   static uint32_t un_temp;
   *pun_red_led=0;
   *pun_ir_led=0;
   static uint8_t ach_i2c_data[6];
 
-
-
   if(i2cgetCompletition()==true){
 
-	  maxim_max30102_read_block(REG_FIFO_DATA, ach_i2c_data, 6);
+	  maxim_max30102_read_sample(REG_FIFO_DATA, ach_i2c_data, 6);
 
 	  un_temp=(unsigned char) ach_i2c_data[0];
 	  un_temp<<=16;
@@ -113,16 +107,14 @@ bool maxim_max30102_read_fifoNB(uint32_t *pun_red_led, uint32_t *pun_ir_led)
 	  *pun_ir_led&=0x03FFFF;  //Mask MSB [23:18]
 
 	  return true;
-
   }
-
 
   return false;
 
 }
 
 
-bool maxim_max30102_read_block(uint8_t uch_addr, uint8_t *puch_data, uint8_t size)
+bool maxim_max30102_read_sample(uint8_t uch_addr, uint8_t *puch_data, uint8_t size)
 
 {
 	i2cReadMsg(I2C_READ_ADDR, puch_data, size, uch_addr);

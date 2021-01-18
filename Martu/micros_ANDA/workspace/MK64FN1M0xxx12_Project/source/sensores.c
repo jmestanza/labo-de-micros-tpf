@@ -85,10 +85,14 @@ int main(void) {
 
     uint8_t uch_dummy;
     i2cInit();
-    gpioMode(PIN_SPO2, INPUT);
+
     maxim_max30102_reset(); //resets the MAX30102
     maxim_max30102_read_reg_blocking(REG_INTR_STATUS_1, &uch_dummy);  //Reads/clears the interrupt status register
     maxim_max30102_init();  //initialize the MAX30102
+
+    gpioMode(PIN_SPO2, INPUT);
+    gpioIRQ(PIN_SPO2, GPIO_IRQ_MODE_FALLING_EDGE, callback_pin);
+    NVIC_EnableIRQ(PORTB_IRQn);
 
     init_pit(1000000U, callback_pit);
 
@@ -99,12 +103,6 @@ int main(void) {
     /* Enter an infinite loop, just incrementing a counter. */
     while(1) {
     	k++;
-
-    	if(!(gpioRead(PIN_SPO2)))
-    	//if(1)
-    	{
-    		callback_pin();
-    	}
 
         /* 'Dummy' NOP to allow source level single stepping of tight while() loop */
 
@@ -117,7 +115,7 @@ int main(void) {
 void callback_pin (void)
 {
 
-	bool meassure = maxim_max30102_read_fifoNB(( aun_ir_buffer  + a), (aun_red_buffer + a));
+	bool meassure = maxim_max30102_read_fifo(( aun_ir_buffer  + a), (aun_red_buffer + a));
 
 	if (meassure == true)
 	{

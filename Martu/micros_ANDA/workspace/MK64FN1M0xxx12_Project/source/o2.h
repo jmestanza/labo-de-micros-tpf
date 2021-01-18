@@ -139,11 +139,9 @@ bool maxim_max30102_read_reg(uint8_t uch_addr, uint8_t *puch_data);
 bool maxim_max30102_reset(void);
 
 
-
 bool maxim_max30102_write_reg_blocking(uint8_t uch_addr, uint8_t uch_data);
 bool maxim_max30102_read_reg_blocking(uint8_t uch_addr, uint8_t *puch_data);
-
-bool maxim_max30102_read_fifoNB(uint32_t *pun_red_led, uint32_t *pun_ir_led);
+bool maxim_max30102_read_sample(uint8_t uch_addr, uint8_t *puch_data, uint8_t size);
 
 
 

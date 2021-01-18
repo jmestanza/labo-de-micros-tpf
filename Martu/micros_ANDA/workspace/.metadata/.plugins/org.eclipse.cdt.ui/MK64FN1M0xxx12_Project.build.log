@@ -1,26 +1,6 @@
-02:32:28 **** Incremental Build of configuration Debug for project MK64FN1M0xxx12_Project ****
+16:30:25 **** Incremental Build of configuration Debug for project MK64FN1M0xxx12_Project ****
 make -r -j3 all 
-Building file: ../source/o2.c
-Invoking: MCU C Compiler
-arm-none-eabi-gcc -D__REDLIB__ -DCPU_MK64FN1M0VLL12 -DCPU_MK64FN1M0VLL12_cm4 -DFSL_RTOS_BM -DSDK_OS_BAREMETAL -DSERIAL_PORT_TYPE_UART=1 -DSDK_DEBUGCONSOLE=0 -DCR_INTEGER_PRINTF -DPRINTF_FLOAT_ENABLE=0 -D__MCUXPRESSO -D__USE_CMSIS -DDEBUG -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/board" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/source" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/CMSIS" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/component/uart" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/utilities" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/component/serial_manager" -I"/Users/martinamaspero/Desktop/micros_ANDA/workspace/MK64FN1M0xxx12_Project/component/lists" -O0 -fno-common -g3 -Wall -c -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -fmerge-constants -fmacro-prefix-map="../source/"=. -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -D__REDLIB__ -fstack-usage -specs=redlib.specs -MMD -MP -MF"source/o2.d" -MT"source/o2.o" -MT"source/o2.d" -o "source/o2.o" "../source/o2.c"
-Finished building: ../source/o2.c
- 
-Building target: MK64FN1M0xxx12_Project.axf
-Invoking: MCU Linker
-arm-none-eabi-gcc -nostdlib -Xlinker -Map="MK64FN1M0xxx12_Project.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T MK64FN1M0xxx12_Project_Debug.ld -o "MK64FN1M0xxx12_Project.axf"  ./utilities/fsl_debug_console.o ./utilities/fsl_str.o  ./startup/startup_mk64f12.o  ./source/algorithm.o ./source/fever.o ./source/gpio.o ./source/i2c_config.o ./source/o2.o ./source/pit.o ./source/semihost_hardfault.o ./source/sensores.o  ./drivers/fsl_adc16.o ./drivers/fsl_clock.o ./drivers/fsl_common.o ./drivers/fsl_gpio.o ./drivers/fsl_i2c.o ./drivers/fsl_pit.o ./drivers/fsl_smc.o ./drivers/fsl_uart.o  ./device/system_MK64F12.o  ./component/uart/uart_adapter.o  ./component/serial_manager/serial_manager.o ./component/serial_manager/serial_port_uart.o  ./component/lists/generic_list.o  ./board/board.o ./board/clock_config.o ./board/peripherals.o ./board/pin_mux.o   
-Memory region         Used Size  Region Size  %age Used
-   PROGRAM_FLASH:       24744 B         1 MB      2.36%
-      SRAM_UPPER:       10072 B       192 KB      5.12%
-      SRAM_LOWER:          0 GB        64 KB      0.00%
-        FLEX_RAM:          0 GB         4 KB      0.00%
-Finished building target: MK64FN1M0xxx12_Project.axf
- 
-make --no-print-directory post-build
-Performing post-build steps
-arm-none-eabi-size "MK64FN1M0xxx12_Project.axf"; # arm-none-eabi-objcopy -v -O binary "MK64FN1M0xxx12_Project.axf" "MK64FN1M0xxx12_Project.bin" ; # checksum -p MK64FN1M0xxx12 -d "MK64FN1M0xxx12_Project.bin";
-   text	   data	    bss	    dec	    hex	filename
-  24656	     88	   9984	  34728	   87a8	MK64FN1M0xxx12_Project.axf
- 
+make: Nothing to be done for 'all'.
 
-02:32:29 Build Finished. 0 errors, 0 warnings. (took 787ms)
+16:30:25 Build Finished. 0 errors, 0 warnings. (took 125ms)
 

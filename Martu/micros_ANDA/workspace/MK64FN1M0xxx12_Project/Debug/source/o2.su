@@ -1,8 +1,8 @@
-o2.c:9:6:maxim_max30102_write_reg	16	static
-o2.c:16:6:maxim_max30102_write_reg_blocking	16	static
-o2.c:21:6:maxim_max30102_read_reg	16	static
-o2.c:27:6:maxim_max30102_read_reg_blocking	16	static
-o2.c:35:6:maxim_max30102_init	8	static
-o2.c:73:6:maxim_max30102_reset	8	static
-o2.c:82:6:maxim_max30102_read_fifoNB	16	static
-o2.c:125:6:maxim_max30102_read_block	16	static
+o2.c:5:6:maxim_max30102_write_reg	16	static
+o2.c:12:6:maxim_max30102_read_reg	16	static
+o2.c:18:6:maxim_max30102_write_reg_blocking	16	static
+o2.c:23:6:maxim_max30102_read_reg_blocking	16	static
+o2.c:31:6:maxim_max30102_init	8	static
+o2.c:69:6:maxim_max30102_reset	8	static
+o2.c:78:6:maxim_max30102_read_fifo	16	static
+o2.c:117:6:maxim_max30102_read_sample	16	static
