@@ -1,0 +1,2 @@
+fever.c:18:7:fever_temp_meassurement	8	static
+fever.c:26:7:fever_get_temperature	16	static

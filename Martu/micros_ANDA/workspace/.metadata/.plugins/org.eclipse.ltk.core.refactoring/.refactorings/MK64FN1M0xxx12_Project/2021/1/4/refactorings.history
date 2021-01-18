@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;MK64FN1M0xxx12_Project/source/MK64FN1M0xxx12_Project.c&apos; to &apos;sensores.c&apos;" description="Rename resource &apos;MK64FN1M0xxx12_Project.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="source/MK64FN1M0xxx12_Project.c" name="sensores.c" stamp="1610940580656" updateReferences="true"/>
+</session>

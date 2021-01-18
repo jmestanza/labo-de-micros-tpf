@@ -1,0 +1,229 @@
+#include "algorithm.h"
+#include "board.h"
+#include "fsl_debug_console.h"
+#include "fsl_i2c.h"
+
+#include "pin_mux.h"
+#include "clock_config.h"
+
+#include "gpio.h"
+
+#include "algorithm.h"
+
+#include "i2c_config.h"
+#include "o2.h"
+
+
+//DEFINES
+
+
+
+uint8_t i=0;
+uint32_t aun_ir_buffer[FS*ST]; //infrared LED sensor data
+uint32_t aun_red_buffer[FS*ST];  //red LED sensor data
+float n_spo2,ratio,correl;  //SPO2 value
+int8_t ch_spo2_valid;  //indicator to show if the SPO2 calculation is valid
+int32_t n_heart_rate; //heart rate value
+int8_t  ch_hr_valid;  //indicator to show if the heart rate calculation is valid
+
+
+
+
+bool maxim_max30102_read_block(uint8_t uch_addr, uint8_t *puch_data, uint8_t size);
+
+void initPins(void);
+
+void pinInt(void);
+
+bool maxim_max30102_write_reg(uint8_t uch_addr, uint8_t uch_data)
+{
+	i2cWriteMsgBlocking(I2C_WRITE_ADDR, &uch_data, 1, uch_addr);
+    return 0;
+}
+
+bool maxim_max30102_write_reg_blocking(uint8_t uch_addr, uint8_t uch_data)
+{
+	i2cWriteMsgBlocking(I2C_WRITE_ADDR, &uch_data, 1, uch_addr);
+	return 0;
+}
+
+bool maxim_max30102_read_reg(uint8_t uch_addr, uint8_t *puch_data)
+{
+	i2cReadMsg(I2C_READ_ADDR, puch_data, 1, uch_addr);
+  	return i2cgetCompletition();
+}
+
+bool maxim_max30102_read_reg_blocking(uint8_t uch_addr, uint8_t *puch_data)
+
+{
+	i2cReadMsgBlocking(I2C_READ_ADDR, puch_data, 1, uch_addr);
+  	return 0;
+
+}
+
+bool maxim_max30102_init()
+{
+
+
+	maxim_max30102_write_reg_blocking(REG_INTR_ENABLE_1,0xc0); // INTR setting
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_INTR_ENABLE_2,0x00);
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_FIFO_WR_PTR,0x00);  //FIFO_WR_PTR[4:0]
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_OVF_COUNTER,0x00);  //OVF_COUNTER[4:0]
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_FIFO_RD_PTR,0x00);  //FIFO_RD_PTR[4:0]
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_FIFO_CONFIG,0x4f);  //sample avg = 4, fifo rollover=false, fifo almost full = 17
+	//waitCompletion();
+	maxim_max30102_write_reg_blocking(REG_MODE_CONFIG,0x03);   //0x02 for Red only, 0x03 for SpO2 mode 0x07 multimode LED
+	//waitCompletion();
+    maxim_max30102_write_reg_blocking(REG_SPO2_CONFIG,0x27);
+	//maxim_max30102_write_reg_blocking(REG_SPO2_CONFIG,0x33);
+    //maxim_max30102_write_reg(REG_SPO2_CONFIG,0x04);
+    //waitCompletion();// SPO2_ADC range = 4096nA, SPO2 sample rate (100 Hz), LED pulseWidth (411uS)
+
+
+    maxim_max30102_write_reg_blocking(REG_LED1_PA,0x24);   //Choose value for ~ 7mA for LED1
+    //waitCompletion();
+    maxim_max30102_write_reg_blocking(REG_LED2_PA,0x24);   // Choose value for ~ 7mA for LED2
+    //waitCompletion();
+    //maxim_max30102_write_reg(0x0E,0x24);   // Choose value for ~ 7mA for LED4
+    //waitCompletion();
+    maxim_max30102_write_reg_blocking(REG_PILOT_PA,0x7f);   // Choose value for ~ 25mA for Pilot LED
+    //waitCompletion();
+    maxim_max30102_write_reg_blocking(0x11,0x21);   // Choose value for ~ 25mA for Pilot LED
+    //waitCompletion();
+    maxim_max30102_write_reg_blocking(0x12,0x36);   // Choose value for ~ 25mA for Pilot LED
+    //waitCompletion();
+    maxim_max30102_write_reg_blocking(0x30,0x20);   // Choose value for ~ 25mA for Pilot LED
+    //waitCompletion();
+    return true;
+}
+
+
+bool maxim_max30102_reset()
+
+{
+    if(!maxim_max30102_write_reg_blocking(REG_MODE_CONFIG,0x40))
+        return false;
+    else
+        return true;
+}
+
+bool maxim_max30102_read_fifoNB(uint32_t *pun_red_led, uint32_t *pun_ir_led)
+{
+  static uint32_t un_temp;
+  static unsigned char uch_temp;
+  *pun_red_led=0;
+  *pun_ir_led=0;
+  static uint8_t ach_i2c_data[6];
+  static uint8_t counter=0;
+
+
+  switch (counter){
+  case 0:
+	  if(i2cgetCompletition()==true)
+	  {
+		  maxim_max30102_read_reg(REG_INTR_STATUS_1, &uch_temp);
+		  counter++;
+	  }
+	  break;
+  case 1:
+	  if(i2cgetCompletition()==true){
+		  counter++;
+		  maxim_max30102_read_reg(REG_INTR_STATUS_1, &uch_temp);
+	  }
+	  break;
+  case 2:
+	  if(i2cgetCompletition()==true){
+		  counter++;
+		  maxim_max30102_read_block(REG_FIFO_DATA, ach_i2c_data, 6);
+
+	  }
+	  break;
+  case 3:
+	  if(i2cgetCompletition()==true){
+		  counter=2;
+		  //counter=2;
+		  un_temp=(unsigned char) ach_i2c_data[0];
+		  un_temp<<=16;
+		  *pun_red_led+=un_temp;
+		  un_temp=(unsigned char) ach_i2c_data[1];
+		  un_temp<<=8;
+		  *pun_red_led+=un_temp;
+		  un_temp=(unsigned char) ach_i2c_data[2];
+		  *pun_red_led+=un_temp;
+
+		  un_temp=(unsigned char) ach_i2c_data[3];
+		  un_temp<<=16;
+		  *pun_ir_led+=un_temp;
+		  un_temp=(unsigned char) ach_i2c_data[4];
+		  un_temp<<=8;
+		  *pun_ir_led+=un_temp;
+		  un_temp=(unsigned char) ach_i2c_data[5];
+		  *pun_ir_led+=un_temp;
+		  *pun_red_led&=0x03FFFF;  //Mask MSB [23:18]
+		  *pun_ir_led&=0x03FFFF;  //Mask MSB [23:18]
+		  //printf("i= %d \n",i);
+		  maxim_max30102_read_reg(REG_INTR_STATUS_1, &uch_temp);
+		  return true;
+
+	  }
+
+	  break;
+
+  }
+  return false;
+	/*  static uint32_t un_temp;
+	  static unsigned char uch_temp;
+	  *pun_red_led=0;
+	  *pun_ir_led=0;
+	  static uint8_t ach_i2c_data[6];
+	  static uint8_t counter=0;
+
+	  if(completionFlag==true)
+	  {
+	  	maxim_max30102_read_block(REG_FIFO_DATA, ach_i2c_data, 6);
+	  	i++;
+	  	un_temp=(unsigned char) ach_i2c_data[0];
+	    un_temp<<=16;
+		*pun_red_led+=un_temp;
+	 	un_temp=(unsigned char) ach_i2c_data[1];
+		un_temp<<=8;
+		*pun_red_led+=un_temp;
+		un_temp=(unsigned char) ach_i2c_data[2];
+		*pun_red_led+=un_temp;
+		un_temp=(unsigned char) ach_i2c_data[3];
+		un_temp<<=16;
+		*pun_ir_led+=un_temp;
+		un_temp=(unsigned char) ach_i2c_data[4];
+		un_temp<<=8;
+		*pun_ir_led+=un_temp;
+		un_temp=(unsigned char) ach_i2c_data[5];
+		*pun_ir_led+=un_temp;
+		*pun_red_led&=0x03FFFF;  //Mask MSB [23:18]
+		*pun_ir_led&=0x03FFFF;
+	  }*/
+}
+
+
+
+
+
+
+
+bool maxim_max30102_read_block(uint8_t uch_addr, uint8_t *puch_data, uint8_t size)
+
+{
+	i2cReadMsg(I2C_READ_ADDR, puch_data, size, uch_addr);
+
+    return 0;
+}
+
+
+
+
+
+

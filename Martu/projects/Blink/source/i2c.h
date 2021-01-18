@@ -1,139 +1,110 @@
 /*
  * i2c.h
  *
- *  Created on: Feb 3, 2020
+ *  Created on: Sep 16, 2019
  *      Author: martinamaspero
  */
 
-/***************************************************************************//**
-  @file     gpio.h
-  @brief    Simple GPIO Pin services, similar to Arduino
-  @author   Nicolás Magliola
- ******************************************************************************/
+#ifndef I2C_H_
+#define I2C_H_
 
-#ifndef _GPIO_H_
-#define _GPIO_H_
 
 /*******************************************************************************
  * INCLUDE HEADER FILES
  ******************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
-#include "hardware.h"
-
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-// Ports
-enum { PA, PB, PC, PD, PE };
 
-// Convert port and number into pin ID
-// Ex: PTB5  -> PORTNUM2PIN(PB,5)  -> 0x25
-//     PTC22 -> PORTNUM2PIN(PC,22) -> 0x56
-#define PORTNUM2PIN(p,n)    (((p)<<5) + (n))
-#define PIN2PORT(p)         (((p)>>5) & 0x07)
-#define PIN2NUM(p)          ((p) & 0x1F)
-#define PORTS_CNT			5
-#define PINS_CNT			32
-
-
-
-// Modes
-#ifndef INPUT
-#define INPUT               0
-#define OUTPUT              1
-#define INPUT_PULLUP        2
-#define INPUT_PULLDOWN      3
-#endif // INPUT
-
-
-// Digital values
-#ifndef LOW
-#define LOW     0
-#define HIGH    1
-#endif // LOW
-
-
-// IRQ modes
-enum {
-    GPIO_IRQ_MODE_DISABLE,
-    GPIO_IRQ_MODE_RISING_EDGE,
-    GPIO_IRQ_MODE_FALLING_EDGE,
-    GPIO_IRQ_MODE_BOTH_EDGES,
-
-    GPIO_IRQ_CANT_MODES
-};
-
+#define ADDRESS_CYCLE_BYTES 2
 
 /*******************************************************************************
  * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
  ******************************************************************************/
 
-typedef uint8_t pin_t;
+typedef void (* pfunc) (void);
+typedef enum {I2C_0, I2C_1, I2C_2}I2C_ChannelType;
 
-typedef void (*pinIrqFun_t)(void);
 
+typedef enum
+{
+         I2C_STAGE_NONE = 0,
+         I2C_STAGE_WRITE_DATA,
+         I2C_STAGE_WRITE_DEV_ADDRESS_W,
+         I2C_STAGE_WRITE_DEV_ADDRESS_R,
+         I2C_STAGE_WRITE_REG_ADDRESS,
+         I2C_STAGE_READ_DUMMY_DATA,
+         I2C_STAGE_READ_DATA,
+
+
+} I2C_STAGE;
+
+typedef enum
+{
+         I2C_MODE_READ = 0,
+         I2C_MODE_WRITE,
+} I2C_MODE;
+
+
+
+typedef enum
+{
+         I2C_NO_FAULT = 0,
+         I2C_BUS_BUSY,
+         I2C_TIMEOUT,
+         I2C_SLAVE_ERROR,
+} I2C_FAULT;
+
+
+typedef struct
+{
+	uint8_t * data;
+	uint8_t data_size; // en bytes
+	uint8_t register_address;
+	uint8_t slave_address;
+	pfunc callback;
+	I2C_FAULT fault;
+
+}I2C_COM_CONTROL;
 
 
 /*******************************************************************************
  * VARIABLE PROTOTYPES WITH GLOBAL SCOPE
  ******************************************************************************/
 
-
-
-
 /*******************************************************************************
  * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
  ******************************************************************************/
 
 /**
- * @brief Configures the specified pin to behave either as an input or an output
- * @param pin the pin whose mode you wish to set (according PORTNUM2PIN)
- * @param mode INPUT, OUTPUT, INPUT_PULLUP or INPUT_PULLDOWN.
- */
-void gpioMode (pin_t pin, uint8_t mode);
-
-/**
- * @brief Configures how the pin reacts when an IRQ event ocurrs
- * @param pin the pin whose IRQ mode you wish to set (according PORTNUM2PIN)
- * @param irqMode disable, risingEdge, fallingEdge or bothEdges
- * @param irqFun function to call on pin event
- * @return Registration succeed
- */
-bool gpioIRQ (pin_t pin, uint8_t irqMode, pinIrqFun_t irqFun);
-
-/**
- * @brief Write a HIGH or a LOW value to a digital pin
- * @param pin the pin to write (according PORTNUM2PIN)
- * @param val Desired value (HIGH or LOW)
- */
-void gpioWrite (pin_t pin, bool value);
-
-/**
- * @brief Toggle the value of a digital pin (HIGH<->LOW)
- * @param pin the pin to toggle (according PORTNUM2PIN)
- */
-void gpioToggle (pin_t pin);
-
-/**
- * @brief Reads the value from a specified digital pin, either HIGH or LOW.
- * @param pin the pin to read (according PORTNUM2PIN)
- * @return HIGH or LOW
- */
-bool gpioRead (pin_t pin);
+ * @brief Initialize i2c driver
+*/
+void i2cInit (uint8_t channel);
 
 
 /**
- * @brief  clears the ISF flag from a specified pin.
- * @param pin the pin to clear the ISF flag(according PORTNUM2PIN)
- */
-void PORT_ClearInterruptFlag (pin_t pin);
+ * @brief Read a received message. Non-Blocking
+*/
+void i2cReadMsg(I2C_COM_CONTROL * i2c_comm);
+
+
+/**
+ * @brief Write a message to be transmitted. Non-Blocking
+*/
+void i2cWriteMsg(I2C_COM_CONTROL * i2c_comm);
+
+
+I2C_FAULT i2cReadMsgBlocking (uint8_t * buffer, uint8_t data_size,	uint8_t register_address, uint8_t slave_address );
+
+I2C_FAULT i2cWriteMsgBlocking (uint8_t * msg, uint8_t data_size,	uint8_t register_address, uint8_t slave_address );
 
 
 /*******************************************************************************
  ******************************************************************************/
 
-#endif // _GPIO_H_
+
+#endif /* I2C_H_ */
