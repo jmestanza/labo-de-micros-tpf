@@ -20,8 +20,8 @@
 //#define FILEPATH		"C:/Users/Guido/Documents/GitHub/LaboDeMicrosTPF/TestS/MP3_test_pc/MP3_test_PC/MP3_test_PC/test/test.mp3"
 //#define FILEPATH_WAV	"C:/Users/Guido/Documents/GitHub/LaboDeMicrosTPF/TestS/MP3_test_pc/MP3_test_PC/MP3_test_PC/test/test.wav"
 
-#define FILEPATH		"test/thomas_16k.mp3"
-#define FILEPATH_WAV	"test/thomas_16k.wav"
+#define FILEPATH		"test/yolo.mp3"
+#define FILEPATH_WAV	"test/yolo.wav"
 
 #define SAMPLE_RATE		16000
 

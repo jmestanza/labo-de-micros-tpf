@@ -1,0 +1,5 @@
+﻿  mp3Decoder.c
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\mp3Decoder.c(521,32): warning C4018: '<': signed/unsigned mismatch
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\mp3Decoder.c(514,1): warning C4047: 'initializing': 'uint8_t *' differs in levels of indirection from 'uint8_t (*)[6913]'
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\MP3_test_PC\mp3Decoder.c(515,1): warning C4047: 'initializing': 'uint8_t *' differs in levels of indirection from 'uint8_t **'
+  MP3_test_PC.vcxproj -> C:\Github_Repos\labo-de-micros-tpf\mp3_decode\MP3_test_PC\Debug\MP3_test_PC.exe

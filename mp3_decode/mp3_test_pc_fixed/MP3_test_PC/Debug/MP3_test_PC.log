@@ -1,0 +1,13 @@
+﻿  main.c
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(57,28): warning C4020: 'MP3LoadFile': too many actual parameters
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(85,28): warning C4018: '<': signed/unsigned mismatch
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(47,25): warning C4101: 'ID3Data': unreferenced local variable
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(45,11): warning C4101: 'wavIn': unreferenced local variable
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(45,20): warning C4101: 'wavOut': unreferenced local variable
+  mp3Decoder.c
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(212,79): warning C4029: declared formal parameter list different from definition
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(520,32): warning C4018: '<': signed/unsigned mismatch
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(513,1): warning C4047: 'initializing': 'uint8_t *' differs in levels of indirection from 'uint8_t (*)[6913]'
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(514,1): warning C4047: 'initializing': 'uint8_t *' differs in levels of indirection from 'uint8_t **'
+  Generating Code...
+  MP3_test_PC.vcxproj -> C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\Debug\MP3_test_PC.exe
