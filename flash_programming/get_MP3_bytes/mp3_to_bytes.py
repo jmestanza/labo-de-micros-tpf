@@ -2,7 +2,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 import io
 
-filename = "sonic_16k"
+filename = "yolo"
 data = open(filename+'.mp3', 'rb').read()
 
 # hex_arr = [el for el in data]
@@ -29,7 +29,7 @@ if(arr_str[-1] == ","):
 arr_str += "};"
 
         
-f = open(filename+"_bytes.txt",'w')
+f = open(filename+"_music_array.h",'w')
 f.write("#define BUFFER_LEN "+str(len(data))+"\n")
 f.write(arr_str)
 

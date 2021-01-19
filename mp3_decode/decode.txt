@@ -1,0 +1,6 @@
+Pasos para decodificar
+
+1) En flash_programming\get_MP3_bytes corremos mp3_to_bytes que genera un {archivo}_music_array.h 
+2) En mp3_decode\mp3_test_pc_fixed\MP3_test_PC\ pegamos el {archivo}_music_array.h, luego en el proyecto lo incluimos
+(en el main.c) #include {archivo}_music_array.h 
+3) En el main.c cambiamos la linea (MP3LoadFile({archivo}_array,sizeof(({archivo}_array))) y listo
