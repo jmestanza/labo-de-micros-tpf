@@ -8,10 +8,9 @@
 #include <stdbool.h>  
 #include "mp3decoder.h"
 #include "lib/helix/pub/mp3dec.h"
-#include "lib/id3tagParser/read_id3.h"
 
 #ifdef __arm__
-#include "lib/fatfs/ff.h"
+//#include "lib/fatfs/ff.h"
 #endif
 
  /*******************************************************************************
@@ -37,7 +36,7 @@ typedef struct
     FIL			file;
     FIL* mp3File;
 #else
-    FILE* mp3File;                                        // MP3 file object
+//    FILE* mp3File;                                        // MP3 file object
 #endif
     uint32_t      f_size;                                       // file size
     uint32_t      bytes_remaining;                                 // Encoded MP3 bytes remaining to be processed by either offset or decodeMP3
@@ -49,11 +48,6 @@ typedef struct
     uint32_t      top_index;                                            // current position in frame buffer (points to top_index)
     uint32_t      bottom_index;                                         // current position at info end in frame buffer
 
-    // ID3 tag
-    bool                  has_ID3_Tag;                              // True if the file has valid ID3 tag
-    mp3_decoder_tag_data_t ID3_data;                                // Parsed data from ID3 tag
-
-
      uint8_t* flash_buffer;
      uint32_t  flash_idx;
 
@@ -63,110 +57,6 @@ typedef struct
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
 
-uint16_t ret_buffer[1000] = {
-6913, 298, 360, 648, 360, 360, 288, 360, 360, 720,
-648, 720, 720, 720, 504, 360, 288, 432, 720, 720,
-648, 720, 720, 720, 720, 720, 720, 432, 360, 360,
-288, 360, 360, 720, 288, 360, 360, 360, 360, 720,
-720, 432, 432, 432, 360, 432, 720, 720, 432, 360,
-432, 360, 360, 720, 720, 432, 288, 360, 360, 288,
-720, 504, 360, 360, 432, 360, 720, 720, 720, 504,
-360, 288, 360, 360, 720, 720, 432, 432, 720, 432,
-360, 720, 504, 288, 288, 360, 360, 288, 720, 432,
-360, 432, 360, 360, 360, 720, 720, 360, 432, 360,
-432, 648, 720, 720, 504, 360, 432, 432, 720, 648,
-360, 288, 360, 360, 288, 360, 720, 432, 360, 360,
-360, 432, 720, 720, 360, 360, 432, 360, 360, 720,
-720, 720, 720, 720, 720, 720, 720, 720, 504, 288,
-360, 288, 360, 720, 720, 360, 360, 360, 360, 288,
-720, 720, 504, 432, 432, 432, 720, 720, 504, 432,
-360, 432, 432, 720, 720, 432, 360, 360, 288, 360,
-360, 720, 432, 360, 360, 432, 432, 648, 720, 720,
-432, 288, 360, 360, 360, 720, 720, 720, 720, 720,
-504, 360, 720, 432, 360, 288, 360, 360, 648, 720,
-432, 360, 360, 360, 360, 720, 720, 360, 432, 360,
-432, 432, 720, 720, 432, 432, 360, 432, 432, 720,
-360, 360, 288, 360, 360, 288, 360, 720, 504, 360,
-288, 360, 720, 720, 720, 360, 432, 360, 360, 360,
-360, 360, 360, 360, 360, 360, 360, 360, 360, 360,
-360, 360, 360, 360, 360, 360, 360, 360, 360, 360,
-360, 432, 360, 432, 360, 360, 360, 360, 432, 288,
-432, 360, 360, 360, 432, 720, 360, 288, 360, 288,
-360, 360, 504, 360, 432, 360, 360, 432, 360, 720,
-360, 360, 360, 360, 360, 432, 504, 432, 360, 432,
-504, 432, 720, 720, 432, 288, 360, 360, 360, 648,
-720, 432, 360, 432, 360, 432, 360, 720, 504, 360,
-360, 360, 360, 432, 504, 432, 432, 432, 360, 360,
-720, 576, 360, 360, 288, 360, 432, 360, 504, 360,
-360, 504, 504, 360, 720, 720, 432, 288, 360, 360,
-432, 576, 720, 360, 432, 504, 360, 432, 720, 432,
-288, 360, 360, 432, 432, 720, 432, 360, 360, 360,
-432, 360, 720, 504, 360, 360, 360, 432, 360, 576,
-432, 432, 360, 432, 432, 720, 720, 432, 360, 360,
-360, 288, 360, 576, 360, 432, 360, 432, 360, 432,
-648, 360, 360, 360, 288, 432, 720, 504, 432, 360,
-360, 35, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-
-};
-
  //File management functions
 static bool open_file(char* file_name);
 static void close_file(void);
@@ -175,8 +65,6 @@ uint32_t getFileSize(void);
 void fileRewind(void);
 uint16_t readFile(void* buf, uint16_t cnt);
 
-//read ID3
-void readID3Tag(void);
 
 //data management
 static void copyDataAndMovePointer(void);
@@ -209,7 +97,7 @@ void  MP3DecoderInit(void) {
 
 }
 
-bool  MP3LoadFile(const char* file_name, uint8_t * audio, uint32_t audio_len) {
+bool  MP3LoadFile(uint8_t * audio, uint32_t audio_len) {
 
     bool res = false;
 //    if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
@@ -221,7 +109,7 @@ bool  MP3LoadFile(const char* file_name, uint8_t * audio, uint32_t audio_len) {
         context_data.f_size = audio_len;
         context_data.bytes_remaining = context_data.f_size;
         context_data.flash_buffer = audio;
-        readID3Tag();
+
 #ifdef DEBUG
         printf("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
 #endif
@@ -389,26 +277,14 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 }
                 else
                 {
-//                    context_data.top_index++;
-//                    context_data.bytes_remaining--;
-                    //                    context_data.top_index++;
-//                    context_data.bytes_remaining--;
-
+                    context_data.top_index++;
+                    context_data.bytes_remaining--;
 #ifdef DEBUG
-                    printf("Error: %d\n", res); // ERR_MP3_INVALID_HUFFCODES
-#endif              
-//                    return MP3DECODER_FILE_END;
-                    // If invalid header, try with next frame
+                    printf("Error: %d\n", res);
+#endif
 
-//                    printf("Entered decoding. File has %d bytes to decode\n", context_data.f_size);
-//                  printf("Buffer has %d bytes to decode\n", context_data.bottom_index - context_data.top_index);
-                    mp3_decoder_result_t aux = res;
-                    while (aux != MP3DECODER_NO_ERROR) {
-                        context_data.top_index++;
-                        context_data.bytes_remaining--;
-                        mp3_decoder_result_t aux = MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
-                    }
-                    return res; //! H-quearlo
+                    // If invalid header, try with next frame
+                    return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
                 }
             }
         }
@@ -433,62 +309,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 
  //File management functions
 
-static bool open_file(char* file_name) {
-    bool ret = false;
-#ifdef __arm__
-    fr = f_open(&context_data.file, file_name, FA_READ);
-    if (fr == FR_OK)
-    {
-        context_data.mp3File = &(context_data.file);
-        ret = true;
-    }
-#else
-    context_data.mp3File = fopen(file_name, "rb");
-    ret = (context_data.mp3File != NULL);
-#endif
-    return ret;
-}
 
-static void close_file(void) {
-#ifdef __arm__
-    f_close(context_data.mp3File);
-#else
-    fclose(context_data.mp3File);
-#endif // __arm__
-}
-
-
-static void fileSeek(size_t pos) {
-#ifdef __arm__
-    f_lseek(context_data.mp3File, pos);
-#else
-    fseek(context_data.mp3File, pos, SEEK_SET);
-#endif
-}
-
-uint32_t getFileSize(void) {
-    uint32_t ret = 0;
-    if (context_data.file_opened)
-    {
-#ifdef __arm__
-        ret = f_size(context_data.mp3File);
-#else
-        fseek(context_data.mp3File, 0L, SEEK_END);
-        ret = ftell(context_data.mp3File);
-        fileRewind();
-        fseek(context_data.mp3File, 0, SEEK_SET);
-#endif
-    }
-    return ret;
-}
-
-void fileRewind(void) {
-#ifdef __arm__
-    f_rewind(context_data.mp3File);
-#else
-    rewind(context_data.mp3File);
-#endif
-}
 
 uint16_t readFile(void* buf, uint16_t cnt) {
     static int count = 0;
@@ -506,37 +327,15 @@ uint16_t readFile(void* buf, uint16_t cnt) {
             ret = read;
         }
 #else
-       
-
+      
         uint8_t * pointer = NULL; // ojo puede hacer overflow sumando (me parece)
         uint8_t* pointer2 = NULL; // ojo puede hacer overflow sumando (me parece)
-        uint8_t* base_pointer = &context_data.encoded_frame_buffer; // ojo puede hacer overflow sumando (me parece)
-        uint8_t* base_pointer2 = &context_data.flash_buffer; // ojo puede hacer overflow sumando (me parece)
-
-
-
-        uint8_t aux_val = 0;
-        ret = ret_buffer[index];
+        
+        ret = 360;
         for (uint32_t i = 0; i < ret; i++) {
-
-            if (count == 19 && i == 184) {
-                printf("posible iteracion");
-
-                printf("(uint8_t*)buf+i = %p", (uint8_t*)buf + i);
-            }
-
             pointer = context_data.flash_buffer + context_data.flash_idx; // este no se puede pasar me parece
             pointer2 = (uint8_t*)buf; // este si se puede pasar, quiza hace falta un modulo
-
-  //          *(((uint8_t*)buf+i)% MP3_FRAME_BUFFER_BYTES) = *(pointer);
- //           __try {
-
-//            if (pointer >= base_pointer && pointer < base_pointer + (MP3_FRAME_BUFFER_BYTES - 1)) {
-//                if (pointer2 >= base_pointer2 && (pointer2 < base_pointer2 + (context_data.f_size - 1))) {
-                    aux_val = *(pointer + i);
-                   *(pointer2 + i) = aux_val;
-//               }
-//            }
+            *(pointer2 + i) = *(pointer + i);;
         }
         context_data.flash_idx += ret;
 
@@ -545,32 +344,6 @@ uint16_t readFile(void* buf, uint16_t cnt) {
 #endif
     }
     return ret;
-}
-
-
-
-
-
-//ID3
-void readID3Tag(void)
-{
-
-    /*if (has_ID3_tag(context_data.mp3File))
-    {*/
-        context_data.has_ID3_Tag = true;
-
-        //unsigned int tagSize = 160;// get_ID3_size(context_data.mp3File); // con sonic es 160 puede cambiar con otro MP3
-        unsigned int tagSize = 123;// thomas mp3
-
-
-#ifdef DEBUG
-        printf("ID3 Track found.\n");
-        printf("ID3 Tag is %d bytes long\n", tagSize);
-#endif  
-
-        context_data.bytes_remaining -= tagSize;
-        context_data.flash_idx += tagSize;
-
 }
 
 void copyDataAndMovePointer() {
@@ -605,7 +378,6 @@ void copyFrameInfo(mp3_decoder_frame_data_t* mp3_data, MP3FrameInfo* helix_data)
 }
 void resetContextData(void) {
     context_data.file_opened = false;
-    context_data.has_ID3_Tag = false;
     context_data.bottom_index = 0;
     context_data.top_index = 0;
     context_data.bytes_remaining = 0;

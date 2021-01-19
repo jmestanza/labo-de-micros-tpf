@@ -21,7 +21,6 @@
 //#define FILEPATH_WAV	"C:/Users/Guido/Documents/GitHub/LaboDeMicrosTPF/TestS/MP3_test_pc/MP3_test_PC/MP3_test_PC/test/test.wav"
 
 //#define FILEPATH		"test/thomas_16k.mp3"
-#define	FILEPATH		"banana"
 #define FILEPATH_WAV	"test/yolo.wav"
 
 //#define SAMPLE_RATE		44100
@@ -51,10 +50,10 @@ int main(void) {
 	wav_set_format(wav, SAMPLE_FORMAT);
 	wav_set_sample_rate(wav, SAMPLE_RATE);
 	wav_set_num_channels(wav, 1);
-
+			
 	MP3DecoderInit();
 //	MP3LoadFile(const char* file_name, uint8_t * audio, uint32_t audio_len)
-	if (MP3LoadFile(FILEPATH, yolo_array,sizeof(yolo_array))){
+	if (MP3LoadFile(yolo_array,sizeof(yolo_array))){
 			
 		int i = 0;
 		while (1)
