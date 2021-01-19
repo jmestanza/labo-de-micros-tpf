@@ -1,0 +1,17 @@
+Pasos para decodificar
+
+1) Poner el archivo mp3 (asegurarse que es 16KHz) a decodificar en la carpeta: mp3_decode\original\MP3_test_PC\test
+2) Cambiar en mp3_decode\original\MP3_test_PC\main.c los FILEPATH a => FILEPATH = "test/{archivo}.mp3" y FILEPATH_WAV = "test/{archivo}.wav"
+2) Correr el proyecto original con un breakpoint el archivo mp3Decoder.c en la linea [ret = MP3DECODER_FILE_END;].
+3) Agregamos un watch para ver la variable context_data.buffer_ret
+4) Abrimos con el boton para ver todas las variables dentro del buffer.
+5) En el watch con los datos desplegados, hacemos Ctrl+A, y copiamos ese contenido a mp3_decode\buffer_files\buffer_{archivo}.txt
+6) Corremos el archivo buffer_{archivo}.py y nos genera un archivo buffer_{archivo}_ret.txt
+7) Pegamos el contenido de buffer_{archivo}_ret.txt en mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c
+8) En flash_programming\get_MP3_bytes corremos mp3_to_bytes que genera un {archivo}_music_array.h 
+9) En mp3_decode\mp3_test_pc_fixed\MP3_test_PC\ pegamos el {archivo}_music_array.h, luego en el proyecto lo incluimos
+(en el main.c) #include {archivo}_music_array.h 
+
+Creo que con eso seria todo, vamos a tratar de automatizarlo
+
+Nota: esto puede fallar porque no tiene en cuenta el offset inicial del ID3Tag, pero por ahora en las pruebas que hice no fallo.

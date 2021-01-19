@@ -1,4 +1,0 @@
-"C:\Program Files\JetBrains\CLion 2020.3.1\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_dec
--- Configuring done
--- Generating done
--- Build files have been written to: C:/Github_Repos/labo-de-micros-tpf/mp3_decode/mp3_dec/cmake-build-debug

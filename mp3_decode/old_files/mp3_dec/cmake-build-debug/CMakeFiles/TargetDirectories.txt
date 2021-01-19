@@ -1,3 +1,0 @@
-C:/Github_Repos/labo-de-micros-tpf/mp3_decode/mp3_dec/cmake-build-debug/CMakeFiles/mp3_dec.dir
-C:/Github_Repos/labo-de-micros-tpf/mp3_decode/mp3_dec/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Github_Repos/labo-de-micros-tpf/mp3_decode/mp3_dec/cmake-build-debug/CMakeFiles/rebuild_cache.dir
