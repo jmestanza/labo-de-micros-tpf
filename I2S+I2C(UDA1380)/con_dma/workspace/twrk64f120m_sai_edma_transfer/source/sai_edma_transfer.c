@@ -65,8 +65,6 @@
 #define EXAMPLE_CHANNEL (0U)
 #define EXAMPLE_SAI_TX_SOURCE kDmaRequestMux0I2S0Tx
 
-
-
 //#define DEMO_SAI_IRQ I2S0_Tx_IRQn
 
 #define I2C_RELEASE_SDA_PORT PORTE
@@ -89,6 +87,8 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
  * Variables
  ******************************************************************************/
 AT_NONCACHEABLE_SECTION_INIT(sai_edma_handle_t txHandle) = {0};
+//sai_edma_handle_t txHandle = {0};
+
 edma_handle_t dmaHandle = {0};
 codec_handle_t codecHandle = {0};
 extern codec_config_t boardCodecConfig;
@@ -96,13 +96,9 @@ AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t buffer[BUFFER_NUM*BUFFER_SIZE], 4);
 volatile bool isFinished = false;
 volatile uint32_t finishIndex = 0U;
 volatile uint32_t emptyBlock = BUFFER_NUM;
-/*******************************************************************************
- * Code
- ******************************************************************************/
 
-
-uint32_t cpy_index = 0U, tx_index=0U;
-
+uint32_t cpy_index = 0U;
+uint32_t tx_index=0U;
 sai_transfer_t xfer;
 sai_config_t config;
 uint32_t delayCycle = 5000000U;
@@ -110,7 +106,11 @@ edma_config_t dmaConfig = {0};
 uint32_t mclkSourceClockHz = 0U;
 sai_transfer_format_t format;
 
-I2S_Type * sai_base = I2S0;
+
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 
 
 static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status, void *userData)
@@ -136,14 +136,52 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
 
 void PIT_1_0_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_TFLG_TIF(1));
+	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 	// si pongo un breakpoint aca funciona el codigo // si le pongo menos de 10ms al PIT, entra dos veces a este handler
     CODEC_Init(&codecHandle, &boardCodecConfig);
     CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
-    PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+
 }
 
-void PIT_1_1_IRQHANDLER(void){
-	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
+
+void dummy_play_music(void){
+    isFinished = false;
+    finishIndex = 0U;
+    emptyBlock = BUFFER_NUM;
+    cpy_index = 0U;
+    tx_index=0U;
+    delayCycle = 5000000U;
+
+    while(!isFinished)
+    {
+        if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
+        {
+             /* Fill in the buffers. */
+             memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&music[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
+             emptyBlock--;
+             cpy_index++;
+        }
+        if(emptyBlock < BUFFER_NUM)
+        {
+
+            /*  xfer structure */
+            xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
+            xfer.dataSize = BUFFER_SIZE;
+            /* Wait for available queue. */
+            status_t status = SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer);
+
+            if(kStatus_Success == status)
+            {
+                tx_index++;
+            }else if(kStatus_SAI_QueueFull == status){
+				// clear the queue
+				__ASM("nop");
+			}
+
+        }
+    }
+
+    int a = 5;
 }
 
 void play_music(void){
@@ -184,41 +222,106 @@ void play_music(void){
 }
 
 
-void I2S0_Tx_IRQHandler(void){ // ACA DEBERIA LLEGAR POR ERROR DE LA FIFO SOLAMENTE
-	if (sai_base->TCSR & I2S_TCSR_FEF_MASK){
-		//	void SAI_ErrorIRQHandler(void){
-		/* Clear the FIFO error flag */
-		SAI_TxClearStatusFlags(DEMO_SAI, kSAI_FIFOErrorFlag);
+void play_music_roto(void){
+	// el problema que tiene es que no se llama a EDMA_HandleIRQ() en algun momento de esta funcion
+    isFinished = false;
+    finishIndex = 0U;
+    emptyBlock = BUFFER_NUM;
+    cpy_index = 0U;
+    tx_index=0U;
+    delayCycle = 5000000U;
 
-		/* Reset FIFO */
-		SAI_TxSoftwareReset(DEMO_SAI, kSAI_ResetTypeFIFO);
+//	dmaHandle.base->CINT = handle->channel;
+//	dmaHandle.base->CR &= ~DMA_CR_HOE_MASK; // clear supongo...
 
 
-		/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-		  exception return operation might vector to incorrect interrupt */
-		#if defined __CORTEX_M && (__CORTEX_M == 4U)
-			__DSB();
-		#endif
+    while(!isFinished)
+    {
+        if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
+        {
+             /* Fill in the buffers. */
+             memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&music[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
+             emptyBlock--;
+             cpy_index++;
+        }
+        if(emptyBlock < BUFFER_NUM)
+        {
 
-	}
+            /*  xfer structure */
+            xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
+            xfer.dataSize = BUFFER_SIZE;
+            /* Wait for available queue. */
+            status_t status = SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer);
+//            EDMA_HandleIRQ(&dmaHandle); esto no se llama. Hola.
+            if(kStatus_Success == status)
+            {
+                tx_index++;
+            }else if(kStatus_SAI_QueueFull == status){
+				// clear the queue
+				__ASM("nop");
+			}
+
+        }
+    }
 }
 
-void init_I2S_and_DMA(void){
 
+
+//void I2S0_Tx_IRQHandler(void){ // ACA DEBERIA LLEGAR POR ERROR DE LA FIFO SOLAMENTE
+//	I2S_Type * sai_base = DEMO_SAI;
+//	if (sai_base->TCSR & I2S_TCSR_FEF_MASK){
+//		//	void SAI_ErrorIRQHandler(void){
+//		/* Clear the FIFO error flag */
+//		SAI_TxClearStatusFlags(DEMO_SAI, kSAI_FIFOErrorFlag);
+//
+//		/* Reset FIFO */
+//		SAI_TxSoftwareReset(DEMO_SAI, kSAI_ResetTypeFIFO);
+//
+//
+//		/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+//		  exception return operation might vector to incorrect interrupt */
+//		#if defined __CORTEX_M && (__CORTEX_M == 4U)
+//			__DSB();
+//		#endif
+//
+//	}
+//}
+
+void init_I2S_and_DMA(void){
 	memset(&txHandle, 0, sizeof(txHandle));
 	memset(&dmaHandle, 0, sizeof(dmaHandle));
 	memset(&codecHandle, 0, sizeof(codecHandle));
-	memset(&dmaConfig, 0, sizeof(dmaConfig));
+//	memset(&boardCodecConfig, 0, sizeof(boardCodecConfig)); esto no se descomenta
+
+
+	memset(&buffer[0], 0, BUFFER_NUM*BUFFER_SIZE*sizeof(buffer[0]));
+
+	isFinished = false;
+	finishIndex = 0U;
+	emptyBlock = BUFFER_NUM;
+	cpy_index = 0U;
+	tx_index=0U;
+
 	memset(&xfer, 0, sizeof(xfer));
 	memset(&config, 0, sizeof(config));
+	delayCycle = 5000000U;
+	memset(&dmaConfig, 0, sizeof(dmaConfig));
+	mclkSourceClockHz = 0U;
+	memset(&format, 0, sizeof(format));
+
 
     EDMA_GetDefaultConfig(&dmaConfig);
     EDMA_Init(EXAMPLE_DMA, &dmaConfig);
     EDMA_CreateHandle(&dmaHandle, EXAMPLE_DMA, EXAMPLE_CHANNEL);
 
+    DMA_Type * base_dma = EXAMPLE_DMA;
+
+    base_dma->ERQ |= DMA_ERQ_ERQ0_MASK;
+
     DMAMUX_Init(DMAMUX0);
     DMAMUX_SetSource(DMAMUX0, EXAMPLE_CHANNEL, EXAMPLE_SAI_TX_SOURCE);
     DMAMUX_EnableChannel(DMAMUX0, EXAMPLE_CHANNEL);
+
 
     SAI_TxGetDefaultConfig(&config);
     config.mclkOutputEnable = true;
@@ -236,8 +339,8 @@ void init_I2S_and_DMA(void){
     format.watermark = FSL_FEATURE_SAI_FIFO_COUNT / 2U;
 
 /* If need to handle audio error, enable sai interrupt */
-    EnableIRQ(I2S0_Tx_IRQn);
-    SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
+//    EnableIRQ(I2S0_Tx_IRQn);
+//    SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
 
     SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
 
@@ -245,19 +348,14 @@ void init_I2S_and_DMA(void){
     SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
 }
 
-
 void PIT_1_2_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
-	init_I2S_and_DMA(); // en el init ya se hace reset antes de configurar!
-
-//	sai_base->TCR3 |= I2S_TCR3_TCE(1);
-//	sai_base->TCSR |= I2S_TCSR_TE(1) | I2S_TCSR_BCE(1) | I2S_TCSR_FEIE(1) | I2S_TCSR_FRDE(1) ;
-	// no puedo poner el 1 en WSF del TCSR porque es un flag y en 0x40 esta la TFR0 donde estan los punteros de la TRANSFER FIFO
-	__ASM("nop");
-
-	// Aca llega igual que al play_music del comienzo del main. Asi que la configuracion de i2s no es el problema.
-	play_music();
 	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
+
+	init_I2S_and_DMA(); // en el init ya se hace reset antes de configurar!
+	// Aca llega igual que al play_music del comienzo del main. Asi que la configuracion de i2s no es el problema.
+	play_music_roto();
+
 }
 
 void get_delay(uint32_t max){
@@ -288,15 +386,33 @@ int main(void)
 
     PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 
-    play_music(); // el primero por la inicializacion no se escucha bien me parece
+    dummy_play_music(); // dummy play music para q se pueda inicializar el codec uda 1380
 
     play_music();
 
+//    get_delay(3000000); // tira error en el flag de la fifo pero anda
+//    get_delay(2*3000000); // tira error en el flag de la fifo pero anda
+//    get_delay(10*3000000); // tira error en el flag de la fifo y no anda
+
+//    play_music();
+
     /* Once transfer finish, disable SAI instance. */
+
+
+
+    DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
+	DMAMUX_Deinit(DMAMUX0);
+
+//	EDMA_ResetChannel(DMA0, EXAMPLE_CHANNEL);
+//	EDMA_Deinit(DMA0);
+
 	SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
 	SAI_Deinit(DEMO_SAI);
 
-    PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // desp de 10ms se llama a este timer
+
+
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // desp de 10ms se llama a este timer
+
 
     while (1)
     {
