@@ -204,6 +204,14 @@ void I2S0_Tx_IRQHandler(void){ // ACA DEBERIA LLEGAR POR ERROR DE LA FIFO SOLAME
 }
 
 void init_I2S_and_DMA(void){
+
+	memset(&txHandle, 0, sizeof(txHandle));
+	memset(&dmaHandle, 0, sizeof(dmaHandle));
+	memset(&codecHandle, 0, sizeof(codecHandle));
+	memset(&dmaConfig, 0, sizeof(dmaConfig));
+	memset(&xfer, 0, sizeof(xfer));
+	memset(&config, 0, sizeof(config));
+
     EDMA_GetDefaultConfig(&dmaConfig);
     EDMA_Init(EXAMPLE_DMA, &dmaConfig);
     EDMA_CreateHandle(&dmaHandle, EXAMPLE_DMA, EXAMPLE_CHANNEL);
@@ -241,6 +249,13 @@ void init_I2S_and_DMA(void){
 void PIT_1_2_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
 	init_I2S_and_DMA(); // en el init ya se hace reset antes de configurar!
+
+//	sai_base->TCR3 |= I2S_TCR3_TCE(1);
+//	sai_base->TCSR |= I2S_TCSR_TE(1) | I2S_TCSR_BCE(1) | I2S_TCSR_FEIE(1) | I2S_TCSR_FRDE(1) ;
+	// no puedo poner el 1 en WSF del TCSR porque es un flag y en 0x40 esta la TFR0 donde estan los punteros de la TRANSFER FIFO
+	__ASM("nop");
+
+	// Aca llega igual que al play_music del comienzo del main. Asi que la configuracion de i2s no es el problema.
 	play_music();
 	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 }

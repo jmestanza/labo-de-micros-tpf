@@ -55,7 +55,7 @@ extern "C" {
 /* Definition of clock source frequency. */
 #define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
 /* Definition of ticks count for channel 0. */
-#define PIT_1_0_TICKS USEC_TO_COUNT(10000U, PIT_1_CLK_FREQ) - 1U
+#define PIT_1_0_TICKS USEC_TO_COUNT(100000U, PIT_1_CLK_FREQ) - 1U
 /* Definition of ticks count for channel 1. */
 //#define PIT_1_1_TICKS USEC_TO_COUNT(33333U, PIT_1_CLK_FREQ) - 1U
 //#define PIT_1_1_TICKS USEC_TO_COUNT(27000U, PIT_1_CLK_FREQ) - 1U
