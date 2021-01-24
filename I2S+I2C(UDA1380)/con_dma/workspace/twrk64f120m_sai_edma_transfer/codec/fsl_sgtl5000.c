@@ -61,7 +61,7 @@ status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
 //    handle->slaveAddress = 0x1AU; // PONGO A1 = 1
 
 //   write reg (handle,reg,value)
-    SGTL_WriteReg(handle, 0x7F, 0x0000); // ACTIVO TODO, WSPLL => cuando es de 16 bits (como el del ejemplo ejemplo) => PPL1 = 0 PLL0=1 (entre 12 y 25KHz) (era 16k)
+    SGTL_WriteReg(handle, 0x7F, 0x0000); // Reset
 
 //	//00H evaluation modes, WSPLL settings, clock divider and clock selectors
 //    SGTL_WriteReg(handle, 0x00, 0x0312);

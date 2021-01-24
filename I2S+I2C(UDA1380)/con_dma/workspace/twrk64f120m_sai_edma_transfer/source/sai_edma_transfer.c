@@ -144,10 +144,12 @@ void PIT_1_0_IRQHANDLER(void){
 
 }
 
+count_pit_1 = 0;
+
 void PIT_1_1_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
 	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
-//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
 }
 
 void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
@@ -155,6 +157,8 @@ void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
 	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
 	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
 }
+
+
 
 void mini_play_music(void){
     if(!isFinished)
@@ -279,6 +283,9 @@ void terminatePlayState(void){
 	resetVariables();
 }
 
+bool first_time_pit_2 = true;
+
+
 void PIT_1_2_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
 
@@ -292,6 +299,10 @@ void PIT_1_2_IRQHANDLER(void){
 		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
 		resetVariables();
 		terminatePlayState();
+		if(first_time_pit_2){
+			PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // que pare de llamarse este timer que reproduce la cancion
+			first_time_pit_2 = false;
+		}
 	}
 }
 
@@ -320,8 +331,6 @@ int main(void)
     BOARD_Codec_I2C_Init();
 
     PRINTF("SAI example started!\n\r");
-
-
 
     PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 

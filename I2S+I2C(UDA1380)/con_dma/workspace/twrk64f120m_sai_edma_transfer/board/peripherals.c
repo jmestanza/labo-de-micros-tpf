@@ -58,6 +58,8 @@ void PIT_1_init(void) {
 
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_1_3_TICKS);
 
+//  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_3_TICKS);
+
 
   /* Enable interrupts from channel 0. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
