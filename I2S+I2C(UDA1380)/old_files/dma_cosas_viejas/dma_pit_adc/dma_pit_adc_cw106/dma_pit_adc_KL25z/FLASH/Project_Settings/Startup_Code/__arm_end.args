@@ -1,0 +1,20 @@
+-mcpu=cortex-m0
+-mthumb
+-mfloat-abi=soft
+-g3
+-gdwarf-2
+-gstrict-dwarf
+-I"C:/Users/b52932/Documents/DMA_code/workspace/dma_pit_adc_KL25z/Project_Headers"
+-I"C:/Users/b52932/Documents/DMA_code/workspace/dma_pit_adc_KL25z/Sources/drivers/adc"
+-I"C:/Users/b52932/Documents/DMA_code/workspace/dma_pit_adc_KL25z/Sources/drivers/dma"
+-I"C:/Users/b52932/Documents/DMA_code/workspace/dma_pit_adc_KL25z/Sources/drivers/pit"
+-I"C:/Users/b52932/Documents/DMA_code/workspace/dma_pit_adc_KL25z/Project_Settings/Startup_Code"
+-I"C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include"
+-I"C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_Runtime/include"
+-O0
+-ffunction-sections
+-fdata-sections
+-Wall
+-c
+-fmessage-length=0
+-specs=ewl_c.specs
