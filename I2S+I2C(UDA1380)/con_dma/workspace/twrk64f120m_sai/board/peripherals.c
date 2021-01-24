@@ -42,9 +42,55 @@ product: Peripherals v1.0
 
 #include "peripherals.h"
 
+const pit_config_t PIT_1_config = {
+  .enableRunInDebug = false
+};
+
+void PIT_1_init(void) {
+  /* Initialize the PIT. */
+  PIT_Init(PIT_1_PERIPHERAL, &PIT_1_config);
+  /* Set channel 0 period to 10 ms. */
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
+
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_1_1_TICKS);
+  /* Set channel 2 period to 5 s. */
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_1_2_TICKS);
+
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_1_3_TICKS);
+
+
+  /* Enable interrupts from channel 0. */
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
+
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_1, kPIT_TimerInterruptEnable);
+  /* Enable interrupts from channel 2. */
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_2, kPIT_TimerInterruptEnable);
+
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_3, kPIT_TimerInterruptEnable);
+
+  /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_0_IRQN);
+  /* Enable interrupt PIT_1_2_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_1_IRQN);
+  /* Enable interrupt PIT_1_2_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_2_IRQN);
+
+  EnableIRQ(PIT_1_3_IRQN);
+
+}
+
+
 /**
  * @brief Set up and initialize all required blocks and functions related to the peripherals hardware.
  */
+
+void BOARD_InitPeripherals(void)
+{
+  /* Initialize components */
+  PIT_1_init();
+}
+
 void BOARD_InitBootPeripherals(void) {
 	/* The user initialization should be placed here */
+	  BOARD_InitPeripherals();
 }

@@ -58,10 +58,38 @@ extern "C" {
 #define PIT_1_0_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U
 
 
-#define PIT_1_1_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 100u segs
+// ----------------------------PIT1 CH1----------------------------------------
+// NO ANDA CON:
+//#define PIT_1_1_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U // 5 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(4000000U, PIT_1_CLK_FREQ) - 1U // 4 segs
 
+// ANDA CON:
+#define PIT_1_1_TICKS USEC_TO_COUNT(3500000U, PIT_1_CLK_FREQ) - 1U // 3.5 segs // anda pero empieza como 10 segundos despues...
+//#define PIT_1_1_TICKS USEC_TO_COUNT(3000000U, PIT_1_CLK_FREQ) - 1U // 3 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(1000000U, PIT_1_CLK_FREQ) - 1U // 1 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(500000U, PIT_1_CLK_FREQ) - 1U // 0.5 segs
+// -----------------------------------------------------------------------------
+
+
+// ----------------------------PIT1 CH2----------------------------------------
 //#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
-#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 100u segs
+#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 25m segs
+// -----------------------------------------------------------------------------
+
+
+// ----------------------------PIT1 CH3----------------------------------------
+// NO ANDA:
+//#define PIT_1_3_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U // 5 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(3500000U, PIT_1_CLK_FREQ) - 1U // 3.5 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(3000000U, PIT_1_CLK_FREQ) - 1U // 3 seg
+
+// ANDA:
+#define PIT_1_3_TICKS USEC_TO_COUNT(2000000U, PIT_1_CLK_FREQ) - 1U // 2 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(1000000U, PIT_1_CLK_FREQ) - 1U // 1 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(100000U, PIT_1_CLK_FREQ) - 1U // 100m
+//#define PIT_1_3_TICKS USEC_TO_COUNT(10000U, PIT_1_CLK_FREQ) - 1U // 10m
+// -----------------------------------------------------------------------------
+
 
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_0_IRQN PIT0_IRQn
@@ -78,7 +106,10 @@ extern "C" {
 /* PIT_1 interrupt handler identifier. */
 #define PIT_1_2_IRQHANDLER PIT2_IRQHandler
 
-
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_3_IRQN PIT3_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_3_IRQHANDLER PIT3_IRQHandler
 
 void BOARD_InitPeripherals(void);
 /**

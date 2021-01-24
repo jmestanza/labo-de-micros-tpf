@@ -106,7 +106,7 @@ uint32_t delayCycle = 5000000U;
 edma_config_t dmaConfig = {0};
 uint32_t mclkSourceClockHz = 0U;
 sai_transfer_format_t format;
-
+bool first_time = true;
 
 
 /*******************************************************************************
@@ -143,6 +143,19 @@ void PIT_1_0_IRQHANDLER(void){
     CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
 }
+
+void PIT_1_1_IRQHANDLER(void){
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
+//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
+}
+
+void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_TFLG_TIF(1));
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
+	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
+}
+
 void mini_play_music(void){
     if(!isFinished)
     {
@@ -180,45 +193,8 @@ void play_music(void){
     tx_index=0U;
     delayCycle = 5000000U;
 
-    if(count_play == 3){
-    	__ASM("nop");  // CR, ES, ERQ, EEI, INT, ERR, HRS, ok
-
-    }
-
-    while(!isFinished)
-    {
-
-
-        if((emptyBlock > 0U) && (cpy_index < MUSIC_LEN/BUFFER_SIZE))
-        {
-             /* Fill in the buffers. */
-             memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&music[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
-             emptyBlock--;
-             cpy_index++;
-        }
-        if(emptyBlock < BUFFER_NUM)
-        {
-
-            /*  xfer structure */
-            xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
-            xfer.dataSize = BUFFER_SIZE;
-            /* Wait for available queue. */
-            status_t status = SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer);
-
-            if(count_play == 3){
-              	__ASM("nop");
-//              	sai_base->TCD[EXAMPLE_CHANNEL].CSR |= DMA_CSR_START(1); // haog que haga request
-              }
-
-            if(kStatus_Success == status)
-            {
-                tx_index++;
-            }else if(kStatus_SAI_QueueFull == status){
-				// clear the queue
-				__ASM("nop");
-			}
-
-        }
+    while(!isFinished){
+    	mini_play_music();
     }
 }
 
@@ -261,9 +237,9 @@ void init_I2S(void){
     format.isFrameSyncCompact = false;
     format.watermark = FSL_FEATURE_SAI_FIFO_COUNT / 2U;
 
-/* If need to handle audio error, enable sai interrupt */
-    EnableIRQ(I2S0_Tx_IRQn);
-    SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
+///* If need to handle audio error, enable sai interrupt */
+//    EnableIRQ(I2S0_Tx_IRQn);
+//    SAI_TxEnableInterrupts(DEMO_SAI, kSAI_FIFOErrorInterruptEnable);
 
     SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
 
@@ -273,23 +249,50 @@ void init_I2S(void){
 
 I2S_Type * sai_base = I2S0;
 
+void resetVariables(void){
+	first_time = true;
+	isFinished = false;
+	finishIndex = 0U;
+	emptyBlock = BUFFER_NUM;
+	cpy_index = 0U;
+	tx_index=0U;
+	delayCycle = 5000000U;
+}
+
+
+void initPlayState(void){
+//	resetVariables();
+	init_DMA();
+	init_I2S();
+}
+
+void terminatePlayState(void){
+	disableRequests();
+	while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
+	}
+	//	SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
+	SAI_TransferTerminateSendEDMA(DEMO_SAI, &txHandle);
+	SAI_Deinit(DEMO_SAI);
+	DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
+	DMAMUX_Deinit(DMAMUX0);
+	EDMA_Deinit(EXAMPLE_DMA);
+	resetVariables();
+}
+
 void PIT_1_2_IRQHANDLER(void){
-	static bool first_time = true;
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
+
 	if(first_time == true){
 		first_time = false;
-		init_DMA();
-		init_I2S(); //en el init ya se hace reset antes de configurar!
+		initPlayState();
+		//en el init ya se hace reset antes de configurar!
 	}
-		// Aca llega igual que al play_music del comienzo del main. Asi que la configuracion de i2s no es el problema.
-//		for(int i = 0;  i< 100 ; i ++ ){
-//			sai_base->TDR[0] = 0xffffffff; // dummy write needed
-//		}
 	mini_play_music();
-
-
-//	}
-//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
+	if(isFinished){
+		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
+		resetVariables();
+		terminatePlayState();
+	}
 }
 
 void get_delay(uint32_t max){
@@ -300,6 +303,8 @@ void get_delay(uint32_t max){
 		delayCycle--;
 	}
 }
+
+
 
 int main(void)
 {
@@ -316,106 +321,38 @@ int main(void)
 
     PRINTF("SAI example started!\n\r");
 
-    init_DMA();
-    init_I2S();
+
 
     PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_0);
 
+    initPlayState();
+
     play_music(); // dummy play music para q se pueda inicializar el codec uda 1380
 
-    disableRequests();
-    while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
-    }
-	SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
-	SAI_Deinit(DEMO_SAI);
-	DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
-	DMAMUX_Deinit(DMAMUX0);
-	EDMA_Deinit(EXAMPLE_DMA);
+    terminatePlayState();
 
-	init_DMA();
-	init_I2S();
+    initPlayState();
+
     play_music();
 
-    disableRequests();
-    while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
-    }
-//	SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
-	SAI_TransferTerminateSendEDMA(DEMO_SAI, &txHandle);
-	SAI_Deinit(DEMO_SAI);
-	DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
-	DMAMUX_Deinit(DMAMUX0);
-	EDMA_Deinit(EXAMPLE_DMA);
+    terminatePlayState();
 
+//  Explicacion de los PITs => PIT1 channel 2 es el timer que reproduce la musica.
 
-	isFinished = false;
-	finishIndex = 0U;
-	emptyBlock = BUFFER_NUM;
-	cpy_index = 0U;
-	tx_index=0U;
-	delayCycle = 5000000U;
+// Lo puedo llamar directamente desde aca (se apaga solo despues de reproducir la musica):
+//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 
+	//y esto anda.
 
-//    get_delay(3000000); // tira error en el flag de la fifo pero anda
-//    get_delay(2*3000000); // tira error en el flag de la fifo pero anda
-//    get_delay(10*3000000); // tira error en el flag de la fifo y no anda
+// Puedo llamar al PIT1 channel 2 cada n segundos, controlado por el PIT1 channel 1, por ejemplo:
+//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
 
-//    play_music();
+// Puedo llamar al PIT1 channel 2 llamarlo 1 sola vez en n segundos, controlado por el PIT1 channel 3, por ejemplo:
 
-    /* Once transfer finish, disable SAI instance. */
-
-//    SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
-//    SAI_Deinit(DEMO_SAI);
-//    disableRequests();
-
-
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // desp de 10ms se llama a este timer
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
 
 
     while (1)
     {
     }
-}
-
-
-////#if defined(SAI_ErrorIRQHandler)
-//void SAI_ErrorIRQHandler(void)
-//{
-//    /* Clear the FIFO error flag */
-//    SAI_TxClearStatusFlags(DEMO_SAI, kSAI_FIFOErrorFlag);
-//
-//    /* Reset FIFO */
-//    SAI_TxSoftwareReset(DEMO_SAI, kSAI_ResetTypeFIFO);
-///* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-//  exception return operation might vector to incorrect interrupt */
-//#if defined __CORTEX_M && (__CORTEX_M == 4U)
-//    __DSB();
-//#endif
-//}
-////#endif
-
-void I2S0_Tx_IRQHandler(){ // ACA DEBERIA LLEGAR POR ERROR DE LA FIFO SOLAMENTE
-	if (sai_base->TCSR & I2S_TCSR_FEF_MASK){
-		//	void SAI_ErrorIRQHandler(void){
-		/* Clear the FIFO error flag */
-		SAI_TxClearStatusFlags(DEMO_SAI, kSAI_FIFOErrorFlag);
-
-		/* Reset FIFO */
-		SAI_TxSoftwareReset(DEMO_SAI, kSAI_ResetTypeFIFO);
-
-//				SAI_TxSoftwareReset(base, type);
-//				SAI_TxInit(DEMO_SAI, &config);
-//				SAI_TxReset(sai_base);
-//				SAI_TxInit(DEMO_SAI, &config);
-//				SAI_TransferTxCreateHandleEDMA(DEMO_SAI, &txHandle, callback, NULL, &dmaHandle);
-//				mclkSourceClockHz = DEMO_SAI_CLK_FREQ;
-//				SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
-
-
-		/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-		  exception return operation might vector to incorrect interrupt */
-		#if defined __CORTEX_M && (__CORTEX_M == 4U)
-			__DSB();
-		#endif
-
-	}
 }

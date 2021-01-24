@@ -38,10 +38,80 @@
 #ifndef _PERIPHERALS_H_
 #define _PERIPHERALS_H_
 
+#include "fsl_pit.h"
+
+
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
 
+
+/* Definitions for BOARD_InitPeripherals functional group */
+/* BOARD_InitPeripherals defines for PIT */
+/* Definition of peripheral ID. */
+#define PIT_1_PERIPHERAL PIT
+/* Definition of clock source. */
+#define PIT_1_CLOCK_SOURCE kCLOCK_BusClk
+/* Definition of clock source frequency. */
+#define PIT_1_CLK_FREQ CLOCK_GetFreq(PIT_1_CLOCK_SOURCE)
+/* Definition of ticks count for channel 0. */
+#define PIT_1_0_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U
+
+
+// ----------------------------PIT1 CH1----------------------------------------
+// NO ANDA CON:
+//#define PIT_1_1_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U // 5 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(4000000U, PIT_1_CLK_FREQ) - 1U // 4 segs
+
+// ANDA CON:
+#define PIT_1_1_TICKS USEC_TO_COUNT(3500000U, PIT_1_CLK_FREQ) - 1U // 3.5 segs // anda pero empieza como 10 segundos despues...
+//#define PIT_1_1_TICKS USEC_TO_COUNT(3000000U, PIT_1_CLK_FREQ) - 1U // 3 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(1000000U, PIT_1_CLK_FREQ) - 1U // 1 segs
+//#define PIT_1_1_TICKS USEC_TO_COUNT(500000U, PIT_1_CLK_FREQ) - 1U // 0.5 segs
+// -----------------------------------------------------------------------------
+
+
+// ----------------------------PIT1 CH2----------------------------------------
+//#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
+#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 25m segs
+// -----------------------------------------------------------------------------
+
+
+// ----------------------------PIT1 CH3----------------------------------------
+// NO ANDA:
+//#define PIT_1_3_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U // 5 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(3500000U, PIT_1_CLK_FREQ) - 1U // 3.5 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(3000000U, PIT_1_CLK_FREQ) - 1U // 3 seg
+
+// ANDA:
+#define PIT_1_3_TICKS USEC_TO_COUNT(2000000U, PIT_1_CLK_FREQ) - 1U // 2 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(1000000U, PIT_1_CLK_FREQ) - 1U // 1 seg
+//#define PIT_1_3_TICKS USEC_TO_COUNT(100000U, PIT_1_CLK_FREQ) - 1U // 100m
+//#define PIT_1_3_TICKS USEC_TO_COUNT(10000U, PIT_1_CLK_FREQ) - 1U // 10m
+// -----------------------------------------------------------------------------
+
+
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_0_IRQN PIT0_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_0_IRQHANDLER PIT0_IRQHandler
+
+#define PIT_1_1_IRQN PIT1_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_1_IRQHANDLER PIT1_IRQHandler
+
+
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_2_IRQN PIT2_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_2_IRQHANDLER PIT2_IRQHandler
+
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_3_IRQN PIT3_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_3_IRQHANDLER PIT3_IRQHandler
+
+void BOARD_InitPeripherals(void);
 /**
  * @brief 	Initialize peripherals specific settings.
  */
