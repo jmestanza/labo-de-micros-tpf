@@ -498,6 +498,11 @@ static uint8_t Get_StartInstance(void)
     return StartInstanceNum;
 }
 
+void EDMA_EnableIRQ( DMA_Type *base,uint32_t channel){
+	uint32_t edmaInstance = EDMA_GetInstance(base);
+    status_t stat = EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);
+}
+
 void EDMA_CreateHandle(edma_handle_t *handle, DMA_Type *base, uint32_t channel)
 {
     assert(handle != NULL);
@@ -1964,7 +1969,7 @@ void DMA0_27_31_DriverIRQHandler(void)
 /* 4 channels (No Shared): kv10  */
 #if defined(FSL_FEATURE_EDMA_MODULE_CHANNEL) && FSL_FEATURE_EDMA_MODULE_CHANNEL > 0
 
-void DMA0_DriverIRQHandler(void)
+void DMA0_DriverIRQHandler(void) // ES ESTE!!
 {
     EDMA_HandleIRQ(s_EDMAHandle[0]);
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping

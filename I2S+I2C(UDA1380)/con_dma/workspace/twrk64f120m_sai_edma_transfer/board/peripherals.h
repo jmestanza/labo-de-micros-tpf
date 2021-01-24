@@ -57,12 +57,22 @@ extern "C" {
 /* Definition of ticks count for channel 0. */
 #define PIT_1_0_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U
 
-#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
+
+#define PIT_1_1_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 100u segs
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
+#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 100u segs
 
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_0_IRQN PIT0_IRQn
 /* PIT_1 interrupt handler identifier. */
 #define PIT_1_0_IRQHANDLER PIT0_IRQHandler
+
+#define PIT_1_1_IRQN PIT1_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_1_IRQHANDLER PIT1_IRQHandler
+
+
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_2_IRQN PIT2_IRQn
 /* PIT_1 interrupt handler identifier. */
