@@ -1,2 +1,6 @@
-ecg.c:14:6:ecg_init	8	static
-ecg.c:28:6:pit_func	8	static
+core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static
+fsl_adc16.h:487:24:ADC16_GetChannelConversionValue	16	static
+fsl_pit.h:286:20:PIT_StartTimer	16	static
+ecg.c:22:6:ecg_init	16	static
+ecg.c:33:6:ecg_get_samples	24	static
+ecg.c:56:6:ADC0_IRQHandler	8	static

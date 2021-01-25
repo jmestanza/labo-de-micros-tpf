@@ -44,6 +44,7 @@
 #include "fever.h"
 #include "algorithm.h"
 #include "o2.h"
+#include "ecg.h"
 
 
 
@@ -55,6 +56,7 @@
 
 void callback_pin (void);
 void callback_pit(void);
+void ecg_callback(void);
 
 uint8_t a = 0;
 
@@ -81,6 +83,7 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
+    /*
     uint8_t uch_dummy;
     i2cInit();
 
@@ -93,7 +96,11 @@ int main(void) {
     NVIC_EnableIRQ(PORTB_IRQn);
 
 
-    init_pit(0, 1000000U, callback_pit);
+    init_pit(0, 1000000U);
+    pit_enable_int (0, callback_pit);
+    */
+
+    ecg_init(ecg_callback);
 
     PRINTF("Hello World\n");
 
@@ -146,7 +153,16 @@ void callback_pit(void)
 
 }
 
+void ecg_callback(void)
+{
+	uint16_t data[ECG_VALUES];
+	ecg_get_samples(data);
 
+	for (int i =0 ; i < ECG_VALUES; i++)
+	{
+		printf("%d , \n", (int)data[i]);
+	}
+}
 
 
 

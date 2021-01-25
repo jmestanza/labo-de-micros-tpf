@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../source/adc.c \
 ../source/algorithm.c \
 ../source/ecg.c \
 ../source/fever.c \
@@ -16,7 +15,6 @@ C_SRCS += \
 ../source/sensores.c 
 
 OBJS += \
-./source/adc.o \
 ./source/algorithm.o \
 ./source/ecg.o \
 ./source/fever.o \
@@ -28,7 +26,6 @@ OBJS += \
 ./source/sensores.o 
 
 C_DEPS += \
-./source/adc.d \
 ./source/algorithm.d \
 ./source/ecg.d \
 ./source/fever.d \

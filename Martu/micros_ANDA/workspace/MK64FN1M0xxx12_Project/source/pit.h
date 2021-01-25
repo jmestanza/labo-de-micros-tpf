@@ -18,7 +18,9 @@
 
 typedef void (* pfunc) (void);
 
-void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback);
+void init_pit (uint8_t ch, uint32_t timeInUSEC);
+
+void pit_enable_int (uint8_t ch, pfunc callback);
 
 
 #endif /* PIT_H_ */
