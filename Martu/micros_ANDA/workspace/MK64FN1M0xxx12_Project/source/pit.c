@@ -15,7 +15,7 @@ pfunc callback_0;
 pfunc callback_1;
 pfunc callback_2;
 
-void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback)
+void init_pit (uint8_t ch, uint32_t timeInUSEC)
 {
     pit_config_t pitConfig;
     /*
@@ -29,6 +29,14 @@ void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback)
     /* Set timer period for channel */
     PIT_SetTimerPeriod(PIT_BASEADDR, ch, USEC_TO_COUNT(timeInUSEC, PIT_SOURCE_CLOCK));
 
+    /* Start channel */
+    PIT_StartTimer(PIT_BASEADDR, ch);
+
+}
+
+void pit_enable_int (uint8_t ch, pfunc callback)
+{
+	PIT_ClearStatusFlags(PIT_BASEADDR, ch, kPIT_TimerFlag);
     /* Enable timer interrupts for channel  */
     PIT_EnableInterrupts(PIT_BASEADDR, ch, kPIT_TimerInterruptEnable);
 
@@ -46,10 +54,6 @@ void init_pit (uint8_t ch, uint32_t timeInUSEC, pfunc callback)
 			callback_2 = callback;
 			break;
 	}
-
-    /* Start channel */
-    PIT_StartTimer(PIT_BASEADDR, ch);
-
 }
 
 void PIT0_IRQHandler(void)

@@ -1,5 +1,5 @@
 source/ecg.o source/ecg.d: ../source/ecg.c ../source/ecg.h \
- ../source/adc.h ../source/pit.h ../source/gpio.h \
+ ../source/gpio.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/fsl_device_registers.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/CMSIS/core_cm4.h \
@@ -7,13 +7,16 @@ source/ecg.o source/ecg.d: ../source/ecg.c ../source/ecg.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/CMSIS/cmsis_compiler.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/CMSIS/cmsis_gcc.h \
  /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/system_MK64F12.h \
- /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12_features.h
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12_features.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_adc16.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_common.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_clock.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/board/peripherals.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_common.h \
+ /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_pit.h
 
 ../source/ecg.h:
-
-../source/adc.h:
-
-../source/pit.h:
 
 ../source/gpio.h:
 
@@ -32,3 +35,17 @@ source/ecg.o source/ecg.d: ../source/ecg.c ../source/ecg.h \
 /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/system_MK64F12.h:
 
 /Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12_features.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_adc16.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_common.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_clock.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/device/MK64F12.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/board/peripherals.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_common.h:
+
+/Users/martinamaspero/Desktop/labo-de-micros-tpf/Martu/micros_ANDA/workspace/MK64FN1M0xxx12_Project/drivers/fsl_pit.h:
