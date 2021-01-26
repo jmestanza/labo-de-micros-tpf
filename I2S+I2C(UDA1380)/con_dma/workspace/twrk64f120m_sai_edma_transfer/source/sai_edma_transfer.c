@@ -119,7 +119,6 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
     if(kStatus_SAI_TxError == status)   // me parece que deberia ser con Tx
     {
     	PRINTF("Hubo un error en el SAI");
-//    	SAI_ErrorIRQHandler();
     }
     else
     {
@@ -143,8 +142,6 @@ void PIT_1_0_IRQHANDLER(void){
     CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
 }
-
-count_pit_1 = 0;
 
 void PIT_1_1_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
@@ -265,7 +262,6 @@ void resetVariables(void){
 
 
 void initPlayState(void){
-//	resetVariables();
 	init_DMA();
 	init_I2S();
 }
