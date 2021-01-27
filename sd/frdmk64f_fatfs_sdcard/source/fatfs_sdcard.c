@@ -44,12 +44,17 @@
 #include "fsl_sysmpu.h"
 #include "pin_mux.h"
 #include "clock_config.h"
+
+#include "mp3Decoder.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 /* buffer size (in byte) for read/write operations */
-#define BUFFER_SIZE (100U)
+//#define BUFFER_SIZE (100U)
+#define BUFFER_SIZE (360U)
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -99,6 +104,9 @@ static const sdmmchost_pwr_card_t s_sdCardPwrCtrl = {
 /*!
  * @brief Main function
  */
+
+static short buffer[MP3_DECODED_BUFFER_SIZE];
+
 int main(void)
 {
     FRESULT error;
@@ -232,46 +240,32 @@ int main(void)
 //
     PRINTF("\r\nWrite/read file until encounters error......\r\n");
     bool first_time = true;
+
+	MP3DecoderInit();
+	uint16_t sampleCount;
+	uint32_t sr = 0;
+	mp3_decoder_frame_data_t frameData;
+	int i = 0;
+	PRINTF("FILE SIZE = %d \r\n",f_size(&g_fileObject));
+
+	error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
+	if (error)
+	{
+		if (error == FR_EXIST)
+		{
+			PRINTF("File exists.\r\n");
+		}
+		else
+		{
+			PRINTF("Open file failed.\r\n");
+			return -1;
+		}
+	}
+
+	MP3LoadFile(g_bufferRead,&bytesRead, f_size(&g_fileObject));
+
     while (true)
     {
-        if (failedFlag || (ch == 'q'))
-        {
-            break;
-        }
-
-//        PRINTF("\r\nWrite to above created file.\r\n");
-//        error = f_write(&g_fileObject, g_bufferWrite, sizeof(g_bufferWrite), &bytesWritten);
-//        if ((error) || (bytesWritten != sizeof(g_bufferWrite)))
-//        {
-//            PRINTF("Write file failed. \r\n");
-//            failedFlag = true;
-//            continue;
-//        }
-        if(first_time){
-            error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
-            first_time = false;
-        }
-
-        if (error)
-        {
-            if (error == FR_EXIST)
-            {
-                PRINTF("File exists.\r\n");
-            }
-            else
-            {
-                PRINTF("Open file failed.\r\n");
-                return -1;
-            }
-        }
-
-        /* Move the file pointer */
-//        if (f_lseek(&g_fileObject, 0U))
-//        {
-//            PRINTF("Set file pointer position failed. \r\n");
-//            failedFlag = true;
-//            continue;
-//        }
 
         PRINTF("Pointer before read = %p \r\n",f_tell(&g_fileObject));
 
@@ -287,22 +281,55 @@ int main(void)
 
         PRINTF("Pointer after read = %p \r\n",f_tell(&g_fileObject));
 
+//    		while (1)
+//    		{
+    #ifdef MAIN_DEBUG
+    			PRINTF("\n[APP] Frame %d decoding started.\n", i);
+    #endif
+    			mp3_decoder_result_t res = MP3GetDecodedFrame(buffer, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
+    			if (res == 0)
+    			{
+    				MP3GetLastFrameData(&frameData);
+    				if (sr != frameData.sampleRate)
+    				{
+    					int huevo = 0;
+    					huevo++;
+    				}
+    #ifdef MAIN_DEBUG
+    				PRINTF("[APP] Frame %d decoded.\n", i);
+    #endif
+    				i++;
 
-//        PRINTF("Compare the read/write content......\r\n");
-//        if (memcmp(g_bufferWrite, g_bufferRead, sizeof(g_bufferWrite)))
-//        {
-//            PRINTF("Compare read/write content isn't consistent.\r\n");
-//            failedFlag = true;
-//            continue;
-//        }
+    				sr = frameData.sampleRate;
+    #ifdef MAIN_DEBUG
+    				PRINTF("[APP] FRAME SAMPLE RATE: %d \n", sr);
+    #endif
 
-//        PRINTF("The read/write content is consistent.\r\n");
+    				int16_t auxBuffer[MP3_DECODED_BUFFER_SIZE];
+    				for (uint32_t j = 0; j < sampleCount / frameData.channelCount; j++)
+    				{
+    					auxBuffer[j] = buffer[frameData.channelCount * j];
+    				}
+//    				wav_write(wav, auxBuffer, sampleCount / frameData.channelCount);
+    			}
+    			else if (res == MP3DECODER_FILE_END)
+    			{
+    				PRINTF("[APP] FILE ENDED. Decoded %d frames.\n", i - 1);
+//    				wav_close(wav);
+    				break;
+    			}
+    			else
+    			{
+    				int huevo = 0;
+    				huevo++;
+    			}
 
         PRINTF("\r\nInput 'q' to quit read/write.\r\nInput other char to read/write file again.\r\n");
 //        ch = GETCHAR();
 //        PUTCHAR(ch);
     }
 
+// 	Termino de leer cuando llega a aca!!
     PRINTF("\r\nThe example will not read/write file again.\r\n");
 
     if (f_close(&g_fileObject))
