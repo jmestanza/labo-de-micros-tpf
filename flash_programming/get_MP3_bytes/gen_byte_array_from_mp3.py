@@ -34,7 +34,11 @@ for filename in all_mp3:
 
 # filename = "ecg_oor"
     data = open("mp3_files_8KHz/"+filename, 'rb').read()
-
+    
+    f = open("hex_files/"+filename[:-4]+".bin",'w')
+    for el in data:
+        f.write(str(hex(el))[2:])
+    f.close()
     # hex_arr = [el for el in data]
 
     # print(hex_arr[:10])

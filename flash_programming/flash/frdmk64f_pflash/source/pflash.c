@@ -136,9 +136,10 @@ void app_finalize(void)
  *            + Erase a sector and verify.
  *            + Program a sector and verify.
  */
+#include <cr_section_macros.h>
 
-
-
+//__DATA(Flash) const int roarray[10000];
+__DATA(Flash2) const int roarray[10000];
 
 
 int main(void)
@@ -175,7 +176,7 @@ int main(void)
     {
         error_trap();
     }
-    /* Get flash properties*/
+//    /* Get flash properties*/
     FLASH_GetProperty(&s_flashDriver, kFLASH_PropertyPflash0BlockBaseAddr, &pflashBlockBase);
     FLASH_GetProperty(&s_flashDriver, kFLASH_PropertyPflash0TotalSize, &pflashTotalSize);
     FLASH_GetProperty(&s_flashDriver, kFLASH_PropertyPflash0SectorSize, &pflashSectorSize);
@@ -209,82 +210,81 @@ int main(void)
             break;
     }
     PRINTF("\r\n");
-
-    /* Test pflash basic opeation only if flash is unsecure. */
-    if (kFTFx_SecurityStateNotSecure == securityStatus)
-    {
-        /* Pre-preparation work about flash Cache/Prefetch/Speculation. */
-        FTFx_CACHE_ClearCachePrefetchSpeculation(&s_cacheDriver, true);
-
-        /* Debug message for user. */
-        /* Erase several sectors on upper pflash block where there is no code */
-        PRINTF("\r\n Erase a sector of flash");
-
-
-/* In case of the protected sectors at the end of the pFlash just select
-the block from the end of pFlash to be used for operations
-SECTOR_INDEX_FROM_END = 1 means the last sector,
-SECTOR_INDEX_FROM_END = 2 means (the last sector - 1) ...
-in case of FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP it is
-SECTOR_INDEX_FROM_END = 1 means the last 2 sectors with width of 2 sectors,
-SECTOR_INDEX_FROM_END = 2 means the last 4 sectors back
-with width of 2 sectors ...
-*/
-#ifndef SECTOR_INDEX_FROM_END
-  #define SECTOR_INDEX_FROM_END 1U
-#endif
-
-/* Erase a sector from destAdrss. */
-#if defined(FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP) && FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP
-        /* Note: we should make sure that the sector shouldn't be swap indicator sector*/
-        destAdrss = pflashBlockBase + (pflashTotalSize - (SECTOR_INDEX_FROM_END * pflashSectorSize * 2));
-#else
-        destAdrss = pflashBlockBase + (pflashTotalSize - (SECTOR_INDEX_FROM_END * pflashSectorSize));
-#endif
-
+//
+//    /* Test pflash basic opeation only if flash is unsecure. */
+//    if (kFTFx_SecurityStateNotSecure == securityStatus)
+//    {
+//        /* Pre-preparation work about flash Cache/Prefetch/Speculation. */
+//        FTFx_CACHE_ClearCachePrefetchSpeculation(&s_cacheDriver, true);
+//
+//        /* Debug message for user. */
+//        /* Erase several sectors on upper pflash block where there is no code */
+//        PRINTF("\r\n Erase a sector of flash");
+//
+//
+///* In case of the protected sectors at the end of the pFlash just select
+//the block from the end of pFlash to be used for operations
+//SECTOR_INDEX_FROM_END = 1 means the last sector,
+//SECTOR_INDEX_FROM_END = 2 means (the last sector - 1) ...
+//in case of FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP it is
+//SECTOR_INDEX_FROM_END = 1 means the last 2 sectors with width of 2 sectors,
+//SECTOR_INDEX_FROM_END = 2 means the last 4 sectors back
+//with width of 2 sectors ...
+//*/
+//#ifndef SECTOR_INDEX_FROM_END
+//  #define SECTOR_INDEX_FROM_END 1U
+//#endif
+//
+///* Erase a sector from destAdrss. */
+//#if defined(FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP) && FSL_FEATURE_FLASH_HAS_PFLASH_BLOCK_SWAP
+//        /* Note: we should make sure that the sector shouldn't be swap indicator sector*/
+//        destAdrss = pflashBlockBase + (pflashTotalSize - (SECTOR_INDEX_FROM_END * pflashSectorSize * 2));
+//#else
+//        destAdrss = pflashBlockBase + (pflashTotalSize - (SECTOR_INDEX_FROM_END * pflashSectorSize));
+//#endif
+//
 //        result = FLASH_Erase(&s_flashDriver, destAdrss, pflashSectorSize, kFTFx_ApiEraseKey);
-        result = kStatus_FTFx_Success;
-        if (kStatus_FTFx_Success != result)
-        {
-            error_trap();
-        }
-
-        /* Verify sector if it's been erased. */
+//
+//        if (kStatus_FTFx_Success != result)
+//        {
+//            error_trap();
+//        }
+//
+//        /* Verify sector if it's been erased. */
 //        result = FLASH_VerifyErase(&s_flashDriver, destAdrss, pflashSectorSize, kFTFx_MarginValueUser);
-        result = kStatus_FTFx_Success;
-        if (kStatus_FTFx_Success != result)
-        {
-            error_trap();
-        }
-
-        /* Print message for user. */
-        PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", destAdrss, (destAdrss + pflashSectorSize));
-
-        /* Print message for user. */
-        PRINTF("\r\n Program a buffer to a sector of flash ");
-        /* Prepare user buffer. */
-        for (i = 0; i < BUFFER_LEN; i++)
-        {
-//            s_buffer[i] = i;
-#if defined(ECG_OOR_8)
-            s_buffer[i] = ecg_oor_8_array[i];
-#endif
-#if defined(SPO2_OOR_8)
-            s_buffer[i] = spo2_oor_8_array[i];
-#endif
-#if defined(TEMP_OOR_8)
-            s_buffer[i] = temp_oor_8_array[i];
-#endif
-
-        }
-
-        /* Program user buffer into flash*/
-        result = FLASH_Program(&s_flashDriver, destAdrss, (uint8_t *)s_buffer, sizeof(s_buffer));
-        if (kStatus_FTFx_Success != result)
-        {
-            error_trap();
-        }
-
+//        if (kStatus_FTFx_Success != result)
+//        {
+//            error_trap();
+//        }
+//
+//        /* Print message for user. */
+//        PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", destAdrss, (destAdrss + pflashSectorSize));
+//
+//        /* Print message for user. */
+//        PRINTF("\r\n Program a buffer to a sector of flash ");
+//        /* Prepare user buffer. */
+//        for (i = 0; i < BUFFER_LEN; i++)
+//        {
+////            s_buffer[i] = i;
+//#if defined(ECG_OOR_8)
+//            s_buffer[i] = ecg_oor_8_array[i];
+//#endif
+//#if defined(SPO2_OOR_8)
+//            s_buffer[i] = spo2_oor_8_array[i];
+//#endif
+//#if defined(TEMP_OOR_8)
+//            s_buffer[i] = temp_oor_8_array[i];
+//#endif
+//
+//        }
+//
+//        /* Program user buffer into flash*/
+//        result = FLASH_Program(&s_flashDriver, destAdrss, (uint8_t *)s_buffer, sizeof(s_buffer));
+//        if (kStatus_FTFx_Success != result)
+//        {
+//            error_trap();
+//        }
+//
 //        /* Verify programming by Program Check command with user margin levels */
 //        result = FLASH_VerifyProgram(&s_flashDriver, destAdrss, sizeof(s_buffer), (const uint8_t *)s_buffer, kFTFx_MarginValueUser,
 //                                     &failAddr, &failDat);
@@ -296,43 +296,51 @@ with width of 2 sectors ...
 //        /* Post-preparation work about flash Cache/Prefetch/Speculation. */
 //        FTFx_CACHE_ClearCachePrefetchSpeculation(&s_cacheDriver, false);
 //
-//#if defined(FSL_FEATURE_HAS_L1CACHE) && FSL_FEATURE_HAS_L1CACHE
-//        L1CACHE_InvalidateCodeCache();
-//#endif /* FSL_FEATURE_HAS_L1CACHE */
+#if defined(FSL_FEATURE_HAS_L1CACHE) && FSL_FEATURE_HAS_L1CACHE
+        L1CACHE_InvalidateCodeCache();
+#endif /* FSL_FEATURE_HAS_L1CACHE */
+
+#if defined(__DCACHE_PRESENT) && __DCACHE_PRESENT
+        /* Clean the D-Cache before reading the flash data*/
+        SCB_CleanInvalidateDCache();
+#endif
+        /* Verify programming by reading back from flash directly*/
+        for (uint32_t i = 0; i < BUFFER_LEN; i++)
+        {
+            s_buffer_rbc[i] = *(volatile uint32_t *)(destAdrss + i * 4);
+            if(i<15){
+            	 PRINTF("\r valor[%d] = %d\n",i,s_buffer_rbc[i]);
+            }
+
+            if (s_buffer_rbc[i] != s_buffer[i])
+            {
+                error_trap();
+            }
+        }
 //
-//#if defined(__DCACHE_PRESENT) && __DCACHE_PRESENT
-//        /* Clean the D-Cache before reading the flash data*/
-//        SCB_CleanInvalidateDCache();
-//#endif
-//        /* Verify programming by reading back from flash directly*/
-//        for (uint32_t i = 0; i < BUFFER_LEN; i++)
-//        {
-//            s_buffer_rbc[i] = *(volatile uint32_t *)(destAdrss + i * 4);
-//            if (s_buffer_rbc[i] != s_buffer[i])
-//            {
-//                error_trap();
-//            }
-//        }
 //
-//        aux_pnt = destAdrss;
-
-//        PRINTF("\r\n Value  = 0x %02x \r\n", *aux_pnt);
-//        PRINTF("\r\n Adress of mp3  =  %p \r\n", aux_pnt);
-
-
-        PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", destAdrss,
-               (destAdrss + sizeof(s_buffer)));
-
-        /* Erase the context we have progeammed before*/
-        /* Note: we should make sure that the sector which will be set as swap indicator should be blank*/
-
-// 		Comento el flash erase para que quede
-//        FLASH_Erase(&s_flashDriver, destAdrss, pflashSectorSize, kFTFx_ApiEraseKey);
-    }
-    else
-    {
-        PRINTF("\r\n Erase/Program opeation will not be executed, as Flash is SECURE!");
-    }
+//
+//
+////
+////        aux_pnt = destAdrss;
+//
+////        PRINTF("\r\n Value  = 0x %02x \r\n", *aux_pnt);
+////        PRINTF("\r\n Adress of mp3  =  %p \r\n", aux_pnt);
+//
+//
+//        PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", destAdrss,
+//               (destAdrss + sizeof(s_buffer)));
+//
+//        /* Erase the context we have progeammed before*/
+//        /* Note: we should make sure that the sector which will be set as swap indicator should be blank*/
+//
+//// 		Comento el flash erase para que quede
+////        FLASH_Erase(&s_flashDriver, destAdrss, pflashSectorSize, kFTFx_ApiEraseKey);
+//    }
+//    else
+//    {
+//        PRINTF("\r\n Erase/Program opeation will not be executed, as Flash is SECURE!");
+//    }
 
     app_finalize();
 
