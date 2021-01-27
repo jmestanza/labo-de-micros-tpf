@@ -174,20 +174,20 @@ int main(void)
 
     PRINTF("\r\nCreate a file in that directory......\r\n");
 //    error = f_open(&g_fileObject, _T("/dir_1/f_1.dat"), (FA_WRITE | FA_READ | FA_CREATE_ALWAYS));
-    error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
-
-    if (error)
-    {
-        if (error == FR_EXIST)
-        {
-            PRINTF("File exists.\r\n");
-        }
-        else
-        {
-            PRINTF("Open file failed.\r\n");
-            return -1;
-        }
-    }
+//    error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
+//
+//    if (error)
+//    {
+//        if (error == FR_EXIST)
+//        {
+//            PRINTF("File exists.\r\n");
+//        }
+//        else
+//        {
+//            PRINTF("Open file failed.\r\n");
+//            return -1;
+//        }
+//    }
 
 //    PRINTF("\r\nCreate a directory in that directory......\r\n");
 //    error = f_mkdir(_T("/dir_1/dir_2"));
@@ -248,38 +248,39 @@ int main(void)
 	int i = 0;
 	PRINTF("FILE SIZE = %d \r\n",f_size(&g_fileObject));
 
-	error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
-	if (error)
-	{
-		if (error == FR_EXIST)
-		{
-			PRINTF("File exists.\r\n");
-		}
-		else
-		{
-			PRINTF("Open file failed.\r\n");
-			return -1;
-		}
-	}
+//	error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
+//	if (error)
+//	{
+//		if (error == FR_EXIST)
+//		{
+//			PRINTF("File exists.\r\n");
+//		}
+//		else
+//		{
+//			PRINTF("Open file failed.\r\n");
+//			return -1;
+//		}
+//	}
 
-	MP3LoadFile(g_bufferRead,&bytesRead, f_size(&g_fileObject));
+//	MP3LoadFile(g_bufferRead,&bytesRead, f_size(&g_fileObject));
+	MP3LoadFile("/./ecg_oor.mp3");
 
     while (true)
     {
 
-        PRINTF("Pointer before read = %p \r\n",f_tell(&g_fileObject));
-
-        PRINTF("Read from above created file.\r\n");
-        memset(g_bufferRead, 0U, sizeof(g_bufferRead));
-        error = f_read(&g_fileObject, g_bufferRead, sizeof(g_bufferRead), &bytesRead);
-        if ((error) || (bytesRead != sizeof(g_bufferRead)))
-        {
-            PRINTF("Read file failed. \r\n");
-            failedFlag = true;
-            continue;
-        }
-
-        PRINTF("Pointer after read = %p \r\n",f_tell(&g_fileObject));
+//        PRINTF("Pointer before read = %p \r\n",f_tell(&g_fileObject));
+//
+//        PRINTF("Read from above created file.\r\n");
+//        memset(g_bufferRead, 0U, sizeof(g_bufferRead));
+//        error = f_read(&g_fileObject, g_bufferRead, sizeof(g_bufferRead), &bytesRead);
+//        if ((error) || (bytesRead != sizeof(g_bufferRead)))
+//        {
+//            PRINTF("Read file failed. \r\n");
+//            failedFlag = true;
+//            continue;
+//        }
+//
+//        PRINTF("Pointer after read = %p \r\n",f_tell(&g_fileObject));
 
 //    		while (1)
 //    		{

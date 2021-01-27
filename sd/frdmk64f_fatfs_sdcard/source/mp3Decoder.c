@@ -10,7 +10,7 @@
 #include "lib/helix/pub/mp3dec.h"
 #include "utilities/fsl_debug_console.h"
 
-//#include "fatfs/fatfs_include/ff.h"
+#include "fatfs/fatfs_include/ff.h"
 //#ifdef __arm__
 //#include "fatfs/fatfs_include/ff.h"
 //#endif
@@ -38,8 +38,8 @@ typedef struct
     uint8_t * bytes_read_buffer;
     // MP3 file
 //#ifdef __arm__
-//    FIL			file;
-//    FIL* mp3File;
+    FIL			file;
+    FIL* mp3File;
 //#else
 //    FILE* mp3File;                                        // MP3 file object
 //#endif
@@ -80,9 +80,9 @@ void resetContextData(void);
  ******************************************************************************/
 
 static mp3_decoder_context_t context_data;
-//#ifdef __arm__
-//static FRESULT fr;
-//#endif // __arm__
+#ifdef __arm__
+static FRESULT fr;
+#endif // __arm__
 
 
 /*******************************************************************************
@@ -90,6 +90,46 @@ static mp3_decoder_context_t context_data;
                         GLOBAL FUNCTION DEFINITIONS
  *******************************************************************************
  ******************************************************************************/
+
+static bool open_file(char* file_name) {
+    bool ret = false;
+#ifdef __arm__
+    fr = f_open(&context_data.file, file_name, FA_READ);
+    if (fr == FR_OK)
+    {
+        context_data.mp3File = &(context_data.file);
+        ret = true;
+    }
+#else
+    context_data.mp3File = fopen(file_name, "rb");
+    ret = (context_data.mp3File != NULL);
+#endif
+    return ret;
+}
+
+static void close_file(void) {
+#ifdef __arm__
+    f_close(context_data.mp3File);
+#else
+    fclose(context_data.mp3File);
+#endif // __arm__
+}
+
+uint32_t getFileSize(void) {
+    uint32_t ret = 0;
+    if (context_data.file_opened)
+    {
+#ifdef __arm__
+        ret = f_size(context_data.mp3File);
+#else
+        fseek(context_data.mp3File, 0L, SEEK_END);
+        ret = ftell(context_data.mp3File);
+        fileRewind();
+        fseek(context_data.mp3File, 0, SEEK_SET);
+#endif
+    }
+    return ret;
+}
 
 
 void  MP3DecoderInit(void) {
@@ -102,30 +142,51 @@ void  MP3DecoderInit(void) {
 
 }
 
-bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len) {
+//bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len) {
+//
+//	context_data.bytes_read_before = bytes_read;
+//    context_data.bytes_read_buffer = audio_buffer;
+//
+//    bool res = false;
+////    if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
+////        resetContextData();
+////        close_file();
+////    }
+// //   if (open_file(file_name)) {
+//        context_data.file_opened = true;
+//        context_data.f_size = audio_len;
+//        context_data.bytes_remaining = context_data.f_size;
+////        context_data.flash_buffer = audio;
+//
+//#ifdef DEBUG
+//        PRINTF("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
+//#endif
+//        res = true;
+// //   }
+//    return res;
+//
+//}
 
-	context_data.bytes_read_before = bytes_read;
-    context_data.bytes_read_buffer = audio_buffer;
-
+bool  MP3LoadFile(const char* file_name) {
     bool res = false;
-//    if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
-//        resetContextData();
-//        close_file();
-//    }
- //   if (open_file(file_name)) {
+    if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
+        resetContextData();
+        close_file();
+    }
+    if (open_file(file_name)) {
         context_data.file_opened = true;
-        context_data.f_size = audio_len;
+        context_data.f_size = getFileSize();
         context_data.bytes_remaining = context_data.f_size;
-//        context_data.flash_buffer = audio;
-
+//        readID3Tag();
 #ifdef DEBUG
-        PRINTF("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
+        printf("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
 #endif
         res = true;
- //   }
+    }
     return res;
 
 }
+
 
 bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data) {
     bool ret = false;
@@ -144,7 +205,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
     mp3_decoder_result_t ret = MP3DECODER_NO_ERROR;    // Return value of the function
 
 #ifdef DEBUG
-    PRINTF("Entered decoding. File has %d bytes to decode\n", context_data.f_size);
+    PRINTF("Entered decoding. File has %d bytes to decode\n", context_data.bytes_remaining);
     PRINTF("Buffer has %d bytes to decode\n", context_data.bottom_index - context_data.top_index);
 #endif
 
@@ -320,53 +381,23 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 
 
 uint16_t readFile(void* buf, uint16_t cnt) {
-//    static int count = 0;
-//    static int index = 0;
-//    int buffer_size_to_write = -1;
-//    static bool first_time = true;
-    int ret = 0;
 
-    if (context_data.file_opened)
-    {
-//#ifdef __arm__
-//        fr = f_read(context_data.mp3File, ((uint8_t*)buf) + ret, cnt, &read);
-//        if (fr == FR_OK)
-//        {
-//            ret = read;
-//        }
-//#else
-
-//        uint8_t * pointer = NULL; // ojo puede hacer overflow sumando (me parece)
-//        uint8_t* pointer2 = NULL; // ojo puede hacer overflow sumando (me parece)
-//
-//        ret = 360;
-//        for (uint32_t i = 0; i < ret; i++) {
-//            pointer = context_data.flash_buffer + context_data.flash_idx; // este no se puede pasar me parece
-//            pointer2 = (uint8_t*)buf; // este si se puede pasar, quiza hace falta un modulo
-//            *(pointer2 + i) = *(pointer + i);;
-//        }
-//        context_data.flash_idx += ret;
-
-
-    	// lo que leo es ret. Que es bytes read de la funcion ya previamente llamada.
-    	uint8_t * pointer = context_data.bytes_read_buffer;
-    	uint8_t * pointer2 = (uint8_t*)buf;
-
-    	ret = *(context_data.bytes_read_before);
-    	for (uint32_t i = 0; i < ret; i++) {
-    		pointer2[i] = pointer[i];
-//			*(pointer2 + i) = *(pointer + i);;
-		}
-
-
-    	// buf deberia hacerlo apuntar a donde esta el buffer de cosas leidas
-
-    	// o puedo copiar lo que esta leido en  buf y deberia funcionar...
-
-//        index++;
-//        count++;
-//#endif
-    }
+    uint16_t ret = 0;
+    uint16_t read;
+ //   if (context_data.file_opened)
+ //   {
+#ifdef __arm__
+        fr = f_read(context_data.mp3File, ((uint8_t*)buf) + ret, cnt, &read);
+        if (fr == FR_OK)
+        {
+            ret = read;
+        }
+#else
+        ret = fread(buf, 1, cnt, context_data.mp3File);
+        context_data.buffer_ret[context_data.buffer_ret_idx] = ret;
+        context_data.buffer_ret_idx++;
+#endif
+ //   }
     return ret;
 }
 

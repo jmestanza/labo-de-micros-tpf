@@ -52,7 +52,8 @@ typedef struct
  * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
  ******************************************************************************/
 void  MP3DecoderInit(void);
-bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len);
+bool  MP3LoadFile(const char* file_name);
+//bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len);
 bool MP3GetTagData(mp3_decoder_tag_data_t* data);
 bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data);
 bool MP3GetNextFrameData(mp3_decoder_frame_data_t* data);
