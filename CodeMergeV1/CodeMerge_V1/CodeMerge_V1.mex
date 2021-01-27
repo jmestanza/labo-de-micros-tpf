@@ -55,7 +55,7 @@
                <pin_label pin_num="16" pin_signal="ADC1_DP1" label="J4[5]"/>
                <pin_label pin_num="15" pin_signal="ADC0_DM1" label="J4[3]"/>
                <pin_label pin_num="14" pin_signal="ADC0_DP1" label="J4[1]"/>
-               <pin_label pin_num="55" pin_signal="ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3" label="J4[2]" identifier="ADC0_SE12"/>
+               <pin_label pin_num="55" pin_signal="ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3" label="J4[2]" identifier="PIN_SPO2"/>
                <pin_label pin_num="56" pin_signal="ADC0_SE13/PTB3/I2C0_SDA/UART0_CTS_b/UART0_COL_b/ENET0_1588_TMR1/FTM0_FLT0" label="J4[4]"/>
                <pin_label pin_num="58" pin_signal="ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1" label="J4[6]"/>
                <pin_label pin_num="59" pin_signal="ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2" label="J4[8]"/>
@@ -146,6 +146,11 @@
                         <data>true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="Peripheral" resourceId="GPIOB" description="Peripheral GPIOB is not initialized" problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -181,6 +186,12 @@
                   </pin>
                   <pin peripheral="JTAG" signal="JTAG_TCLK_SWD_CLK" pin_num="34" pin_signal="PTA0/UART0_CTS_b/UART0_COL_b/FTM0_CH5/JTAG_TCLK/SWD_CLK/EZP_CLK"/>
                   <pin peripheral="JTAG" signal="JTAG_TMS_SWD_DIO" pin_num="37" pin_signal="PTA3/UART0_RTS_b/FTM0_CH0/JTAG_TMS/SWD_DIO"/>
+                  <pin peripheral="GPIOB" signal="GPIO, 2" pin_num="55" pin_signal="ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3">
+                     <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
+                        <pin_feature name="gpio_interrupt" value="kPORT_InterruptFallingEdge"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
             <function name="BOARD_InitButtons">
@@ -1048,6 +1059,16 @@
                         <setting name="enable_irq" value="false"/>
                         <struct name="port_interrupt">
                            <setting name="IRQn" value="PORTC_IRQn"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="enable_custom_name" value="false"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="GPIO_2" type="gpio" type_id="gpio_f970a92e447fa4793838db25a2947ed7" mode="GPIO" peripheral="GPIOB" enabled="true">
+                     <config_set name="fsl_gpio">
+                        <setting name="enable_irq" value="true"/>
+                        <struct name="port_interrupt">
+                           <setting name="IRQn" value="PORTB_IRQn"/>
                            <setting name="enable_priority" value="false"/>
                            <setting name="enable_custom_name" value="false"/>
                         </struct>

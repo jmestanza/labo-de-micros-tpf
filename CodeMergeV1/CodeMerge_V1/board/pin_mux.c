@@ -50,7 +50,7 @@ pin_labels:
 - {pin_num: '16', pin_signal: ADC1_DP1, label: 'J4[5]'}
 - {pin_num: '15', pin_signal: ADC0_DM1, label: 'J4[3]'}
 - {pin_num: '14', pin_signal: ADC0_DP1, label: 'J4[1]'}
-- {pin_num: '55', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, label: 'J4[2]', identifier: ADC0_SE12}
+- {pin_num: '55', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, label: 'J4[2]', identifier: PIN_SPO2}
 - {pin_num: '56', pin_signal: ADC0_SE13/PTB3/I2C0_SDA/UART0_CTS_b/UART0_COL_b/ENET0_1588_TMR1/FTM0_FLT0, label: 'J4[4]'}
 - {pin_num: '58', pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1, label: 'J4[6]'}
 - {pin_num: '59', pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2, label: 'J4[8]'}
@@ -151,6 +151,7 @@ BOARD_InitPins:
   - {pin_num: '76', peripheral: GPIOC, signal: 'GPIO, 4', pin_signal: PTC4/LLWU_P8/SPI0_PCS0/UART1_TX/FTM0_CH3/FB_AD11/CMP1_OUT, direction: OUTPUT}
   - {pin_num: '34', peripheral: JTAG, signal: JTAG_TCLK_SWD_CLK, pin_signal: PTA0/UART0_CTS_b/UART0_COL_b/FTM0_CH5/JTAG_TCLK/SWD_CLK/EZP_CLK}
   - {pin_num: '37', peripheral: JTAG, signal: JTAG_TMS_SWD_DIO, pin_signal: PTA3/UART0_RTS_b/FTM0_CH0/JTAG_TMS/SWD_DIO}
+  - {pin_num: '55', peripheral: GPIOB, signal: 'GPIO, 2', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -165,10 +166,19 @@ void BOARD_InitPins(void)
 {
     /* Port A Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port B Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortB);
     /* Port C Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortC);
     /* Port D Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortD);
+
+    gpio_pin_config_t PIN_SPO2_config = {
+        .pinDirection = kGPIO_DigitalInput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PTB2 (pin 55)  */
+    GPIO_PinInit(BOARD_PIN_SPO2_GPIO, BOARD_PIN_SPO2_PIN, &PIN_SPO2_config);
 
     gpio_pin_config_t ILI9341_RST_config = {
         .pinDirection = kGPIO_DigitalOutput,
@@ -189,6 +199,12 @@ void BOARD_InitPins(void)
 
     /* PORTA3 (pin 37) is configured as JTAG_TMS */
     PORT_SetPinMux(PORTA, 3U, kPORT_MuxAlt7);
+
+    /* PORTB2 (pin 55) is configured as PTB2 */
+    PORT_SetPinMux(BOARD_PIN_SPO2_PORT, BOARD_PIN_SPO2_PIN, kPORT_MuxAsGpio);
+
+    /* Interrupt configuration on PORTB2 (pin 55): Interrupt on falling edge */
+    PORT_SetPinInterruptConfig(BOARD_PIN_SPO2_PORT, BOARD_PIN_SPO2_PIN, kPORT_InterruptFallingEdge);
 
     /* PORTC3 (pin 73) is configured as PTC3 */
     PORT_SetPinMux(BOARD_ILI9341_RST_PORT, BOARD_ILI9341_RST_PIN, kPORT_MuxAsGpio);

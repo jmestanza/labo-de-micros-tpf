@@ -55,6 +55,13 @@ void BOARD_InitBootPins(void);
 #define BOARD_ILI9341_DC_PIN 4U     /*!<@brief PORTC pin index: 4 */
                                     /* @} */
 
+/*! @name PORTB2 (number 55), J4[2]
+  @{ */
+#define BOARD_PIN_SPO2_GPIO GPIOB /*!<@brief GPIO device name: GPIOB */
+#define BOARD_PIN_SPO2_PORT PORTB /*!<@brief PORT device name: PORTB */
+#define BOARD_PIN_SPO2_PIN 2U     /*!<@brief PORTB pin index: 2 */
+                                  /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

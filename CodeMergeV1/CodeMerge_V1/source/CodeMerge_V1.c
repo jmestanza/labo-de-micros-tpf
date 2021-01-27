@@ -44,14 +44,30 @@
 #include "ecg.h"
 #include "fever.h"
 #include "i2c_config.h"
+#include "o2.h"
+#include "algorithm.h"
 /* TODO: insert other definitions and declarations here. */
 void ecg_callback(void);
 
 
-uint16_t i,j;
+uint16_t i,j,l;
 uint16_t bpm[160];
 uint16_t oxy[160];
+/*
+ * ECG data
+ */
 uint16_t data[ECG_VALUES];
+/*
+ * Oximeter data
+ */
+uint8_t a = 0;
+
+uint32_t aun_ir_buffer[FS*ST]; //infrared LED sensor data
+uint32_t aun_red_buffer[FS*ST];  //red LED sensor data
+float n_spo2,prev_spo2,ratio,correl;  //SPO2 value
+int8_t ch_spo2_valid;  //indicator to show if the SPO2 calculation is valid
+int32_t n_heart_rate,prev_heart_rate; //heart rate value
+int8_t  ch_hr_valid;  //indicator to show if the heart rate calculation is valid
 /*
  * @brief   Application entry point.
  */
@@ -97,16 +113,30 @@ int main(void) {
     	bpm[i+65+80] = 20+(i*60/15);
     }
 
+    prev_spo2 = 00.00;
+    prev_heart_rate = 00;
     /*
      * Init ECG
      */
     ecg_init(ecg_callback);
 
     /*
-     * Oximeter init
+     * Temp init
      */
     i2cInit();
 
+    /*
+     * Oximeter init
+     */
+    uint8_t uch_dummy;
+
+    maxim_max30102_reset(); //resets the MAX30102
+    maxim_max30102_read_reg_blocking(REG_INTR_STATUS_1, &uch_dummy);  //Reads/clears the interrupt status register
+    maxim_max30102_init();  //initialize the MAX30102
+
+//    gpioMode(PIN_SPO2, INPUT);
+//    gpioIRQ(PIN_SPO2, GPIO_IRQ_MODE_FALLING_EDGE, callback_pin);
+//    NVIC_EnableIRQ(PORTB_IRQn);
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
@@ -129,16 +159,56 @@ void PIT2_IRQHandler(void)
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_2, kPIT_TimerFlag);
 	i++;
 	j++;
-	if(!(j%40))
-	{// Cada 1s
+	if(!(j%160))
+	{// Cada 4s
 		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 		fever_temp_meassurement();
 		float temp;
 		temp = fever_get_temperature();
- 		lcdGFX_updateDATA(i%99, 82.34, temp);
+		if(ch_spo2_valid)
+		{
+			prev_spo2 = n_spo2;
+			prev_heart_rate = n_heart_rate;
+		}
+ 		lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 	}
 
+}
+
+void PORTB_IRQHandler(void)
+{
+    /* Clear external interrupt flag. */
+    GPIO_PortClearInterruptFlags(BOARD_PIN_SPO2_GPIO, 1U << BOARD_PIN_SPO2_PIN);
+
+    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+      exception return operation might vector to incorrect interrupt */
+	bool meassure = maxim_max30102_read_fifo(( aun_ir_buffer  + a), (aun_red_buffer + a));
+
+	if (meassure == true)
+	{
+		a++;
+
+	}
+
+	if(a == FS*ST)
+	{
+		rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, FS*ST, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl);
+
+		if (ch_spo2_valid ){
+			//printf("spo2 %d heart rate %d \n",(int)n_spo2, n_heart_rate);
+		}
+		else
+		{
+			//printf("no valido \n");
+		}
+
+		a = 0;
+	}
+
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
 }
 
 void ecg_callback(void)
@@ -146,6 +216,15 @@ void ecg_callback(void)
 	ecg_get_samples(data);
 	for(int k=0;k<ECG_VALUES-1;k++)
 	{
-		lcdGFX_updateGFX((data[k]+data[k+1])/82, oxy[i%160]);
+		uint32_t uni,dec;
+		uni = (aun_red_buffer[l]/100)%10;
+		dec = (aun_red_buffer[l]/1000)%10;
+
+		lcdGFX_updateGFX((data[k]+data[k+1])/82, ((dec*10) + uni));
+		l++;
+		if(l == 100)
+		{
+			l = 0;
+		}
 	}
 }

@@ -290,6 +290,34 @@ void GPIO_1_init(void) {
 }
 
 /***********************************************************************************************************************
+ * GPIO_2 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'GPIO_2'
+- type: 'gpio'
+- mode: 'GPIO'
+- type_id: 'gpio_f970a92e447fa4793838db25a2947ed7'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'GPIOB'
+- config_sets:
+  - fsl_gpio:
+    - enable_irq: 'true'
+    - port_interrupt:
+      - IRQn: 'PORTB_IRQn'
+      - enable_priority: 'false'
+      - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+
+void GPIO_2_init(void) {
+  /* Make sure, the clock gate for port B is enabled (e. g. in pin_mux.c) */
+  /* Enable interrupt PORTB_IRQn request in the NVIC */
+  EnableIRQ(PORTB_IRQn);
+}
+
+/***********************************************************************************************************************
  * BOARD_InitBUTTONsPeripheral functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -526,6 +554,7 @@ void BOARD_InitPeripherals(void)
   ADC0_init();
   SPI_0_init();
   GPIO_1_init();
+  GPIO_2_init();
 }
 
 void BOARD_InitBUTTONsPeripheral(void)

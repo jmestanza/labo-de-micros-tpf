@@ -63,6 +63,14 @@ extern "C" {
 #define SPI_0_CLK_FREQ CLOCK_GetFreq(SPI_0_CLOCK_SOURCE)
 /* Alias for GPIOC peripheral */
 #define GPIO_1_GPIO GPIOC
+/* Alias for GPIOB peripheral */
+#define GPIO_2_GPIO GPIOB
+/* Alias for PORTB */
+#define GPIO_2_PORT PORTB
+/* GPIO_2 interrupt vector ID (number). */
+#define GPIO_2_IRQN PORTB_IRQn
+/* GPIO_2 interrupt handler identifier. */
+#define GPIO_2_IRQHANDLER PORTB_IRQHandler
 
 /* Definitions for BOARD_InitBUTTONsPeripheral functional group */
 /* Alias for GPIOC peripheral */

@@ -59,8 +59,8 @@ uint16_t				 ///< Coordenates for number values
   temp_y = 0,
   oxy_x = 0,
   oxy_y = 0;
-uint16_t ECG_graph[160];
-uint16_t SPO2_graph[160];
+uint16_t ECG_graph[160+1];
+uint16_t SPO2_graph[160+1];
 
 // Standard ASCII 5x7 font
 #ifndef FONT5X7_H
