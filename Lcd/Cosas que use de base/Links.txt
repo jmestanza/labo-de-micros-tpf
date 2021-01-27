@@ -1,0 +1,9 @@
+ - En esencia es el primero
+https://simple-circuit.com/pic18f46k22-ili9341-tft-ccs-c-proteus/
+
+https://github.com/adafruit/Adafruit_ILI9341
+
+https://community.nxp.com/t5/Kinetis-Software-Development-Kit/Example-using-LCD-TFT-ILI9341/m-p/416317
+
+ - Programa para convertir imagen a hex
+https://320volt.com/en/resimleri-hex-formatina-ceviren-program/
