@@ -47,13 +47,6 @@
 
 #include "mp3Decoder.h"
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-
-/* buffer size (in byte) for read/write operations */
-//#define BUFFER_SIZE (100U)
-#define BUFFER_SIZE (360U)
 
 /*******************************************************************************
  * Prototypes
@@ -77,10 +70,10 @@ static FIL g_fileObject;   /* File object */
 * DMA transfer is used, otherwise the buffer address is not important.
 * At the same time buffer address/size should be aligned to the cache line size if cache is supported.
 */
-SDK_ALIGN(uint8_t g_bufferWrite[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
-          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
-SDK_ALIGN(uint8_t g_bufferRead[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
-          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
+//SDK_ALIGN(uint8_t g_bufferWrite[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
+//          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
+//SDK_ALIGN(uint8_t g_bufferRead[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
+//          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
 /*! @brief SDMMC host detect card configuration */
 static const sdmmchost_detect_card_t s_sdCardDetect = {
 #ifndef BOARD_SD_DETECT_TYPE
@@ -105,19 +98,15 @@ static const sdmmchost_pwr_card_t s_sdCardPwrCtrl = {
  * @brief Main function
  */
 
-static short buffer[MP3_DECODED_BUFFER_SIZE];
+static short buffer_out[MP3_DECODED_BUFFER_SIZE];
 
 int main(void)
 {
     FRESULT error;
     DIR directory; /* Directory object */
     FILINFO fileInformation;
-    UINT bytesWritten;
-    UINT bytesRead;
     const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
-    volatile bool failedFlag = false;
-    char ch = '0';
-    BYTE work[FF_MAX_SS];
+
 
     BOARD_InitPins();
     BOARD_BootClockRUN();
@@ -157,53 +146,6 @@ int main(void)
     }
 #endif /* FF_USE_MKFS */
 
-//    PRINTF("\r\nCreate directory......\r\n");
-//    error = f_mkdir(_T("/dir_1"));
-//    if (error)
-//    {
-//        if (error == FR_EXIST)
-//        {
-//            PRINTF("Directory exists.\r\n");
-//        }
-//        else
-//        {
-//            PRINTF("Make directory failed.\r\n");
-//            return -1;
-//        }
-//    }
-
-    PRINTF("\r\nCreate a file in that directory......\r\n");
-//    error = f_open(&g_fileObject, _T("/dir_1/f_1.dat"), (FA_WRITE | FA_READ | FA_CREATE_ALWAYS));
-//    error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
-//
-//    if (error)
-//    {
-//        if (error == FR_EXIST)
-//        {
-//            PRINTF("File exists.\r\n");
-//        }
-//        else
-//        {
-//            PRINTF("Open file failed.\r\n");
-//            return -1;
-//        }
-//    }
-
-//    PRINTF("\r\nCreate a directory in that directory......\r\n");
-//    error = f_mkdir(_T("/dir_1/dir_2"));
-//    if (error)
-//    {
-//        if (error == FR_EXIST)
-//        {
-//            PRINTF("Directory exists.\r\n");
-//        }
-//        else
-//        {
-//            PRINTF("Directory creation failed.\r\n");
-//            return -1;
-//        }
-//    }
-
     PRINTF("\r\nList the file in that directory......\r\n");
     if (f_opendir(&directory, "/."))
     {
@@ -234,12 +176,6 @@ int main(void)
         }
     }
 
-//    memset(g_bufferWrite, 'a', sizeof(g_bufferWrite));
-//    g_bufferWrite[BUFFER_SIZE - 2U] = '\r';
-//    g_bufferWrite[BUFFER_SIZE - 1U] = '\n';
-//
-    PRINTF("\r\nWrite/read file until encounters error......\r\n");
-    bool first_time = true;
 
 	MP3DecoderInit();
 	uint16_t sampleCount;
@@ -248,46 +184,15 @@ int main(void)
 	int i = 0;
 	PRINTF("FILE SIZE = %d \r\n",f_size(&g_fileObject));
 
-//	error = f_open(&g_fileObject, _T("/./ecg_oor.mp3"), ( FA_READ ));
-//	if (error)
-//	{
-//		if (error == FR_EXIST)
-//		{
-//			PRINTF("File exists.\r\n");
-//		}
-//		else
-//		{
-//			PRINTF("Open file failed.\r\n");
-//			return -1;
-//		}
-//	}
-
-//	MP3LoadFile(g_bufferRead,&bytesRead, f_size(&g_fileObject));
 	MP3LoadFile("/./ecg_oor.mp3");
 
     while (true)
     {
 
-//        PRINTF("Pointer before read = %p \r\n",f_tell(&g_fileObject));
-//
-//        PRINTF("Read from above created file.\r\n");
-//        memset(g_bufferRead, 0U, sizeof(g_bufferRead));
-//        error = f_read(&g_fileObject, g_bufferRead, sizeof(g_bufferRead), &bytesRead);
-//        if ((error) || (bytesRead != sizeof(g_bufferRead)))
-//        {
-//            PRINTF("Read file failed. \r\n");
-//            failedFlag = true;
-//            continue;
-//        }
-//
-//        PRINTF("Pointer after read = %p \r\n",f_tell(&g_fileObject));
-
-//    		while (1)
-//    		{
     #ifdef MAIN_DEBUG
     			PRINTF("\n[APP] Frame %d decoding started.\n", i);
     #endif
-    			mp3_decoder_result_t res = MP3GetDecodedFrame(buffer, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
+    			mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
     			if (res == 0)
     			{
     				MP3GetLastFrameData(&frameData);
@@ -309,14 +214,14 @@ int main(void)
     				int16_t auxBuffer[MP3_DECODED_BUFFER_SIZE];
     				for (uint32_t j = 0; j < sampleCount / frameData.channelCount; j++)
     				{
-    					auxBuffer[j] = buffer[frameData.channelCount * j];
+    					auxBuffer[j] = buffer_out[frameData.channelCount * j];
     				}
-//    				wav_write(wav, auxBuffer, sampleCount / frameData.channelCount);
+
     			}
     			else if (res == MP3DECODER_FILE_END)
     			{
     				PRINTF("[APP] FILE ENDED. Decoded %d frames.\n", i - 1);
-//    				wav_close(wav);
+
     				break;
     			}
     			else
@@ -326,8 +231,7 @@ int main(void)
     			}
 
         PRINTF("\r\nInput 'q' to quit read/write.\r\nInput other char to read/write file again.\r\n");
-//        ch = GETCHAR();
-//        PUTCHAR(ch);
+
     }
 
 // 	Termino de leer cuando llega a aca!!
