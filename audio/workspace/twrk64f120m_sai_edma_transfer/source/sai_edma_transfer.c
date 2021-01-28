@@ -131,11 +131,12 @@ sai_transfer_format_t format;
 bool first_time = true;
 bool startedPlaying = false;
 bool total_decode = false;
+uint8_t * pointer_to_dst = NULL;
+uint32_t music_len = 0;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-uint32_t music_len = 0;
 
 static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status, void *userData)
 {
@@ -167,19 +168,6 @@ void PIT_1_0_IRQHANDLER(void){
 
 }
 
-//void PIT_1_1_IRQHANDLER(void){
-//	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
-//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
-//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
-//}
-//
-//void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
-//	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_TFLG_TIF(1));
-//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
-//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
-//}
-
-uint8_t * pointer_to_dst = NULL;
 
 void mini_play_music(void){
 	if(!isFinished){
@@ -283,7 +271,6 @@ void terminatePlayState(void){
 	disableRequests();
 	while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
 	}
-	//	SAI_TransferAbortSendEDMA(DEMO_SAI, &txHandle);
 	SAI_TransferTerminateSendEDMA(DEMO_SAI, &txHandle);
 	SAI_Deinit(DEMO_SAI);
 	DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
@@ -296,23 +283,14 @@ void terminatePlayState(void){
 
 void PIT_1_2_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
-	// hay que tener cuidado con resetVariables porque hace que transmita de un solo lado si no estoy mal
-	// hay que analizar como se comportaba eso, puede ser la clave para que esto ande bien.
-	// No solo eso de transmitir 1 solo lado sino otras variables en la funcion de mini_play_music()
 	if(isFinished){
 		resetVariables();
-//		startedPlaying = false;
 	}else{
 		if(startedPlaying){
 			mini_play_music();
 		}
 	}
 }
-
-
-
-
-
 
 void get_delay(uint32_t max){
 	delayCycle = max;
@@ -338,19 +316,6 @@ static status_t sdcardWaitCardInsert(void);
 static FATFS g_fileSystem; /* File system object */
 static FIL g_fileObject;   /* File object */
 
-/* @brief decription about the read/write buffer
-* The size of the read/write buffer should be a multiple of 512, since SDHC/SDXC card uses 512-byte fixed
-* block length and this driver example is enabled with a SDHC/SDXC card.If you are using a SDSC card, you
-* can define the block length by yourself if the card supports partial access.
-* The address of the read/write buffer should align to the specific DMA data buffer address align value if
-* DMA transfer is used, otherwise the buffer address is not important.
-* At the same time buffer address/size should be aligned to the cache line size if cache is supported.
-*/
-//SDK_ALIGN(uint8_t g_bufferWrite[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
-//          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
-//SDK_ALIGN(uint8_t g_bufferRead[SDK_SIZEALIGN(BUFFER_SIZE, SDMMC_DATA_BUFFER_ALIGN_CACHE)],
-//          MAX(SDMMC_DATA_BUFFER_ALIGN_CACHE, SDMMCHOST_DMA_BUFFER_ADDR_ALIGN));
-/*! @brief SDMMC host detect card configuration */
 static const sdmmchost_detect_card_t s_sdCardDetect = {
 #ifndef BOARD_SD_DETECT_TYPE
     .cdType = kSDMMCHOST_DetectCardByGpioCD,
@@ -360,12 +325,6 @@ static const sdmmchost_detect_card_t s_sdCardDetect = {
     .cdTimeOut_ms = (~0U),
 };
 
-/*! @brief SDMMC card power control configuration */
-#if defined DEMO_SDCARD_POWER_CTRL_FUNCTION_EXIST
-static const sdmmchost_pwr_card_t s_sdCardPwrCtrl = {
-    .powerOn = BOARD_PowerOnSDCARD, .powerOnDelay_ms = 500U, .powerOff = BOARD_PowerOffSDCARD, .powerOffDelay_ms = 0U,
-};
-#endif
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -381,14 +340,10 @@ int main(void)
 	FILINFO fileInformation;
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 
-
 	BOARD_InitPins();
 	BOARD_BootClockRUN();
-	//este lo inserte
 	BOARD_InitBootPeripherals();
-	//este lo inserte
 	BOARD_I2C_ConfigurePins();
-
 	BOARD_InitDebugConsole();
 	SYSMPU_Enable(SYSMPU, false);
 	BOARD_Codec_I2C_Init();
@@ -444,45 +399,6 @@ int main(void)
 		return -1;
 	}
 #endif
-//
-//#if FF_USE_MKFS
-//	PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
-//	if (f_mkfs(driverNumberBuffer, FM_ANY, 0U, work, sizeof work))
-//	{
-//		PRINTF("Make file system failed.\r\n");
-//		return -1;
-//	}
-//#endif /* FF_USE_MKFS */
-//
-//	PRINTF("\r\nList the file in that directory......\r\n");
-//	if (f_opendir(&directory, "/."))
-//	{
-//		PRINTF("Open directory failed.\r\n");
-//		return -1;
-//	}
-//
-//	for (;;)
-//	{
-//		error = f_readdir(&directory, &fileInformation);
-//
-//		/* To the end. */
-//		if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
-//		{
-//			break;
-//		}
-//		if (fileInformation.fname[0] == '.')
-//		{
-//			continue;
-//		}
-//		if (fileInformation.fattrib & AM_DIR)
-//		{
-//			PRINTF("Directory file : %s.\r\n", fileInformation.fname);
-//		}
-//		else
-//		{
-//			PRINTF("General file : %s.\r\n", fileInformation.fname);
-//		}
-//	}
 
 	MP3DecoderInit();
 	uint16_t sampleCount;
@@ -498,25 +414,10 @@ int main(void)
 	resetVariables();
 	while (true)
 	{
-
-#ifdef MAIN_DEBUG
-			PRINTF("\n[APP] Frame %d decoding started.\n", i);
-#endif
-
 		mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
 		if (res == MP3DECODER_NO_ERROR)
 		{
 			MP3GetLastFrameData(&frameData);
-#ifdef MAIN_DEBUG
-			PRINTF("[APP] Frame %d decoded.\n", i);
-#endif
-//					sr = sampleCount;
-//					PRINTF("[APP] sampleCount: %d \n", sr);
-
-#ifdef MAIN_DEBUG
-			sr = frameData.sampleRate;
-			PRINTF("[APP] FRAME SAMPLE RATE: %d \n", sr);
-#endif
 
 			music_len = sampleCount*2;// las samples son de 2 bytes, asi que music_len (que se mide en bytes) es sampleCountx2
 
