@@ -84,7 +84,29 @@ extern "C" {
 // ----------------------------PIT1 CH2----------------------------------------
 //#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
 //#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 25m segs
-#define PIT_1_2_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U // 17.36m segs
+//#define PIT_1_2_TICKS USEC_TO_COUNT(1152U, PIT_1_CLK_FREQ) - 1U // 17.36m segs
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(12000U, PIT_1_CLK_FREQ) - 1U // 17.36m segs // no anduvo tan mal con este
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(13000U, PIT_1_CLK_FREQ) - 1U //
+//#define PIT_1_2_TICKS USEC_TO_COUNT(12500U, PIT_1_CLK_FREQ) - 1U // medio malo
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(11500U, PIT_1_CLK_FREQ) - 1U //
+
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(11000U, PIT_1_CLK_FREQ) - 1U //
+
+// con 10000 se siente muy rapido
+
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(17000U, PIT_1_CLK_FREQ) - 1U // 17.36m segs es lo que tiene que durar con samples*2, parece que hay frames que faltan
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(8750U, PIT_1_CLK_FREQ) - 1U //
+
+//#define PIT_1_2_TICKS USEC_TO_COUNT(24000U, PIT_1_CLK_FREQ) - 1U // Con esto nos da el tiempo bien del audio
+
+#define PIT_1_2_TICKS USEC_TO_COUNT(12000U, PIT_1_CLK_FREQ) - 1U // Con audacity le puse microfono y lo fui ajustando hasta que dio
+
 
 // es 25 ms si el buffer es de 1600 ahora el buffer este (2*1152) => menos tiempo, cuanto?
 //  25 ms --> 1/1600

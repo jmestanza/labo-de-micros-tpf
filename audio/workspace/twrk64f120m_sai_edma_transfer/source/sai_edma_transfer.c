@@ -96,8 +96,8 @@
 #define I2C_RELEASE_BUS_COUNT 100U
 #define OVER_SAMPLE_RATE (256U)
 //#define BUFFER_SIZE (1600U) // recordar: #define MP3_DECODED_BUFFER_SIZE (4*1152) y que este buffer es la mitad
-#define BUFFER_SIZE (2*1152)
-//#define BUFFER_SIZE (1152)
+//#define BUFFER_SIZE (2*1152)
+#define BUFFER_SIZE (1152)
 //#define BUFFER_SIZE (1152)
 
 #define BUFFER_NUM (2U)
@@ -130,7 +130,7 @@ uint32_t mclkSourceClockHz = 0U;
 sai_transfer_format_t format;
 bool first_time = true;
 bool startedPlaying = false;
-
+bool total_decode = false;
 
 /*******************************************************************************
  * Code
@@ -152,7 +152,7 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
         if(music_len/BUFFER_SIZE == finishIndex)
         {
             isFinished = true; // hay que resetear los indices
-//            startedPlaying = false;
+			startedPlaying = false;
         }
     }
 }
@@ -167,56 +167,57 @@ void PIT_1_0_IRQHANDLER(void){
 
 }
 
-void PIT_1_1_IRQHANDLER(void){
-	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
-	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
-}
-
-void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
-	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_TFLG_TIF(1));
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
-	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
-}
+//void PIT_1_1_IRQHANDLER(void){
+//	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
+//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
+//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
+//}
+//
+//void PIT_1_3_IRQHANDLER(void){ // solo se llama una vez a este timer
+//	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_TFLG_TIF(1));
+//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // empiezo a reproducir
+//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_3);
+//}
 
 uint8_t * pointer_to_dst = NULL;
 
 void mini_play_music(void){
-
-	if((emptyBlock > 0U) && (cpy_index < music_len/BUFFER_SIZE))
-	{
-		 /* Fill in the buffers. */
-		 memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&pointer_to_dst[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
-		 emptyBlock--;
-		 cpy_index++;
-	}
-	if(emptyBlock < BUFFER_NUM)
-	{
-		/*  xfer structure */
-		xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
-		xfer.dataSize = BUFFER_SIZE;
-		/* Wait for available queue. */
-		status_t status = SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer);
-
-		if(kStatus_Success == status)
+	if(!isFinished){
+		if((emptyBlock > 0U) && (cpy_index < music_len/BUFFER_SIZE))
 		{
-			tx_index++;
+			 /* Fill in the buffers. */
+			 memcpy((uint8_t *)&buffer[BUFFER_SIZE*(cpy_index%BUFFER_NUM)],(uint8_t *)&pointer_to_dst[cpy_index*BUFFER_SIZE],sizeof(uint8_t)*BUFFER_SIZE);
+			 emptyBlock--;
+			 cpy_index++;
+		}
+		if(emptyBlock < BUFFER_NUM)
+		{
+			/*  xfer structure */
+			xfer.data = (uint8_t *)&buffer[BUFFER_SIZE*(tx_index%BUFFER_NUM)];
+			xfer.dataSize = BUFFER_SIZE;
+			/* Wait for available queue. */
+			status_t status = SAI_TransferSendEDMA(DEMO_SAI, &txHandle, &xfer);
+
+			if(kStatus_Success == status)
+			{
+				tx_index++;
+			}
 		}
 	}
+
+}
+
+void resetVariables(void){
+	isFinished = false;
+	finishIndex = 0U;
+	emptyBlock = BUFFER_NUM;
+	cpy_index = 0U;
+	tx_index=0U;
 }
 
 
 void play_music(void){
-	static int count_play = 0;
-	count_play++;
-
-    isFinished = false;
-    finishIndex = 0U;
-    emptyBlock = BUFFER_NUM;
-    cpy_index = 0U;
-    tx_index=0U;
-    delayCycle = 5000000U;
-
+	resetVariables();
     while(!isFinished){
     	mini_play_music();
     }
@@ -271,22 +272,6 @@ void init_I2S(void){
     SAI_TransferTxSetFormatEDMA(DEMO_SAI, &txHandle, &format, mclkSourceClockHz, format.masterClockHz);
 }
 
-I2S_Type * sai_base = I2S0;
-bool first_time_pit_2 = true;
-
-
-
-void resetVariables(void){
-	first_time = true;
-	first_time_pit_2 = true;
-	isFinished = false;
-	finishIndex = 0U;
-	emptyBlock = BUFFER_NUM;
-	cpy_index = 0U;
-	tx_index=0U;
-	delayCycle = 5000000U;
-}
-
 
 void initPlayState(void){
 	init_DMA();
@@ -294,6 +279,7 @@ void initPlayState(void){
 }
 
 void terminatePlayState(void){
+	I2S_Type * sai_base = I2S0;
 	disableRequests();
 	while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
 	}
@@ -310,29 +296,23 @@ void terminatePlayState(void){
 
 void PIT_1_2_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_TFLG_TIF(1));
-
-//	mini_play_music();
-
-//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
-
-//	startedPlaying = false;
-
+	// hay que tener cuidado con resetVariables porque hace que transmita de un solo lado si no estoy mal
+	// hay que analizar como se comportaba eso, puede ser la clave para que esto ande bien.
+	// No solo eso de transmitir 1 solo lado sino otras variables en la funcion de mini_play_music()
 	if(isFinished){
-		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
 		resetVariables();
-		terminatePlayState();
-		startedPlaying = false;
+//		startedPlaying = false;
 	}else{
 		if(startedPlaying){
-			if(first_time == true){
-				first_time = false;
-				initPlayState();
-				//en el init ya se hace reset antes de configurar!
-			}
 			mini_play_music();
 		}
 	}
 }
+
+
+
+
+
 
 void get_delay(uint32_t max){
 	delayCycle = max;
@@ -392,7 +372,6 @@ static const sdmmchost_pwr_card_t s_sdCardPwrCtrl = {
 
 
 static short buffer_out[MP3_DECODED_BUFFER_SIZE];
-static int16_t auxBuffer[MP3_DECODED_BUFFER_SIZE];
 
 int main(void)
 {
@@ -412,24 +391,11 @@ int main(void)
 
 	BOARD_InitDebugConsole();
 	SYSMPU_Enable(SYSMPU, false);
-
-//	BOARD_InitPins();
-//	BOARD_BootClockRUN();
-//	BOARD_InitBootPeripherals();
-//	BOARD_I2C_ConfigurePins();
-//	BOARD_InitDebugConsole();
 	BOARD_Codec_I2C_Init();
 
 
 	PRINTF("len del arreglo music (READ ONLY) = %d \n",sizeof(music));
 	PRINTF("MUSIC_LEN (el define)= %d \n",MUSIC_LEN);
-
-//    BOARD_InitPins();
-//    BOARD_BootClockRUN();
-//    BOARD_InitBootPeripherals();
-//    BOARD_I2C_ConfigurePins();
-//    BOARD_InitDebugConsole();
-//    BOARD_Codec_I2C_Init();
 
     PRINTF("SAI example started!\n\r");
 
@@ -438,18 +404,21 @@ int main(void)
     music_len = MUSIC_LEN;
 	pointer_to_dst = (uint8_t *)&music;
 
-	PRINTF("Puntero a music: %p \n", music);
-	PRINTF("pointer_to_dst: %p \n", pointer_to_dst);
-
-	PRINTF("valor music: %d \n", (uint8_t *)&music[0]);
-	PRINTF("valor pointer_to_dst: %d \n", (uint8_t *)&pointer_to_dst[0]);
-
-
     initPlayState();
 
     play_music(); // dummy play music para q se pueda inicializar el codec uda 1380
 
     terminatePlayState();
+
+
+	music_len = MUSIC_LEN;
+	pointer_to_dst = (uint8_t *)&music;
+
+	initPlayState();
+
+	play_music();
+
+	terminatePlayState();
 
 
 	PRINTF("\r\nFATFS example to demonstrate how to use FATFS with SD card.\r\n");
@@ -475,45 +444,45 @@ int main(void)
 		return -1;
 	}
 #endif
-
-#if FF_USE_MKFS
-	PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
-	if (f_mkfs(driverNumberBuffer, FM_ANY, 0U, work, sizeof work))
-	{
-		PRINTF("Make file system failed.\r\n");
-		return -1;
-	}
-#endif /* FF_USE_MKFS */
-
-	PRINTF("\r\nList the file in that directory......\r\n");
-	if (f_opendir(&directory, "/."))
-	{
-		PRINTF("Open directory failed.\r\n");
-		return -1;
-	}
-
-	for (;;)
-	{
-		error = f_readdir(&directory, &fileInformation);
-
-		/* To the end. */
-		if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
-		{
-			break;
-		}
-		if (fileInformation.fname[0] == '.')
-		{
-			continue;
-		}
-		if (fileInformation.fattrib & AM_DIR)
-		{
-			PRINTF("Directory file : %s.\r\n", fileInformation.fname);
-		}
-		else
-		{
-			PRINTF("General file : %s.\r\n", fileInformation.fname);
-		}
-	}
+//
+//#if FF_USE_MKFS
+//	PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
+//	if (f_mkfs(driverNumberBuffer, FM_ANY, 0U, work, sizeof work))
+//	{
+//		PRINTF("Make file system failed.\r\n");
+//		return -1;
+//	}
+//#endif /* FF_USE_MKFS */
+//
+//	PRINTF("\r\nList the file in that directory......\r\n");
+//	if (f_opendir(&directory, "/."))
+//	{
+//		PRINTF("Open directory failed.\r\n");
+//		return -1;
+//	}
+//
+//	for (;;)
+//	{
+//		error = f_readdir(&directory, &fileInformation);
+//
+//		/* To the end. */
+//		if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
+//		{
+//			break;
+//		}
+//		if (fileInformation.fname[0] == '.')
+//		{
+//			continue;
+//		}
+//		if (fileInformation.fattrib & AM_DIR)
+//		{
+//			PRINTF("Directory file : %s.\r\n", fileInformation.fname);
+//		}
+//		else
+//		{
+//			PRINTF("General file : %s.\r\n", fileInformation.fname);
+//		}
+//	}
 
 	MP3DecoderInit();
 	uint16_t sampleCount;
@@ -523,84 +492,55 @@ int main(void)
 //	MP3LoadFile("/./spo2_oor.mp3");
 //	MP3LoadFile("/./temp_oor.mp3");
 
+	initPlayState();
+	//en el init ya se hace reset de SAI antes de configurar!
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
 	resetVariables();
 	while (true)
 	{
 
-	#ifdef MAIN_DEBUG
-				PRINTF("\n[APP] Frame %d decoding started.\n", i);
-	#endif
+#ifdef MAIN_DEBUG
+			PRINTF("\n[APP] Frame %d decoding started.\n", i);
+#endif
 
-			if(!startedPlaying){
-				mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
-				if (res == MP3DECODER_NO_ERROR)
-				{
-					MP3GetLastFrameData(&frameData);
-	#ifdef MAIN_DEBUG
-					PRINTF("[APP] Frame %d decoded.\n", i);
-	#endif
+		mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
+		if (res == MP3DECODER_NO_ERROR)
+		{
+			MP3GetLastFrameData(&frameData);
+#ifdef MAIN_DEBUG
+			PRINTF("[APP] Frame %d decoded.\n", i);
+#endif
 //					sr = sampleCount;
 //					PRINTF("[APP] sampleCount: %d \n", sr);
 
-	#ifdef MAIN_DEBUG
-					sr = frameData.sampleRate;
-					PRINTF("[APP] FRAME SAMPLE RATE: %d \n", sr);
-	#endif
+#ifdef MAIN_DEBUG
+			sr = frameData.sampleRate;
+			PRINTF("[APP] FRAME SAMPLE RATE: %d \n", sr);
+#endif
 
+			music_len = sampleCount*2;// las samples son de 2 bytes, asi que music_len (que se mide en bytes) es sampleCountx2
 
-					music_len = sampleCount*2;// las samples son de 2 bytes, asi que music_len (que se mide en bytes) es sampleCountx2
+			pointer_to_dst = (uint8_t *)&buffer_out; // esto deberia tener formato de L-R-L-R
 
-					pointer_to_dst = (uint8_t *)&buffer_out; // esto deberia tener formato de L-R-L-R
+			while(startedPlaying){} // este while es liberado por PIT Channel 2
+			// hasta que no se trasmitio la anterior, no se transmite otra decodificacion
+			// pero ya decodifique antes
+			startedPlaying = true;
+		}
+		else if (res == MP3DECODER_FILE_END)
+		{
+			PRINTF("[APP] FILE ENDED.\n");
+			break;
+		}else{
+			PRINTF("[APP] An error has ocurred probably\n");
+		}
 
-					PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
-					startedPlaying = true;
-
-				}
-				else if (res == MP3DECODER_FILE_END)
-				{
-//					PRINTF("[APP] FILE ENDED. Decoded %d frames.\n", i - 1);
-					break;
-				}else{
-					PRINTF("[APP] An error has ocurred probably\n");
-				}
-			}
 	}
 
-//	memset(music, 0x00,MUSIC_LEN); // borro music
+	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
 
 // 	Termino de leer cuando llega a aca!!
 	PRINTF("\r\n Terminamos de decodificar.\r\n");
-
-//	if (f_close(&g_fileObject))
-//	{
-//		PRINTF("\r\nClose file failed.\r\n");
-//		return -1;
-//	}
-
-
-
-
-//    initPlayState();
-//
-//    music_len = MUSIC_LEN;
-//	pointer_to_dst = (uint8_t *)&music;
-//
-//    play_music();
-//
-//    terminatePlayState();
-
-//  Explicacion de los PITs => PIT1 channel 2 es el timer que reproduce la musica.
-
-// Lo puedo llamar directamente desde aca (se apaga solo despues de reproducir la musica):
-//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
-
-	//y esto anda.
-
-// Puedo llamar al PIT1 channel 2 cada n segundos, controlado por el PIT1 channel 1, por ejemplo:
-//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
-
-// Puedo llamar al PIT1 channel 2 llamarlo 1 sola vez en n segundos, controlado por el PIT1 channel 3, por ejemplo:
-
 
 
     while (1)
