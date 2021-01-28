@@ -136,7 +136,7 @@ void  MP3DecoderInit(void) {
     resetContextData();
     context_data.Decoder = MP3InitDecoder();//Helix decoder init
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
     PRINTF("MP3 decoder initialized");
 #endif // DEBUG
 
@@ -158,7 +158,7 @@ void  MP3DecoderInit(void) {
 //        context_data.bytes_remaining = context_data.f_size;
 ////        context_data.flash_buffer = audio;
 //
-//#ifdef DEBUG
+//#ifdef DEBUG_PRO
 //        PRINTF("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
 //#endif
 //        res = true;
@@ -178,7 +178,7 @@ bool  MP3LoadFile(const char* file_name) {
         context_data.f_size = getFileSize();
         context_data.bytes_remaining = context_data.f_size;
 //        readID3Tag();
-#ifdef DEBUG
+#ifdef DEBUG_PRO
         printf("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
 #endif
         res = true;
@@ -204,7 +204,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 
     mp3_decoder_result_t ret = MP3DECODER_NO_ERROR;    // Return value of the function
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
     PRINTF("Entered decoding. File has %d bytes to decode\n", context_data.bytes_remaining);
     PRINTF("Buffer has %d bytes to decode\n", context_data.bottom_index - context_data.top_index);
 #endif
@@ -214,13 +214,13 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
         if (!context_data.file_opened)
         {
             ret = MP3DECODER_NO_FILE;
-#ifdef DEBUG
+#ifdef DEBUG_PRO
             PRINTF("There is no opened file\n");
 #endif
         }
         else if (context_data.bytes_remaining) // check if there is remaining info to be decoded
         {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
             PRINTF("Current pointers are Head = %d - Bottom = %d\n", context_data.top_index, context_data.bottom_index);
 #endif
 
@@ -232,21 +232,21 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 context_data.bottom_index = context_data.bottom_index - context_data.top_index;
                 context_data.top_index = 0;
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Copied %d bytes from %d to %d\n", (context_data.bottom_index - context_data.top_index), context_data.top_index, 0);
 #endif
             }
             else if (context_data.bottom_index == context_data.top_index)
             {
                 // If arrived here, there is nothing else to do
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Empty buffer.\n");
 #endif
 
             }
             else if (context_data.bottom_index == MP3_DECODED_BUFFER_SIZE)
             {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Full buffer.\n");
 #endif
             }
@@ -267,7 +267,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 context_data.top_index += offset; // updating top_index pointer
                 context_data.bytes_remaining -= offset;  // subtract garbage info to file size
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Sync word found @ %d offset\n", offset);
 #endif
             }
@@ -277,12 +277,12 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
             int err = MP3GetNextFrameInfo(context_data.Decoder, &nextFrameInfo, context_data.encoded_frame_buffer + context_data.top_index);
             if (err == 0)
             {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Frame to decode has %d samples\n", nextFrameInfo.outputSamps);
 #endif
                 if (nextFrameInfo.outputSamps > bufferSize)
                 {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                     PRINTF("Out buffer isnt big enough to hold samples.\n");
 #endif
                     return MP3DECODER_BUFFER_OVERFLOW;
@@ -301,7 +301,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 uint16_t decodedBytes = context_data.bottom_index - context_data.top_index - bytesLeft;
                 context_data.last_frame_length = decodedBytes;
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Frame decoded!. MP3 frame size was %d bytes\n", decodedBytes);
 #endif
 
@@ -322,13 +322,13 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
             {
                 if (context_data.bytes_remaining == 0)
                 {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                     PRINTF("[Error] Buffer underflow and file empty\n");
 #endif
 
                     return MP3DECODER_FILE_END;
                 }
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                 PRINTF("Underflow error (code %d)\n", res);
 #endif
 
@@ -339,7 +339,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
             {
                 if (context_data.bytes_remaining <= context_data.last_frame_length)
                 {
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                     PRINTF("Dropped frame\n");
 #endif
                     return MP3DECODER_FILE_END;
@@ -348,7 +348,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
                 {
                     context_data.top_index++;
                     context_data.bytes_remaining--;
-#ifdef DEBUG
+#ifdef DEBUG_PRO
                     PRINTF("Error: %d\n", res);
 #endif
 
@@ -414,7 +414,7 @@ void copyDataAndMovePointer() {
     // Update bottom_index pointer
     context_data.bottom_index += bytes_read;
 
-#ifdef DEBUG
+#ifdef DEBUG_PRO
     if (bytes_read == 0)
     {
         PRINTF("File was read completely.\n");

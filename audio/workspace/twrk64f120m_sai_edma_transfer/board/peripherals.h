@@ -83,7 +83,12 @@ extern "C" {
 
 // ----------------------------PIT1 CH2----------------------------------------
 //#define PIT_1_2_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U // 100u segs
-#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 25m segs
+//#define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U // 25m segs
+#define PIT_1_2_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U // 17.36m segs
+
+// es 25 ms si el buffer es de 1600 ahora el buffer este (2*1152) => menos tiempo, cuanto?
+//  25 ms --> 1/1600
+//  x ms  --> 1/2*1152
 // -----------------------------------------------------------------------------
 
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "mp3Decoder.h"
 
-#define DEBUG
+//#define DEBUG
 #include <stdint.h>
 #include <stdio.h>
 #include "wav.h"
@@ -9,7 +9,7 @@
 //#include "music.h"
 #include "yolo_music_array.h"
 
-#define MAIN_DEBUG
+//#define MAIN_DEBUG
 
 #define INTBUF
 
@@ -21,7 +21,7 @@
 //#define FILEPATH_WAV	"C:/Users/Guido/Documents/GitHub/LaboDeMicrosTPF/TestS/MP3_test_pc/MP3_test_PC/MP3_test_PC/test/test.wav"
 
 //#define FILEPATH		"test/thomas_16k.mp3"
-#define FILEPATH_WAV	"test/yolo.wav"
+#define FILEPATH_WAV	"test/ecg_oor.wav"
 
 //#define SAMPLE_RATE		44100
 #define SAMPLE_RATE		16000

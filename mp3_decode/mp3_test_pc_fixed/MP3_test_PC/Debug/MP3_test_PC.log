@@ -1,10 +1,6 @@
 ﻿  main.c
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(85,28): warning C4018: '<': signed/unsigned mismatch
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(47,25): warning C4101: 'ID3Data': unreferenced local variable
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(45,11): warning C4101: 'wavIn': unreferenced local variable
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(45,20): warning C4101: 'wavOut': unreferenced local variable
-  mp3Decoder.c
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(95,11): warning C4013: 'printf' undefined; assuming extern returning int
-C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\mp3Decoder.c(335,32): warning C4018: '<': signed/unsigned mismatch
-  Generating Code...
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(84,28): warning C4018: '<': signed/unsigned mismatch
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(46,25): warning C4101: 'ID3Data': unreferenced local variable
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(44,11): warning C4101: 'wavIn': unreferenced local variable
+C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\MP3_test_PC\main.c(44,20): warning C4101: 'wavOut': unreferenced local variable
   MP3_test_PC.vcxproj -> C:\Github_Repos\labo-de-micros-tpf\mp3_decode\mp3_test_pc_fixed\Debug\MP3_test_PC.exe
