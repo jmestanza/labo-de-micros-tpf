@@ -71,8 +71,7 @@ void SDMMCEVENT_InitTimer(void)
     /* Set systick reload value to generate 1ms interrupt */
 
 	SysTick_Config(CLOCK_GetFreq(kCLOCK_CoreSysClk) / 1000U);
-	int a = 5;
-
+//	int a = 5;
 }
 
 void SysTick_Handler(void)

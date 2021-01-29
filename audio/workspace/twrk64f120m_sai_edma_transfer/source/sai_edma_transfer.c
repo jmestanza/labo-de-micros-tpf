@@ -173,7 +173,6 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
         if(music_len/BUFFER_SIZE == finishIndex)
         {
             isFinished = true; // hay que resetear los indices
-//			startedPlaying = false;
 			audio_state = AUDIO_PLAYING;
         }
     }
@@ -293,7 +292,8 @@ void terminatePlayState(void){
 	I2S_Type * sai_base = I2S0;
 	disableRequests();
 	while(!(sai_base->TCSR & I2S_TCSR_FWF_MASK)){ // wait for FIFO Empty Warning
-	}
+	} // a veces se traba con esta linea, ver si hay que descomentarla
+
 	SAI_TransferTerminateSendEDMA(DEMO_SAI, &txHandle);
 	SAI_Deinit(DEMO_SAI);
 	DMAMUX_DisableChannel(DMAMUX0, EXAMPLE_CHANNEL);
@@ -312,9 +312,6 @@ void PIT_1_2_IRQHANDLER(void){
 		if(audio_state == AUDIO_READY_TO_SEND){
 			mini_play_music();
 		}
-//		if(startedPlaying){
-//			mini_play_music();
-//		}
 	}
 }
 
@@ -334,22 +331,22 @@ void get_delay(uint32_t max){
 /*!
 * @brief wait card insert function.
 */
-static status_t sdcardWaitCardInsert(void);
+//static status_t sdcardWaitCardInsert(void);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-static FATFS g_fileSystem; /* File system object */
+//static FATFS g_fileSystem; /* File system object */
 //static FIL g_fileObject;   /* File object */
 
-static const sdmmchost_detect_card_t s_sdCardDetect = {
-#ifndef BOARD_SD_DETECT_TYPE
-    .cdType = kSDMMCHOST_DetectCardByGpioCD,
-#else
-    .cdType = BOARD_SD_DETECT_TYPE,
-#endif
-    .cdTimeOut_ms = (~0U),
-};
+//static const sdmmchost_detect_card_t s_sdCardDetect = {
+//#ifndef BOARD_SD_DETECT_TYPE
+//    .cdType = kSDMMCHOST_DetectCardByGpioCD,
+//#else
+//    .cdType = BOARD_SD_DETECT_TYPE,
+//#endif
+//    .cdTimeOut_ms = (~0U),
+//};
 
 /*******************************************************************************
  * Code
@@ -364,17 +361,12 @@ void play_mp3(const char* file_name){
 	uint16_t sampleCount;
 	mp3_decoder_frame_data_t frameData;
 
-
 	MP3LoadFile(file_name);
-
-//	MP3LoadFile("/./ecg_oor.mp3");
-//	MP3LoadFile("/./spo2_oor.mp3");
-//	MP3LoadFile("/./temp_oor.mp3");
 
 	initPlayState();
 	//en el init ya se hace reset de SAI antes de configurar!
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
 	resetVariables();
+	bool can_start_pit = true;
 
 	audio_state = AUDIO_PLAYING;
 	while (audio_state != AUDIO_STOP && audio_state != AUDIO_ERROR)
@@ -402,16 +394,54 @@ void play_mp3(const char* file_name){
 				PRINTF("[APP] An error has ocurred probably\n");
 				audio_state = AUDIO_ERROR;
 			}
+		}else if(audio_state == AUDIO_READY_TO_SEND){
+			if(can_start_pit){
+				PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
+				can_start_pit = false;
+			}
 		}
 	}
 
 	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
 	terminatePlayState();
+	MP3CloseFile();
+}
+
+
+uint8_t song_index = 0;
+
+//static FIL g_fileObject;   /* File object */
+
+void PIT_1_1_IRQHANDLER(void){
+	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_TFLG_TIF(1));
+//	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // que pare de llamarse este timer que reproduce la cancion
+
+	song_index = (song_index + 1)%3;
+	// son 3 canciones, a partir del indice 1
+	song_state = song_index+1;
+
+//	song_state = SONG_ECG_OUT_OF_RANGE;
+//	play_mp3("/./ecg_oor.mp3");
+	// NO PONER play_mp3 ACA!! ,
+	// En este contexto se congela systick y es necesario para leer la SD!
+	// Se traba el programa por completo si lo hago :(
 }
 
 const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
+static const sdmmchost_detect_card_t s_sdCardDetect = {
+#ifndef BOARD_SD_DETECT_TYPE
+    .cdType = kSDMMCHOST_DetectCardByGpioCD,
+#else
+    .cdType = BOARD_SD_DETECT_TYPE,
+#endif
+    .cdTimeOut_ms = (~0U),
+};
 
-int init_SD(void){
+FATFS g_fileSystem;
+
+static status_t sdcardWaitCardInsert(void);
+
+FRESULT SD_init(void){
 	FRESULT error;
 	PRINTF("\r\nFATFS example to demonstrate how to use FATFS with SD card.\r\n");
 
@@ -436,14 +466,45 @@ int init_SD(void){
 		return -1;
 	}
 #endif
-
 	return error;
 }
 
+static status_t sdcardWaitCardInsert(void)
+{
+    /* Save host information. */
+    g_sd.host.base = SD_HOST_BASEADDR;
+    g_sd.host.sourceClock_Hz = SD_HOST_CLK_FREQ;
+    /* card detect type */
+    g_sd.usrParam.cd = &s_sdCardDetect;
+#if defined DEMO_SDCARD_POWER_CTRL_FUNCTION_EXIST
+    g_sd.usrParam.pwr = &s_sdCardPwrCtrl;
+#endif
+    /* SD host init function */
+    if (SD_HostInit(&g_sd) != kStatus_Success)
+    {
+        PRINTF("\r\nSD host init fail\r\n");
+        return kStatus_Fail;
+    }
+    /* power off card */
+    SD_PowerOffCard(g_sd.host.base, g_sd.usrParam.pwr);
+    /* wait card insert */
+    if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdCardDetect, true) == kStatus_Success)
+    {
+        PRINTF("\r\nCard inserted.\r\n");
+        /* power on the card */
+        SD_PowerOnCard(g_sd.host.base, g_sd.usrParam.pwr);
+    }
+    else
+    {
+        PRINTF("\r\nCard detect fail.\r\n");
+        return kStatus_Fail;
+    }
 
-uint8_t song_index = 0;
+    return kStatus_Success;
+}
 
-//static FIL g_fileObject;   /* File object */
+
+
 
 int main(void)
 {
@@ -482,87 +543,60 @@ int main(void)
 
 	initPlayState();
 
-	play_music();
+	play_music();			// dummy play to set codec UDA1380
 
 	terminatePlayState();
 
-	if(init_SD() != FR_OK){
-		PRINTF("\n Error en init SD \n");
+	if(SD_init() == FR_OK) {
+		MP3SetSDInitializedFlag();
+	}else{
 		return -1;
 	}
 
 
-//	play_mp3("/./spo2_oor.mp3");
-
-//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // hago que pit se encienda y empiece a transmitir ese buffer
-
-// 	Termino de leer cuando llega a aca!!
-	PRINTF("\r\n Terminamos de decodificar.\r\n");
-
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // en el handler hago que cada 5 segundos se reproduzca un mp3
 
 	song_state = SONG_NO_SOUND;
 
-	int counter = 0;
     while (1)
     {
+    	// espero que PIT cambie el estado de song_state
 
-    	// puede que tengamos que ponerle un silencio previo a los sonidos
-    	// por el dummy write que hace que ande el i2s
-    	if(song_state == SONG_NO_SOUND){ // song no sound dura 0.5 segs
-        	play_mp3("/./no_sound.mp3");
-        	counter++;
-        	if(counter == 3){ // 2 segundos
-        		song_index = (song_index + 1)%3;
-				// son 3 canciones, a partir del indice 1
-				song_state = song_index+1;
-        		counter = 0; // reseteo
-        	};
-    	}else if(song_state == SONG_ECG_OUT_OF_RANGE){
-        	play_mp3("/./ecg_oor.mp3");
-        	song_state = SONG_NO_SOUND;
-    	}else if(song_state == SONG_SPO2_OUT_OF_RANGE){
-        	play_mp3("/./spo2_oor.mp3");
-        	song_state = SONG_NO_SOUND;
-    	}else if(song_state == SONG_TEMP_OUT_OF_RANGE){
-        	play_mp3("/./temp_oor.mp3");
-        	song_state = SONG_NO_SOUND;
+    	if(song_state != SONG_NO_SOUND){
+    		switch(song_state){
+    		case SONG_ECG_OUT_OF_RANGE:
+//    			play_mp3("/./no_sound.mp3"); // dummy play de 1s en total para saber si es porque detecta silencio
+//    			play_mp3("/./no_sound.mp3"); // si detecta silencio probablmeente sea la placa UDA1380 la que se va a sleep  y no I2S, sino, es al reves.
+    			play_mp3("/./sonicpro.mp3"); // efectivamente este dummy play es necesario (si entre las reproducciones hay intervalo mayor a 10 segundos)
+    			play_mp3("/./ecg_oor.mp3"); //
+//    			play_mp3("/./ahh_ecg_oor.mp3");
+    			break;
+    		case SONG_SPO2_OUT_OF_RANGE:
+//    			play_mp3("/./no_sound.mp3");
+//    			play_mp3("/./no_sound.mp3");
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./spo2_oor.mp3");
+//    			play_mp3("/./ahh_spo2_oor.mp3");
+//    			play_mp3("/./ahh_ecg_oor.mp3");
+    			break;
+    		case SONG_TEMP_OUT_OF_RANGE:
+//    			play_mp3("/./no_sound.mp3");
+//    			play_mp3("/./no_sound.mp3");
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./temp_oor.mp3");
+//    			play_mp3("/./ahh_temp_oor.mp3");
+//    			play_mp3("/./ahh_ecg_oor.mp3");
+    			break;
+    		default:
+//    			play_mp3("/./no_sound.mp3");
+    			PRINTF("Shouldn't be here");
+    		}
+			song_state = SONG_NO_SOUND;
     	}
-    	close_file();
+
 	}
     return 0;
 }
 
-static status_t sdcardWaitCardInsert(void)
-{
-    /* Save host information. */
-    g_sd.host.base = SD_HOST_BASEADDR;
-    g_sd.host.sourceClock_Hz = SD_HOST_CLK_FREQ;
-    /* card detect type */
-    g_sd.usrParam.cd = &s_sdCardDetect;
-#if defined DEMO_SDCARD_POWER_CTRL_FUNCTION_EXIST
-    g_sd.usrParam.pwr = &s_sdCardPwrCtrl;
-#endif
-    /* SD host init function */
-    if (SD_HostInit(&g_sd) != kStatus_Success)
-    {
-        PRINTF("\r\nSD host init fail\r\n");
-        return kStatus_Fail;
-    }
-    /* power off card */
-    SD_PowerOffCard(g_sd.host.base, g_sd.usrParam.pwr);
-    /* wait card insert */
-    if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdCardDetect, true) == kStatus_Success)
-    {
-        PRINTF("\r\nCard inserted.\r\n");
-        /* power on the card */
-        SD_PowerOnCard(g_sd.host.base, g_sd.usrParam.pwr);
-    }
-    else
-    {
-        PRINTF("\r\nCard detect fail.\r\n");
-        return kStatus_Fail;
-    }
 
-    return kStatus_Success;
-}
 

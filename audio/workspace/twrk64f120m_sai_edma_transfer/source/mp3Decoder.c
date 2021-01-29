@@ -11,6 +11,13 @@
 #include "utilities/fsl_debug_console.h"
 #include "fatfs/fatfs_include/ff.h"
 
+//#include "diskio.h"
+//#include "fsl_sdmmc_host.h"
+//#include "fsl_sd_disk.h"
+
+
+
+
  /*******************************************************************************
   * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
   ******************************************************************************/
@@ -33,6 +40,7 @@ typedef struct
     FIL			file;
     FIL* mp3File;
 
+    bool 		  sd_initialized;
     uint32_t      f_size;                                       // file size
     uint32_t      bytes_remaining;                                 // Encoded MP3 bytes remaining to be processed by either offset or decodeMP3
     bool          file_opened;                                     // true if there is a loaded file
@@ -47,6 +55,10 @@ typedef struct
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
  ******************************************************************************/
+
+
+
+
 
  //File management functions
 //static bool open_file(char* file_name);
@@ -88,7 +100,7 @@ static bool open_file(const char* file_name) {
     return ret;
 }
 
-void close_file(void) {
+void MP3CloseFile(void) {
     f_close(context_data.mp3File);
     context_data.file_opened = false;
 }
@@ -108,12 +120,18 @@ void  MP3DecoderInit(void) {
     context_data.Decoder = MP3InitDecoder();
 }
 
+
 bool  MP3LoadFile(const char* file_name) {
+
+	if(!context_data.sd_initialized){
+		PRINTF("SD not initialized!.\r\n");
+		return false;
+	}
 
     bool res = false;
     if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
         resetContextData();
-        close_file();
+        MP3CloseFile();
     }
     if (open_file(file_name)){
         context_data.file_opened = true;
@@ -129,6 +147,9 @@ bool  MP3LoadFile(const char* file_name) {
 
 }
 
+void MP3SetSDInitializedFlag(void){
+	context_data.sd_initialized = true;
+}
 
 bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data) {
     bool ret = false;
@@ -360,7 +381,7 @@ void copyFrameInfo(mp3_decoder_frame_data_t* mp3_data, MP3FrameInfo* helix_data)
 }
 void resetContextData(void) {
 	if(context_data.file_opened){
-		close_file();
+		MP3CloseFile();
 	}else{
 		context_data.file_opened = false;
 	}
