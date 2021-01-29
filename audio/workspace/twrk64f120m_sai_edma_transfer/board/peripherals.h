@@ -57,6 +57,13 @@ extern "C" {
 /* Definition of ticks count for channel 0. */
 #define PIT_1_0_TICKS USEC_TO_COUNT(1000U, PIT_1_CLK_FREQ) - 1U
 
+#define PIT_1_1_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(3000000U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(5000000U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(500U, PIT_1_CLK_FREQ) - 1U
+//#define PIT_1_1_TICKS USEC_TO_COUNT(100U, PIT_1_CLK_FREQ) - 1U
+
+
 #define PIT_1_2_TICKS USEC_TO_COUNT(12000U, PIT_1_CLK_FREQ) - 1U
 //Con audacity le puse microfono y lo fui ajustando hasta que dio de longitud parecida
 
@@ -64,6 +71,11 @@ extern "C" {
 #define PIT_1_0_IRQN PIT0_IRQn
 /* PIT_1 interrupt handler identifier. */
 #define PIT_1_0_IRQHANDLER PIT0_IRQHandler
+
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_1_IRQN PIT1_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_1_IRQHANDLER PIT1_IRQHandler
 
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_2_IRQN PIT2_IRQn

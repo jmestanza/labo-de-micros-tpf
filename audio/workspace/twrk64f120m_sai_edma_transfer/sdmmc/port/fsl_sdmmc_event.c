@@ -63,10 +63,16 @@ volatile uint32_t g_eventTimeMilliseconds;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
+
+
 void SDMMCEVENT_InitTimer(void)
 {
     /* Set systick reload value to generate 1ms interrupt */
-    SysTick_Config(CLOCK_GetFreq(kCLOCK_CoreSysClk) / 1000U);
+
+	SysTick_Config(CLOCK_GetFreq(kCLOCK_CoreSysClk) / 1000U);
+	int a = 5;
+
 }
 
 void SysTick_Handler(void)
@@ -119,6 +125,7 @@ bool SDMMCEVENT_Wait(sdmmc_event_t eventType, uint32_t timeoutMilliseconds)
     if (timeoutMilliseconds && event)
     {
         startTime = g_eventTimeMilliseconds;
+
         do
         {
             elapsedTime = (g_eventTimeMilliseconds - startTime);

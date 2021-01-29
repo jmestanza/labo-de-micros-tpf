@@ -53,6 +53,7 @@ typedef struct
  ******************************************************************************/
 void  MP3DecoderInit(void);
 bool  MP3LoadFile(const char* file_name);
+void close_file(void);
 //bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len);
 //bool MP3GetTagData(mp3_decoder_tag_data_t* data);
 bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data);

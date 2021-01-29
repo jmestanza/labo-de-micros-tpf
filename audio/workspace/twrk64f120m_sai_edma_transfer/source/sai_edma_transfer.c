@@ -110,6 +110,24 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+
+typedef enum
+{
+	AUDIO_PLAYING,
+	AUDIO_READY_TO_SEND,
+    AUDIO_STOP,
+	AUDIO_ERROR
+} audio_state_t;
+
+typedef enum
+{
+	SONG_NO_SOUND,
+	SONG_ECG_OUT_OF_RANGE,
+	SONG_SPO2_OUT_OF_RANGE,
+	SONG_TEMP_OUT_OF_RANGE
+} song_state_t;
+
+
 AT_NONCACHEABLE_SECTION_INIT(sai_edma_handle_t txHandle) = {0};
 
 edma_handle_t dmaHandle = {0};
@@ -134,6 +152,8 @@ bool total_decode = false;
 uint8_t * pointer_to_dst = NULL;
 uint32_t music_len = 0;
 
+audio_state_t audio_state;
+song_state_t song_state;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -153,7 +173,8 @@ static void callback(I2S_Type *base, sai_edma_handle_t *handle, status_t status,
         if(music_len/BUFFER_SIZE == finishIndex)
         {
             isFinished = true; // hay que resetear los indices
-			startedPlaying = false;
+//			startedPlaying = false;
+			audio_state = AUDIO_PLAYING;
         }
     }
 }
@@ -167,6 +188,8 @@ void PIT_1_0_IRQHANDLER(void){
     CODEC_SetFormat(&codecHandle, format.masterClockHz, format.sampleRate_Hz, format.bitWidth);
 
 }
+
+
 
 
 void mini_play_music(void){
@@ -286,9 +309,12 @@ void PIT_1_2_IRQHANDLER(void){
 	if(isFinished){
 		resetVariables();
 	}else{
-		if(startedPlaying){
+		if(audio_state == AUDIO_READY_TO_SEND){
 			mini_play_music();
 		}
+//		if(startedPlaying){
+//			mini_play_music();
+//		}
 	}
 }
 
@@ -314,7 +340,7 @@ static status_t sdcardWaitCardInsert(void);
  * Variables
  ******************************************************************************/
 static FATFS g_fileSystem; /* File system object */
-static FIL g_fileObject;   /* File object */
+//static FIL g_fileObject;   /* File object */
 
 static const sdmmchost_detect_card_t s_sdCardDetect = {
 #ifndef BOARD_SD_DETECT_TYPE
@@ -332,13 +358,98 @@ static const sdmmchost_detect_card_t s_sdCardDetect = {
 
 static short buffer_out[MP3_DECODED_BUFFER_SIZE];
 
+
+void play_mp3(const char* file_name){
+	MP3DecoderInit();
+	uint16_t sampleCount;
+	mp3_decoder_frame_data_t frameData;
+
+
+	MP3LoadFile(file_name);
+
+//	MP3LoadFile("/./ecg_oor.mp3");
+//	MP3LoadFile("/./spo2_oor.mp3");
+//	MP3LoadFile("/./temp_oor.mp3");
+
+	initPlayState();
+	//en el init ya se hace reset de SAI antes de configurar!
+	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
+	resetVariables();
+
+	audio_state = AUDIO_PLAYING;
+	while (audio_state != AUDIO_STOP && audio_state != AUDIO_ERROR)
+	{
+		if(audio_state == AUDIO_PLAYING){
+			mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
+			if (res == MP3DECODER_NO_ERROR)
+			{
+				MP3GetLastFrameData(&frameData);
+
+				music_len = sampleCount*2;// las samples son de 2 bytes, asi que music_len (que se mide en bytes) es sampleCountx2
+
+				pointer_to_dst = (uint8_t *)&buffer_out; // esto deberia tener formato de L-R-L-R
+
+				audio_state = AUDIO_READY_TO_SEND;
+				// tengo las samples decodificadas, declaro que estoy listo para enviarlas
+				// mientras este listo para enviarlas, mando sampels (ver la interrupcion de PIT2)
+				// cuando termino de enviar todo, vuelvo a audio_state = AUDIO_PLAYING para que se decodifique la siguiente
+			}
+			else if (res == MP3DECODER_FILE_END)
+			{
+//				PRINTF("[APP] FILE ENDED.\n");
+				audio_state = AUDIO_STOP;
+			}else{
+				PRINTF("[APP] An error has ocurred probably\n");
+				audio_state = AUDIO_ERROR;
+			}
+		}
+	}
+
+	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
+	terminatePlayState();
+}
+
+const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
+
+int init_SD(void){
+	FRESULT error;
+	PRINTF("\r\nFATFS example to demonstrate how to use FATFS with SD card.\r\n");
+
+	PRINTF("\r\nPlease insert a card into board.\r\n");
+
+	if (sdcardWaitCardInsert() != kStatus_Success)
+	{
+		return -1;
+	}
+
+	if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
+	{
+		PRINTF("Mount volume failed.\r\n");
+		return -1;
+	}
+
+#if (FF_FS_RPATH >= 2U)
+	error = f_chdrive((char const *)&driverNumberBuffer[0U]);
+	if (error)
+	{
+		PRINTF("Change drive failed.\r\n");
+		return -1;
+	}
+#endif
+
+	return error;
+}
+
+
+uint8_t song_index = 0;
+
+//static FIL g_fileObject;   /* File object */
+
 int main(void)
 {
 
-	FRESULT error;
-	DIR directory; /* Directory object */
-	FILINFO fileInformation;
-	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
+//	FRESULT error;
+
 
 	BOARD_InitPins();
 	BOARD_BootClockRUN();
@@ -375,78 +486,50 @@ int main(void)
 
 	terminatePlayState();
 
-
-	PRINTF("\r\nFATFS example to demonstrate how to use FATFS with SD card.\r\n");
-
-	PRINTF("\r\nPlease insert a card into board.\r\n");
-
-	if (sdcardWaitCardInsert() != kStatus_Success)
-	{
+	if(init_SD() != FR_OK){
+		PRINTF("\n Error en init SD \n");
 		return -1;
 	}
 
-	if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
-	{
-		PRINTF("Mount volume failed.\r\n");
-		return -1;
-	}
 
-#if (FF_FS_RPATH >= 2U)
-	error = f_chdrive((char const *)&driverNumberBuffer[0U]);
-	if (error)
-	{
-		PRINTF("Change drive failed.\r\n");
-		return -1;
-	}
-#endif
+//	play_mp3("/./spo2_oor.mp3");
 
-	MP3DecoderInit();
-	uint16_t sampleCount;
-	uint32_t sr = 0;
-	mp3_decoder_frame_data_t frameData;
-	MP3LoadFile("/./ecg_oor.mp3");
-//	MP3LoadFile("/./spo2_oor.mp3");
-//	MP3LoadFile("/./temp_oor.mp3");
-
-	initPlayState();
-	//en el init ya se hace reset de SAI antes de configurar!
-	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // hago que pit se encienda y empiece a transmitir ese buffer
-	resetVariables();
-	while (true)
-	{
-		mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
-		if (res == MP3DECODER_NO_ERROR)
-		{
-			MP3GetLastFrameData(&frameData);
-
-			music_len = sampleCount*2;// las samples son de 2 bytes, asi que music_len (que se mide en bytes) es sampleCountx2
-
-			pointer_to_dst = (uint8_t *)&buffer_out; // esto deberia tener formato de L-R-L-R
-
-			while(startedPlaying){} // este while es liberado por PIT Channel 2
-			// hasta que no se trasmitio la anterior, no se transmite otra decodificacion
-			// pero ya decodifique antes
-			startedPlaying = true;
-		}
-		else if (res == MP3DECODER_FILE_END)
-		{
-			PRINTF("[APP] FILE ENDED.\n");
-			break;
-		}else{
-			PRINTF("[APP] An error has ocurred probably\n");
-		}
-
-	}
-
-	PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2); // que pare de llamarse este timer que reproduce la cancion
+//	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1); // hago que pit se encienda y empiece a transmitir ese buffer
 
 // 	Termino de leer cuando llega a aca!!
 	PRINTF("\r\n Terminamos de decodificar.\r\n");
 
 
+	song_state = SONG_NO_SOUND;
+
+	int counter = 0;
     while (1)
     {
-    }
+
+    	// puede que tengamos que ponerle un silencio previo a los sonidos
+    	// por el dummy write que hace que ande el i2s
+    	if(song_state == SONG_NO_SOUND){ // song no sound dura 0.5 segs
+        	play_mp3("/./no_sound.mp3");
+        	counter++;
+        	if(counter == 3){ // 2 segundos
+        		song_index = (song_index + 1)%3;
+				// son 3 canciones, a partir del indice 1
+				song_state = song_index+1;
+        		counter = 0; // reseteo
+        	};
+    	}else if(song_state == SONG_ECG_OUT_OF_RANGE){
+        	play_mp3("/./ecg_oor.mp3");
+        	song_state = SONG_NO_SOUND;
+    	}else if(song_state == SONG_SPO2_OUT_OF_RANGE){
+        	play_mp3("/./spo2_oor.mp3");
+        	song_state = SONG_NO_SOUND;
+    	}else if(song_state == SONG_TEMP_OUT_OF_RANGE){
+        	play_mp3("/./temp_oor.mp3");
+        	song_state = SONG_NO_SOUND;
+    	}
+    	close_file();
+	}
+    return 0;
 }
 
 static status_t sdcardWaitCardInsert(void)

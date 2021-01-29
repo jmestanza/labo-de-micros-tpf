@@ -52,16 +52,21 @@ void PIT_1_init(void) {
   /* Set channel 0 period. */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
 
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_1, PIT_1_1_TICKS);
   /* Set channel 2 period */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_1_2_TICKS);
 
   /* Enable interrupts from channel 0. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
 
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_1, kPIT_TimerInterruptEnable);
+
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_2, kPIT_TimerInterruptEnable);
 
   /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
   EnableIRQ(PIT_1_0_IRQN);
+  /* Enable interrupt PIT_1_2_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_1_IRQN);
   /* Enable interrupt PIT_1_2_IRQN request in the NVIC */
   EnableIRQ(PIT_1_2_IRQN);
 

@@ -491,11 +491,11 @@ status_t SGTL_SetMute(codec_handle_t *handle, sgtl_module_t module, bool mute)
 
 status_t SGTL_ConfigDataFormat(codec_handle_t *handle, uint32_t mclk, uint32_t sample_rate, uint32_t bits)
 {
-    uint16_t val = 0;
-    uint16_t regVal = 0;
+//    uint16_t val = 0;
+//    uint16_t regVal = 0;
     status_t retval = kStatus_Success;
-    uint16_t mul_clk = 0U;
-    uint32_t sysFs = 0U;
+//    uint16_t mul_clk = 0U;
+//    uint32_t sysFs = 0U;
 
 //    /* Over sample rate can only up to 512, the least to 8k */
 //    if ((mclk / (MIN(sample_rate * 6U, 96000U)) > 512U) || (mclk / sample_rate < 256U))

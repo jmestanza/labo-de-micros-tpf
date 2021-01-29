@@ -498,11 +498,6 @@ static uint8_t Get_StartInstance(void)
     return StartInstanceNum;
 }
 
-void EDMA_EnableIRQ( DMA_Type *base,uint32_t channel){
-	uint32_t edmaInstance = EDMA_GetInstance(base);
-    status_t stat = EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);
-}
-
 void EDMA_CreateHandle(edma_handle_t *handle, DMA_Type *base, uint32_t channel)
 {
     assert(handle != NULL);

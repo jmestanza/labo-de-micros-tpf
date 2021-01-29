@@ -916,10 +916,6 @@ static inline uint32_t EDMA_GetNextTCDAddress(edma_handle_t *handle)
     return (handle->base->TCD[handle->channel].DLAST_SGA);
 }
 
-
-void EDMA_EnableIRQ( DMA_Type *base,uint32_t channel);
-
-
 /*!
  * @brief eDMA IRQ handler for the current major loop transfer completion.
  *

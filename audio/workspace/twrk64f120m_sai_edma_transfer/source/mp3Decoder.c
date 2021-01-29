@@ -9,11 +9,7 @@
 #include "mp3decoder.h"
 #include "lib/helix/pub/mp3dec.h"
 #include "utilities/fsl_debug_console.h"
-
 #include "fatfs/fatfs_include/ff.h"
-//#ifdef __arm__
-//#include "fatfs/fatfs_include/ff.h"
-//#endif
 
  /*******************************************************************************
   * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -24,6 +20,7 @@
 #define DEFAULT_ID3_FIELD       "Unknown"
 #define MAX_DEPTH       3
 
+//#define DEBUG_PRO
   /*******************************************************************************
    * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
    ******************************************************************************/
@@ -33,16 +30,9 @@ typedef struct
     HMP3Decoder   Decoder;                                   // Helix MP3 decoder instance
     MP3FrameInfo  last_frame_info;                                  // current MP3 frame info
 
-
-    unsigned int *bytes_read_before;
-    uint8_t * bytes_read_buffer;
-    // MP3 file
-//#ifdef __arm__
     FIL			file;
     FIL* mp3File;
-//#else
-//    FILE* mp3File;                                        // MP3 file object
-//#endif
+
     uint32_t      f_size;                                       // file size
     uint32_t      bytes_remaining;                                 // Encoded MP3 bytes remaining to be processed by either offset or decodeMP3
     bool          file_opened;                                     // true if there is a loaded file
@@ -53,10 +43,6 @@ typedef struct
     uint32_t      top_index;                                            // current position in frame buffer (points to top_index)
     uint32_t      bottom_index;                                         // current position at info end in frame buffer
 
-//     uint8_t* flash_buffer;
-//     uint32_t  flash_idx;
-
-
 }mp3_decoder_context_t;
 /*******************************************************************************
  * FUNCTION PROTOTYPES FOR PRIVATE FUNCTIONS WITH FILE LEVEL SCOPE
@@ -64,7 +50,7 @@ typedef struct
 
  //File management functions
 //static bool open_file(char* file_name);
-//static void close_file(void);
+
 //static void fileSeek(size_t pos);
 uint32_t getFileSize(void);
 void fileRewind(void);
@@ -80,9 +66,7 @@ void resetContextData(void);
  ******************************************************************************/
 
 static mp3_decoder_context_t context_data;
-#ifdef __arm__
 static FRESULT fr;
-#endif // __arm__
 
 
 /*******************************************************************************
@@ -91,42 +75,29 @@ static FRESULT fr;
  *******************************************************************************
  ******************************************************************************/
 
-static bool open_file(char* file_name) {
+static bool open_file(const char* file_name) {
+
     bool ret = false;
-#ifdef __arm__
+
     fr = f_open(&context_data.file, file_name, FA_READ);
     if (fr == FR_OK)
     {
         context_data.mp3File = &(context_data.file);
         ret = true;
     }
-#else
-    context_data.mp3File = fopen(file_name, "rb");
-    ret = (context_data.mp3File != NULL);
-#endif
     return ret;
 }
 
-static void close_file(void) {
-#ifdef __arm__
+void close_file(void) {
     f_close(context_data.mp3File);
-#else
-    fclose(context_data.mp3File);
-#endif // __arm__
+    context_data.file_opened = false;
 }
 
 uint32_t getFileSize(void) {
     uint32_t ret = 0;
     if (context_data.file_opened)
     {
-#ifdef __arm__
         ret = f_size(context_data.mp3File);
-#else
-        fseek(context_data.mp3File, 0L, SEEK_END);
-        ret = ftell(context_data.mp3File);
-        fileRewind();
-        fseek(context_data.mp3File, 0, SEEK_SET);
-#endif
     }
     return ret;
 }
@@ -134,46 +105,17 @@ uint32_t getFileSize(void) {
 
 void  MP3DecoderInit(void) {
     resetContextData();
-    context_data.Decoder = MP3InitDecoder();//Helix decoder init
-
-#ifdef DEBUG_PRO
-    PRINTF("MP3 decoder initialized");
-#endif // DEBUG
-
+    context_data.Decoder = MP3InitDecoder();
 }
 
-//bool  MP3LoadFile(uint8_t * audio_buffer, unsigned int * bytes_read, uint32_t audio_len) {
-//
-//	context_data.bytes_read_before = bytes_read;
-//    context_data.bytes_read_buffer = audio_buffer;
-//
-//    bool res = false;
-////    if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
-////        resetContextData();
-////        close_file();
-////    }
-// //   if (open_file(file_name)) {
-//        context_data.file_opened = true;
-//        context_data.f_size = audio_len;
-//        context_data.bytes_remaining = context_data.f_size;
-////        context_data.flash_buffer = audio;
-//
-//#ifdef DEBUG_PRO
-//        PRINTF("File opened successfully!\nFile size is %d bytes\n", context_data.f_size);
-//#endif
-//        res = true;
-// //   }
-//    return res;
-//
-//}
-
 bool  MP3LoadFile(const char* file_name) {
+
     bool res = false;
     if (context_data.file_opened == true) {//if there was a opened file, i must close it before opening a new one
         resetContextData();
         close_file();
     }
-    if (open_file(file_name)) {
+    if (open_file(file_name)){
         context_data.file_opened = true;
         context_data.f_size = getFileSize();
         context_data.bytes_remaining = context_data.f_size;
@@ -199,8 +141,6 @@ bool MP3GetLastFrameData(mp3_decoder_frame_data_t* data) {
 }
 
 mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, uint16_t* samples_decoded, uint8_t depth) {
-
-    static int counter = 0;
 
     mp3_decoder_result_t ret = MP3DECODER_NO_ERROR;    // Return value of the function
 
@@ -253,10 +193,6 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 
             // Read encoded data from file
             copyDataAndMovePointer();
-
-            counter++;
-
-
 
             // seek mp3 header beginning
             int offset = MP3FindSyncWord(context_data.encoded_frame_buffer + context_data.top_index, context_data.bottom_index);
@@ -333,7 +269,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 #endif
 
                 // If there weren't enough bytes on the buffer, try again
-                return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
+                return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1);
             }
             else
             {
@@ -353,7 +289,7 @@ mp3_decoder_result_t MP3GetDecodedFrame(short* outBuffer, uint16_t bufferSize, u
 #endif
 
                     // If invalid header, try with next frame
-                    return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1); //! H-quearlo
+                    return MP3GetDecodedFrame(outBuffer, bufferSize, samples_decoded, depth + 1);
                 }
             }
         }
@@ -384,20 +320,13 @@ uint16_t readFile(void* buf, uint16_t cnt) {
 
     uint16_t ret = 0;
     uint16_t read;
- //   if (context_data.file_opened)
- //   {
-#ifdef __arm__
-        fr = f_read(context_data.mp3File, ((uint8_t*)buf) + ret, cnt, &read);
-        if (fr == FR_OK)
-        {
-            ret = read;
-        }
-#else
-        ret = fread(buf, 1, cnt, context_data.mp3File);
-        context_data.buffer_ret[context_data.buffer_ret_idx] = ret;
-        context_data.buffer_ret_idx++;
-#endif
- //   }
+
+	fr = f_read(context_data.mp3File, ((uint8_t*)buf) + ret, cnt, (UINT*)&read);
+	if (fr == FR_OK)
+	{
+		ret = read;
+	}
+
     return ret;
 }
 
@@ -405,9 +334,7 @@ void copyDataAndMovePointer() {
     uint16_t bytes_read;
 
     // Fill buffer with info in mp3 file
-//    if (context_data.bottom_index == 6912) {
-//        PRINTF("wtff"); // llega a aca, NO DEBERIA
-//    }
+
     uint8_t* dst = context_data.encoded_frame_buffer + context_data.bottom_index;
 
     bytes_read = readFile(dst, (MP3_FRAME_BUFFER_BYTES - context_data.bottom_index));
@@ -432,11 +359,13 @@ void copyFrameInfo(mp3_decoder_frame_data_t* mp3_data, MP3FrameInfo* helix_data)
     mp3_data->sampleCount = helix_data->outputSamps;
 }
 void resetContextData(void) {
-    context_data.file_opened = false;
+	if(context_data.file_opened){
+		close_file();
+	}else{
+		context_data.file_opened = false;
+	}
     context_data.bottom_index = 0;
     context_data.top_index = 0;
     context_data.bytes_remaining = 0;
     context_data.f_size = 0;
-    context_data.bytes_read_before = 0;
-    context_data.bytes_read_buffer = NULL;
 }
