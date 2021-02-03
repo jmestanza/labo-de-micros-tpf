@@ -93,6 +93,11 @@ status_t SGTL_Init(codec_handle_t *handle, void *codec_config)
 
     SGTL_WriteReg(handle, 0x14, 0x0000); // saque master mute y mutes de channels
 
+    SGTL_WriteReg(handle, 0x21, 0x0000); // saco el MUTE ADC (por default =1) (Decimator mute) a ver que pasa
+
+    // despues habla del 0x18 headphone driver( hay 3 mute ahi)
+    // despues habla del 0x28 decimator mute flag ( hay 3 mute ahi)
+
 
 //    SGTL_ReadReg(handle, 0x02, 0x2500);
 //    SGTL_WriteReg(handle, 0x04, 0x0000);
