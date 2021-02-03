@@ -152,6 +152,8 @@ BOARD_InitPins:
   - {pin_num: '34', peripheral: JTAG, signal: JTAG_TCLK_SWD_CLK, pin_signal: PTA0/UART0_CTS_b/UART0_COL_b/FTM0_CH5/JTAG_TCLK/SWD_CLK/EZP_CLK}
   - {pin_num: '37', peripheral: JTAG, signal: JTAG_TMS_SWD_DIO, pin_signal: PTA3/UART0_RTS_b/FTM0_CH0/JTAG_TMS/SWD_DIO}
   - {pin_num: '55', peripheral: GPIOB, signal: 'GPIO, 2', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
+  - {pin_num: '58', peripheral: UART3, signal: RX, pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1}
+  - {pin_num: '59', peripheral: UART3, signal: TX, pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -199,6 +201,12 @@ void BOARD_InitPins(void)
 
     /* PORTA3 (pin 37) is configured as JTAG_TMS */
     PORT_SetPinMux(PORTA, 3U, kPORT_MuxAlt7);
+
+    /* PORTB10 (pin 58) is configured as UART3_RX */
+    PORT_SetPinMux(PORTB, 10U, kPORT_MuxAlt3);
+
+    /* PORTB11 (pin 59) is configured as UART3_TX */
+    PORT_SetPinMux(PORTB, 11U, kPORT_MuxAlt3);
 
     /* PORTB2 (pin 55) is configured as PTB2 */
     PORT_SetPinMux(BOARD_PIN_SPO2_PORT, BOARD_PIN_SPO2_PIN, kPORT_MuxAsGpio);

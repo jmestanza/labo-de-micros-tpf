@@ -46,6 +46,7 @@
 #include "i2c_config.h"
 #include "o2.h"
 #include "algorithm.h"
+#include "bt_driver.h"
 /* TODO: insert other definitions and declarations here. */
 void ecg_callback(void);
 
@@ -54,6 +55,10 @@ uint16_t i,j,l;
 uint16_t bpm[160];
 uint16_t oxy[160];
 /*
+ * Temperature data
+ */
+float temp;
+/*
  * ECG data
  */
 uint16_t data[ECG_VALUES];
@@ -61,6 +66,7 @@ uint16_t data[ECG_VALUES];
  * Oximeter data
  */
 uint8_t a = 0;
+int32_t sample_avg = 0;
 
 uint32_t aun_ir_buffer[FS*ST]; //infrared LED sensor data
 uint32_t aun_red_buffer[FS*ST];  //red LED sensor data
@@ -82,6 +88,13 @@ int main(void) {
 
     PRINTF("Hello World\n");
 
+    /*
+     * Bluetooth Init
+     */
+    BOARD_InitLEDs();
+    LED_BLUE_ON();
+    LED_GREEN_OFF();
+    bt_init();
     /*
      * LCD Init
      */
@@ -163,12 +176,16 @@ void PIT2_IRQHandler(void)
 	{// Cada 4s
 		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 		fever_temp_meassurement();
-		float temp;
 		temp = fever_get_temperature();
-		if(ch_spo2_valid)
+		if(ch_spo2_valid || (ch_hr_valid))
 		{
 			prev_spo2 = n_spo2;
 			prev_heart_rate = n_heart_rate;
+		}
+		else
+		{
+			prev_spo2 = 0;
+			prev_heart_rate = 0;
 		}
  		lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
@@ -216,15 +233,39 @@ void ecg_callback(void)
 	ecg_get_samples(data);
 	for(int k=0;k<ECG_VALUES-1;k++)
 	{
-		uint32_t uni,dec;
-		uni = (aun_red_buffer[l]/100)%10;
-		dec = (aun_red_buffer[l]/1000)%10;
+//		uint32_t uni,dec;
+//		uni = (aun_red_buffer[l]/100)%10;
+//		dec = (aun_red_buffer[l]/1000)%10;
 
-		lcdGFX_updateGFX((data[k]+data[k+1])/82, ((dec*10) + uni));
+		sample_avg += (aun_red_buffer[l] - sample_avg/12);
+		int32_t new_sample;
+		new_sample = aun_red_buffer[l] - sample_avg/12; //muestra a graficar
+		int32_t dataSPO2ToPlot,dataHRToPlot;
+		dataSPO2ToPlot = (new_sample/10)+50;
+		dataHRToPlot = (data[k]+data[k+1])/82;
+
+		if(dataSPO2ToPlot > 100) dataSPO2ToPlot = 100;
+		if(dataSPO2ToPlot < 0) dataSPO2ToPlot = 0;
+		if(dataHRToPlot > 100) dataHRToPlot = 100;
+		if(dataHRToPlot < 0) dataHRToPlot = 0;
+
+
+		lcdGFX_updateGFX(dataHRToPlot, dataSPO2ToPlot);
 		l++;
 		if(l == 100)
 		{
 			l = 0;
 		}
 	}
+}
+
+void UART_2_SERIAL_RX_TX_IRQHANDLER()
+{
+	bt_callback();
+}
+
+void FTM_1_IRQHANDLER()
+{
+	FTM_ClearStatusFlags(FTM_1_PERIPHERAL, kFTM_TimeOverflowFlag);
+	bt_tim_callback();
 }

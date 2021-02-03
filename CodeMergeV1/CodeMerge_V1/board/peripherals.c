@@ -318,6 +318,129 @@ void GPIO_2_init(void) {
 }
 
 /***********************************************************************************************************************
+ * FTM_1 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'FTM_1'
+- type: 'ftm'
+- mode: 'EdgeAligned'
+- type_id: 'ftm_5e037045c21cf6f361184c371dbbbab2'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'FTM0'
+- config_sets:
+  - ftm_main_config:
+    - ftm_config:
+      - clockSource: 'kFTM_SystemClock'
+      - clockSourceFreq: 'GetFreq'
+      - prescale: 'kFTM_Prescale_Divide_128'
+      - timerFrequency: '10'
+      - bdmMode: 'kFTM_BdmMode_0'
+      - pwmSyncMode: 'kFTM_SoftwareTrigger'
+      - reloadPoints: ''
+      - faultMode: 'kFTM_Fault_Disable'
+      - faultFilterValue: '0'
+      - deadTimePrescale: 'kFTM_Deadtime_Prescale_1'
+      - deadTimeValue: '0'
+      - extTriggers: ''
+      - chnlInitState: ''
+      - chnlPolarity: ''
+      - useGlobalTimeBase: 'false'
+    - timer_interrupts: 'kFTM_TimeOverflowInterruptEnable'
+    - enable_irq: 'true'
+    - ftm_interrupt:
+      - IRQn: 'FTM0_IRQn'
+      - enable_priority: 'false'
+      - enable_custom_name: 'false'
+    - EnableTimerInInit: 'false'
+  - ftm_edge_aligned_mode:
+    - ftm_edge_aligned_channels_config: []
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const ftm_config_t FTM_1_config = {
+  .prescale = kFTM_Prescale_Divide_128,
+  .bdmMode = kFTM_BdmMode_0,
+  .pwmSyncMode = kFTM_SoftwareTrigger,
+  .reloadPoints = 0,
+  .faultMode = kFTM_Fault_Disable,
+  .faultFilterValue = 0,
+  .deadTimePrescale = kFTM_Deadtime_Prescale_1,
+  .deadTimeValue = 0,
+  .extTriggers = 0,
+  .chnlInitState = 0,
+  .chnlPolarity = 0,
+  .useGlobalTimeBase = false
+};
+
+void FTM_1_init(void) {
+  FTM_Init(FTM_1_PERIPHERAL, &FTM_1_config);
+  FTM_SetTimerPeriod(FTM_1_PERIPHERAL, ((FTM_1_CLOCK_SOURCE/ (1U << (FTM_1_PERIPHERAL->SC & FTM_SC_PS_MASK))) / 10) + 1);
+  FTM_EnableInterrupts(FTM_1_PERIPHERAL, kFTM_TimeOverflowInterruptEnable);
+  /* Enable interrupt FTM0_IRQn request in the NVIC */
+  EnableIRQ(FTM_1_IRQN);
+}
+
+/***********************************************************************************************************************
+ * UART_2 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'UART_2'
+- type: 'uart'
+- mode: 'interrupts'
+- type_id: 'uart_cd31a12aa8c79051fda42cc851a27c37'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'UART3'
+- config_sets:
+  - uartConfig_t:
+    - uartConfig:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'GetFreq'
+      - baudRate_Bps: '115200'
+      - parityMode: 'kUART_ParityDisabled'
+      - stopBitCount: 'kUART_OneStopBit'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - idleType: 'kUART_IdleTypeStartBit'
+      - enableTx: 'true'
+      - enableRx: 'true'
+    - quick_selection: 'QuickSelection1'
+  - interruptsCfg:
+    - interrupts: 'kUART_RxDataRegFullInterruptEnable kUART_RxOverrunInterruptEnable'
+    - interrupt_vectors:
+      - enable_rx_tx_irq: 'true'
+      - interrupt_rx_tx:
+        - IRQn: 'UART3_RX_TX_IRQn'
+        - enable_priority: 'false'
+        - enable_custom_name: 'false'
+      - enable_err_irq: 'false'
+      - interrupt_err:
+        - IRQn: 'UART3_ERR_IRQn'
+        - enable_priority: 'false'
+        - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const uart_config_t UART_2_config = {
+  .baudRate_Bps = 115200,
+  .parityMode = kUART_ParityDisabled,
+  .stopBitCount = kUART_OneStopBit,
+  .txFifoWatermark = 0,
+  .rxFifoWatermark = 1,
+  .idleType = kUART_IdleTypeStartBit,
+  .enableTx = true,
+  .enableRx = true
+};
+
+void UART_2_init(void) {
+  UART_Init(UART_2_PERIPHERAL, &UART_2_config, UART_2_CLOCK_SOURCE);
+  UART_EnableInterrupts(UART_2_PERIPHERAL, kUART_RxDataRegFullInterruptEnable | kUART_RxOverrunInterruptEnable);
+  /* Enable interrupt UART3_RX_TX_IRQn request in the NVIC */
+  EnableIRQ(UART_2_SERIAL_RX_TX_IRQN);
+}
+
+/***********************************************************************************************************************
  * BOARD_InitBUTTONsPeripheral functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -555,6 +678,8 @@ void BOARD_InitPeripherals(void)
   SPI_0_init();
   GPIO_1_init();
   GPIO_2_init();
+  FTM_1_init();
+  UART_2_init();
 }
 
 void BOARD_InitBUTTONsPeripheral(void)

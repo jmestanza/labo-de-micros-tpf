@@ -15,8 +15,9 @@
 #include "fsl_dspi.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
-#include "fsl_uart.h"
 #include "fsl_clock.h"
+#include "fsl_ftm.h"
+#include "fsl_uart.h"
 #include "fsl_i2c.h"
 
 #if defined(__cplusplus)
@@ -71,6 +72,26 @@ extern "C" {
 #define GPIO_2_IRQN PORTB_IRQn
 /* GPIO_2 interrupt handler identifier. */
 #define GPIO_2_IRQHANDLER PORTB_IRQHandler
+/* Definition of peripheral ID */
+#define FTM_1_PERIPHERAL FTM0
+/* Definition of the clock source frequency */
+#define FTM_1_CLOCK_SOURCE CLOCK_GetFreq(kCLOCK_BusClk)
+/* FTM_1 interrupt vector ID (number). */
+#define FTM_1_IRQN FTM0_IRQn
+/* FTM_1 interrupt handler identifier. */
+#define FTM_1_IRQHANDLER FTM0_IRQHandler
+/* Definition of peripheral ID */
+#define UART_2_PERIPHERAL UART3
+/* Definition of the clock source frequency */
+#define UART_2_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
+/* UART_2 interrupt vector ID (number). */
+#define UART_2_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
+/* UART_2 interrupt handler identifier. */
+#define UART_2_SERIAL_RX_TX_IRQHANDLER UART3_RX_TX_IRQHandler
+/* UART_2 interrupt vector ID (number). */
+#define UART_2_SERIAL_ERROR_IRQN UART3_ERR_IRQn
+/* UART_2 interrupt handler identifier. */
+#define UART_2_SERIAL_ERROR_IRQHANDLER UART3_ERR_IRQHandler
 
 /* Definitions for BOARD_InitBUTTONsPeripheral functional group */
 /* Alias for GPIOC peripheral */
@@ -124,6 +145,8 @@ extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;
 extern const dspi_master_config_t SPI_0_config;
+extern const ftm_config_t FTM_1_config;
+extern const uart_config_t UART_2_config;
 extern const uart_config_t BOARD_DEBUG_UART_config;
 extern const i2c_master_config_t BOARD_ACCEL_I2C_config;
 
