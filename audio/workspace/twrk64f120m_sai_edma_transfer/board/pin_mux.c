@@ -56,6 +56,8 @@ processor_version: 2.0.0
 #define PIN5_IDX                         5u   /*!< Pin number for pin 4 in a port */
 #define PIN6_IDX                         6u   /*!< Pin number for pin 6 in a port */
 #define PIN8_IDX                         8u   /*!< Pin number for pin 6 in a port */
+#define PIN10_IDX                         10u   /*!< Pin number for pin 6 in a port */
+#define PIN11_IDX                         11u   /*!< Pin number for pin 6 in a port */
 #define PIN16_IDX                       16u   /*!< Pin number for pin 18 in a port */
 #define PIN17_IDX                       17u   /*!< Pin number for pin 19 in a port */
 #define PIN18_IDX                       18u   /*!< Pin number for pin 18 in a port */
@@ -82,6 +84,8 @@ BOARD_InitPins:
  * Description   : Configures pin routing and optionally pin electrical features.
  *
  *END**************************************************************************/
+
+
 void BOARD_InitPins(void) {
   CLOCK_EnableClock(kCLOCK_PortB);                           /* Port B Clock Gate Control: Clock enabled */
   CLOCK_EnableClock(kCLOCK_PortC);                           /* Port C Clock Gate Control: Clock enabled */
@@ -209,9 +213,16 @@ BOARD_I2C_ConfigurePins:
  * Description   : Configures pin routing and optionally pin electrical features.
  *
  *END**************************************************************************/
+
+
+// SDA PTC11 //
+// SCL PTC10 //
+
 void BOARD_I2C_ConfigurePins(void) {
 //  CLOCK_EnableClock(kCLOCK_PortD);                           /* Port D Clock Gate Control: Clock enabled */
-  CLOCK_EnableClock(kCLOCK_PortE);                           /* Port E Clock Gate Control: Clock enabled */
+//  CLOCK_EnableClock(kCLOCK_PortE);                           /* Port E Clock Gate Control: Clock enabled */
+	CLOCK_EnableClock(kCLOCK_PortC);                           /* Port E Clock Gate Control: Clock enabled */
+
 
 //  PORT_EnablePinsDigitalFilter(                              /* Configure digital filter */
 //    PORTD,                                                   /* Digital filter is configured on port D */
@@ -240,26 +251,58 @@ void BOARD_I2C_ConfigurePins(void) {
 //  };
 //  PORT_SetPinConfig(PORTD, PIN9_IDX, &portd9_pinB9_config);  /* PORTD9 (pin B9) is configured as I2C0_SDA */
 
-  const port_pin_config_t porte24_pin31_config = {
+//  const port_pin_config_t porte24_pin31_config = {
+//    kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
+//    kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
+//    kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
+//    kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
+//    kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
+//    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SCL */
+//    kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
+//  };
+//  PORT_SetPinConfig(PORTE, PIN24_IDX, &porte24_pin31_config); /* PORTE24 (pin 31) is configured as I2C0_SCL */
+//  const port_pin_config_t porte25_pin32_config = {
+//    kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
+//    kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
+//    kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
+//    kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
+//    kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
+//    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SDA */
+//    kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
+//  };
+//  PORT_SetPinConfig(PORTE, PIN25_IDX, &porte25_pin32_config); /* PORTE25 (pin 32) is configured as I2C0_SDA */
+
+
+  const port_pin_config_t portc10_pin31_config = {
     kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
     kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
     kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
     kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
     kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
-    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SCL */
+//    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SCL */
+    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SCL */
     kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
   };
-  PORT_SetPinConfig(PORTE, PIN24_IDX, &porte24_pin31_config); /* PORTE24 (pin 31) is configured as I2C0_SCL */
-  const port_pin_config_t porte25_pin32_config = {
+
+  PORT_SetPinConfig(PORTC, PIN10_IDX, &portc10_pin31_config); /* PORTE24 (pin 31) is configured as I2C0_SCL */
+
+  // SCL PTC10
+
+  const port_pin_config_t portc11_pin32_config = {
     kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
     kPORT_FastSlewRate,                                      /* Fast slew rate is configured */
     kPORT_PassiveFilterDisable,                              /* Passive filter is disabled */
     kPORT_OpenDrainEnable,                                   /* Open drain is enabled */
     kPORT_LowDriveStrength,                                  /* Low drive strength is configured */
-    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SDA */
+//    kPORT_MuxAlt5,                                           /* Pin is configured as I2C0_SDA */
+    kPORT_MuxAlt2,                                           /* Pin is configured as I2C0_SCL */
     kPORT_UnlockRegister                                     /* Pin Control Register fields [15:0] are not locked */
   };
-  PORT_SetPinConfig(PORTE, PIN25_IDX, &porte25_pin32_config); /* PORTE25 (pin 32) is configured as I2C0_SDA */
+  PORT_SetPinConfig(PORTC, PIN11_IDX, &portc11_pin32_config); /* PORTE25 (pin 32) is configured as I2C0_SDA */
+
+  // SDA PTC11
+
+
   SIM->SOPT5 = ((SIM->SOPT5 &
     (~(SIM_SOPT5_UART0TXSRC_MASK)))                          /* Mask bits to zero which are setting */
       | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX)       /* UART 0 transmit data source select: UART0_TX pin */

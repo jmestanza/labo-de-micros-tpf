@@ -137,7 +137,9 @@ status_t BOARD_Accel_I2C_Receive(uint8_t deviceAddress, uint32_t subAddress, uin
 
 void BOARD_Codec_I2C_Init(void)
 {
-    BOARD_I2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
+//    BOARD_I2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
+	BOARD_I2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
+
 }
 
 status_t BOARD_Codec_I2C_Send(
