@@ -98,6 +98,16 @@ instance:
           - IRQn: 'PIT2_IRQn'
           - enable_priority: 'false'
           - enable_custom_name: 'false'
+      - 3:
+        - channelNumber: '3'
+        - enableChain: 'false'
+        - timerPeriod: '0.012s'
+        - startTimer: 'false'
+        - enableInterrupt: 'true'
+        - interrupt:
+          - IRQn: 'PIT3_IRQn'
+          - enable_priority: 'false'
+          - enable_custom_name: 'false'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const pit_config_t PIT_1_config = {
@@ -113,14 +123,20 @@ void PIT_1_init(void) {
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_0, PIT_1_0_TICKS);
   /* Set channel 2 period to 25 ms. */
   PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_2, PIT_1_2_TICKS);
+  /* Set channel 3 period to 12 ms. */
+  PIT_SetTimerPeriod(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_1_3_TICKS);
   /* Enable interrupts from channel 0. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_0, kPIT_TimerInterruptEnable);
   /* Enable interrupts from channel 2. */
   PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_2, kPIT_TimerInterruptEnable);
+  /* Enable interrupts from channel 3. */
+  PIT_EnableInterrupts(PIT_1_PERIPHERAL, kPIT_Chnl_3, kPIT_TimerInterruptEnable);
   /* Enable interrupt PIT_1_0_IRQN request in the NVIC */
   EnableIRQ(PIT_1_0_IRQN);
   /* Enable interrupt PIT_1_2_IRQN request in the NVIC */
   EnableIRQ(PIT_1_2_IRQN);
+  /* Enable interrupt PIT_1_3_IRQN request in the NVIC */
+  EnableIRQ(PIT_1_3_IRQN);
 }
 
 /***********************************************************************************************************************
@@ -318,70 +334,6 @@ void GPIO_2_init(void) {
 }
 
 /***********************************************************************************************************************
- * FTM_1 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'FTM_1'
-- type: 'ftm'
-- mode: 'EdgeAligned'
-- type_id: 'ftm_5e037045c21cf6f361184c371dbbbab2'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'FTM0'
-- config_sets:
-  - ftm_main_config:
-    - ftm_config:
-      - clockSource: 'kFTM_SystemClock'
-      - clockSourceFreq: 'GetFreq'
-      - prescale: 'kFTM_Prescale_Divide_128'
-      - timerFrequency: '10'
-      - bdmMode: 'kFTM_BdmMode_0'
-      - pwmSyncMode: 'kFTM_SoftwareTrigger'
-      - reloadPoints: ''
-      - faultMode: 'kFTM_Fault_Disable'
-      - faultFilterValue: '0'
-      - deadTimePrescale: 'kFTM_Deadtime_Prescale_1'
-      - deadTimeValue: '0'
-      - extTriggers: ''
-      - chnlInitState: ''
-      - chnlPolarity: ''
-      - useGlobalTimeBase: 'false'
-    - timer_interrupts: 'kFTM_TimeOverflowInterruptEnable'
-    - enable_irq: 'true'
-    - ftm_interrupt:
-      - IRQn: 'FTM0_IRQn'
-      - enable_priority: 'false'
-      - enable_custom_name: 'false'
-    - EnableTimerInInit: 'false'
-  - ftm_edge_aligned_mode:
-    - ftm_edge_aligned_channels_config: []
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-const ftm_config_t FTM_1_config = {
-  .prescale = kFTM_Prescale_Divide_128,
-  .bdmMode = kFTM_BdmMode_0,
-  .pwmSyncMode = kFTM_SoftwareTrigger,
-  .reloadPoints = 0,
-  .faultMode = kFTM_Fault_Disable,
-  .faultFilterValue = 0,
-  .deadTimePrescale = kFTM_Deadtime_Prescale_1,
-  .deadTimeValue = 0,
-  .extTriggers = 0,
-  .chnlInitState = 0,
-  .chnlPolarity = 0,
-  .useGlobalTimeBase = false
-};
-
-void FTM_1_init(void) {
-  FTM_Init(FTM_1_PERIPHERAL, &FTM_1_config);
-  FTM_SetTimerPeriod(FTM_1_PERIPHERAL, ((FTM_1_CLOCK_SOURCE/ (1U << (FTM_1_PERIPHERAL->SC & FTM_SC_PS_MASK))) / 10) + 1);
-  FTM_EnableInterrupts(FTM_1_PERIPHERAL, kFTM_TimeOverflowInterruptEnable);
-  /* Enable interrupt FTM0_IRQn request in the NVIC */
-  EnableIRQ(FTM_1_IRQN);
-}
-
-/***********************************************************************************************************************
  * UART_2 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -438,6 +390,42 @@ void UART_2_init(void) {
   UART_EnableInterrupts(UART_2_PERIPHERAL, kUART_RxDataRegFullInterruptEnable | kUART_RxOverrunInterruptEnable);
   /* Enable interrupt UART3_RX_TX_IRQn request in the NVIC */
   EnableIRQ(UART_2_SERIAL_RX_TX_IRQN);
+}
+
+/***********************************************************************************************************************
+ * I2C_1 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'I2C_1'
+- type: 'i2c'
+- mode: 'I2C_Polling'
+- type_id: 'i2c_2566d7363e7e9aaedabb432110e372d7'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'I2C1'
+- config_sets:
+  - fsl_i2c:
+    - i2c_mode: 'kI2C_Master'
+    - clockSource: 'BusInterfaceClock'
+    - clockSourceFreq: 'GetFreq'
+    - i2c_master_config:
+      - enableMaster: 'true'
+      - enableStopHold: 'false'
+      - baudRate_Bps: '400000'
+      - glitchFilterWidth: '0'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const i2c_master_config_t I2C_1_config = {
+  .enableMaster = true,
+  .enableStopHold = false,
+  .baudRate_Bps = 400000,
+  .glitchFilterWidth = 0
+};
+
+void I2C_1_init(void) {
+  /* Initialization function */
+  I2C_MasterInit(I2C_1_PERIPHERAL, &I2C_1_config, I2C_1_CLK_FREQ);
 }
 
 /***********************************************************************************************************************
@@ -678,8 +666,8 @@ void BOARD_InitPeripherals(void)
   SPI_0_init();
   GPIO_1_init();
   GPIO_2_init();
-  FTM_1_init();
   UART_2_init();
+  I2C_1_init();
 }
 
 void BOARD_InitBUTTONsPeripheral(void)

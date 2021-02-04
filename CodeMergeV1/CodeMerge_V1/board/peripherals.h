@@ -15,9 +15,8 @@
 #include "fsl_dspi.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
-#include "fsl_clock.h"
-#include "fsl_ftm.h"
 #include "fsl_uart.h"
+#include "fsl_clock.h"
 #include "fsl_i2c.h"
 
 #if defined(__cplusplus)
@@ -41,6 +40,8 @@ extern "C" {
 #define PIT_1_0_TICKS USEC_TO_COUNT(150000U, PIT_1_CLK_FREQ) - 1U
 /* Definition of ticks count for channel 2. */
 #define PIT_1_2_TICKS USEC_TO_COUNT(25000U, PIT_1_CLK_FREQ) - 1U
+/* Definition of ticks count for channel 3. */
+#define PIT_1_3_TICKS USEC_TO_COUNT(12000U, PIT_1_CLK_FREQ) - 1U
 /* PIT_1 interrupt vector ID (number). */
 #define PIT_1_0_IRQN PIT0_IRQn
 /* PIT_1 interrupt handler identifier. */
@@ -49,6 +50,10 @@ extern "C" {
 #define PIT_1_2_IRQN PIT2_IRQn
 /* PIT_1 interrupt handler identifier. */
 #define PIT_1_2_IRQHANDLER PIT2_IRQHandler
+/* PIT_1 interrupt vector ID (number). */
+#define PIT_1_3_IRQN PIT3_IRQn
+/* PIT_1 interrupt handler identifier. */
+#define PIT_1_3_IRQHANDLER PIT3_IRQHandler
 /* Alias for ADC0 peripheral */
 #define ADC0_PERIPHERAL ADC0
 /* ADC0 interrupt vector ID (number). */
@@ -73,14 +78,6 @@ extern "C" {
 /* GPIO_2 interrupt handler identifier. */
 #define GPIO_2_IRQHANDLER PORTB_IRQHandler
 /* Definition of peripheral ID */
-#define FTM_1_PERIPHERAL FTM0
-/* Definition of the clock source frequency */
-#define FTM_1_CLOCK_SOURCE CLOCK_GetFreq(kCLOCK_BusClk)
-/* FTM_1 interrupt vector ID (number). */
-#define FTM_1_IRQN FTM0_IRQn
-/* FTM_1 interrupt handler identifier. */
-#define FTM_1_IRQHANDLER FTM0_IRQHandler
-/* Definition of peripheral ID */
 #define UART_2_PERIPHERAL UART3
 /* Definition of the clock source frequency */
 #define UART_2_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
@@ -92,6 +89,13 @@ extern "C" {
 #define UART_2_SERIAL_ERROR_IRQN UART3_ERR_IRQn
 /* UART_2 interrupt handler identifier. */
 #define UART_2_SERIAL_ERROR_IRQHANDLER UART3_ERR_IRQHandler
+/* BOARD_InitPeripherals defines for I2C1 */
+/* Definition of peripheral ID */
+#define I2C_1_PERIPHERAL I2C1
+/* Definition of the clock source */
+#define I2C_1_CLOCK_SOURCE I2C1_CLK_SRC
+/* Definition of the clock source frequency */
+#define I2C_1_CLK_FREQ CLOCK_GetFreq(I2C_1_CLOCK_SOURCE)
 
 /* Definitions for BOARD_InitBUTTONsPeripheral functional group */
 /* Alias for GPIOC peripheral */
@@ -145,8 +149,8 @@ extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;
 extern const dspi_master_config_t SPI_0_config;
-extern const ftm_config_t FTM_1_config;
 extern const uart_config_t UART_2_config;
+extern const i2c_master_config_t I2C_1_config;
 extern const uart_config_t BOARD_DEBUG_UART_config;
 extern const i2c_master_config_t BOARD_ACCEL_I2C_config;
 

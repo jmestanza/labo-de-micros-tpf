@@ -44,6 +44,8 @@ uint8_t
   textsize = 1;          ///< Desired magnification of text to print()
 _Bool
   wrap = true;           ///< If set, 'wrap' text at right edge of display
+_Bool
+  isLCD_initialized = 0;
 uint16_t				 ///< Grid start references (initialize in lcdGFX_init)
   gridECG_x = 0,
   gridECG_y = 0,
@@ -327,6 +329,11 @@ static const uint8_t font[256][5] = {
 /*
  * Function definitions
  */
+_Bool lcdGFX_getState(void)
+{
+	return isLCD_initialized;
+}
+
 
 void display_setCursor(uint16_t x, uint16_t y)
 {
@@ -767,12 +774,29 @@ void lcdGFX_init(void)
 	tft_begin();
 
     display_setRotation(3);
-    display_fillScreen(ILI9341_BLACK);
+//    display_fillScreen(ILI9341_BLACK);
+
+    for(int16_t i=0;i<320;i++)
+    {
+    	for(int16_t j=0;j<240;j++)
+    	{
+    		display_drawPixel(i,j,ILI9341_BLACK);
+    	}
+    }
+
     int16_t w, h;
     w = get_display_width();
     h = get_display_height();
 
-    display_fillScreen(ILI9341_BLACK);
+//    display_fillScreen(ILI9341_BLACK);
+    for(int16_t i=0;i<320;i++)
+    {
+    	for(int16_t j=0;j<240;j++)
+    	{
+    		display_drawPixel(i,j,ILI9341_BLACK);
+    	}
+    }
+
     gridECG_x = 10;
     gridECG_y = 110;
     gridSPO2_x = 10;
@@ -826,7 +850,7 @@ void lcdGFX_init(void)
     display_setCursor(bpm_x, bpm_y);
 	display_setTextColor(ILI9341_GREEN);
 	display_setTextSize(numSize);
-	display_printString("60\r\n");
+	display_printString("00\r\n");
 
 
     for(uint16_t i=0;i<30;i++)
@@ -870,7 +894,7 @@ void lcdGFX_init(void)
     display_setCursor(temp_x, temp_y);
 	display_setTextColor(ILI9341_YELLOW);
 	display_setTextSize(numSize);
-	display_printString("36.5");
+	display_printString("00.0");
 	int16_t txtRef_x, txtRef_y;
 	txtRef_x = display_getCursorX();
 	txtRef_y = display_getCursorY();
@@ -906,14 +930,14 @@ void lcdGFX_init(void)
     display_setCursor(oxy_x, oxy_y);
 	display_setTextColor(ILI9341_WHITE);
 	display_setTextSize(numSize);
-	display_printString("98");
+	display_printString("00");
 	txtRef_x = display_getCursorX();
 	txtRef_y = display_getCursorY();
 	display_drawChar(txtRef_x, txtRef_y+27, '%', ILI9341_WHITE, 2);
 	numSize = 2;
 	display_setCursor(txtRef_x, txtRef_y);
 	display_setTextSize(numSize);
-	display_printString("89");
+	display_printString("00");
 
     numSize = 1;
     display_setCursor(280-65, (h/2)+20);
@@ -945,6 +969,8 @@ void lcdGFX_init(void)
 	display_printString("2\n");
 
 	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
+
+	isLCD_initialized = 1;
 }
 
 void lcdGFX_updateGFX(uint16_t dataECG, uint16_t dataSPO2)

@@ -19,7 +19,7 @@
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#define PI 3.14159265358979323846
+#define PI 3.1416
 
 #define display_drawPixel   drawPixel
 #define display_drawVLine   drawVLine
@@ -55,6 +55,7 @@ uint16_t display_color565(uint8_t red, uint8_t green, uint8_t blue);
  * Functions for final user
  */
 void lcdGFX_init(void);
+_Bool lcdGFX_getState(void);
 void lcdGFX_updateGFX(uint16_t dataECG, uint16_t dataSPO2);
 void lcdGFX_updateDATA(uint16_t dataECG, float dataSPO2, float dataTEMP);
 

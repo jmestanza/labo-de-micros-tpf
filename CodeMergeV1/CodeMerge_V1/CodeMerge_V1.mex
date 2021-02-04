@@ -896,16 +896,6 @@
                   <data type="Version">2.0.5</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.ftm" description="FTM Driver not found in the toolchain/IDE project." problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data type="Boolean">true</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.ftm" description="Unsupported version of the FTM Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="compatible">
-                  <data type="Version">2.0.2</data>
-               </feature>
-            </dependency>
          </dependencies>
          <peripherals_profile>
             <processor_version>4.0.1</processor_version>
@@ -966,11 +956,6 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="frequency" evaluation="greaterThan">
-                        <data type="Frequency" unit="Hz">0</data>
-                     </feature>
-                  </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART3.uart_tx" description="Signal TX of the peripheral UART3 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="equal">
                         <data type="Boolean">true</data>
@@ -979,6 +964,21 @@
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART3.uart_rx" description="Signal RX of the peripheral UART3 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="equal">
                         <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="I2C1.i2c_scl" description="Signal serial clock of the peripheral I2C1 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="I2C1.i2c_sda" description="Signal serial data of the peripheral I2C1 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
                </dependencies>
@@ -1023,6 +1023,18 @@
                               <setting name="enableInterrupt" value="true"/>
                               <struct name="interrupt">
                                  <setting name="IRQn" value="PIT2_IRQn"/>
+                                 <setting name="enable_priority" value="false"/>
+                                 <setting name="enable_custom_name" value="false"/>
+                              </struct>
+                           </struct>
+                           <struct name="3">
+                              <setting name="channelNumber" value="3"/>
+                              <setting name="enableChain" value="false"/>
+                              <setting name="timerPeriod" value="0.012s"/>
+                              <setting name="startTimer" value="false"/>
+                              <setting name="enableInterrupt" value="true"/>
+                              <struct name="interrupt">
+                                 <setting name="IRQn" value="PIT3_IRQn"/>
                                  <setting name="enable_priority" value="false"/>
                                  <setting name="enable_custom_name" value="false"/>
                               </struct>
@@ -1111,54 +1123,6 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="FTM_1" type="ftm" type_id="ftm_5e037045c21cf6f361184c371dbbbab2" mode="EdgeAligned" peripheral="FTM0" enabled="true">
-                     <config_set name="ftm_main_config">
-                        <struct name="ftm_config">
-                           <setting name="clockSource" value="kFTM_SystemClock"/>
-                           <setting name="clockSourceFreq" value="GetFreq"/>
-                           <setting name="prescale" value="kFTM_Prescale_Divide_128"/>
-                           <setting name="timerFrequency" value="10"/>
-                           <setting name="bdmMode" value="kFTM_BdmMode_0"/>
-                           <set name="pwmSyncMode">
-                              <selected>
-                                 <id>kFTM_SoftwareTrigger</id>
-                              </selected>
-                           </set>
-                           <set name="reloadPoints">
-                              <selected/>
-                           </set>
-                           <setting name="faultMode" value="kFTM_Fault_Disable"/>
-                           <setting name="faultFilterValue" value="0"/>
-                           <setting name="deadTimePrescale" value="kFTM_Deadtime_Prescale_1"/>
-                           <setting name="deadTimeValue" value="0"/>
-                           <set name="extTriggers">
-                              <selected/>
-                           </set>
-                           <set name="chnlInitState">
-                              <selected/>
-                           </set>
-                           <set name="chnlPolarity">
-                              <selected/>
-                           </set>
-                           <setting name="useGlobalTimeBase" value="false"/>
-                        </struct>
-                        <set name="timer_interrupts">
-                           <selected>
-                              <id>kFTM_TimeOverflowInterruptEnable</id>
-                           </selected>
-                        </set>
-                        <setting name="enable_irq" value="true"/>
-                        <struct name="ftm_interrupt">
-                           <setting name="IRQn" value="FTM0_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="enable_custom_name" value="false"/>
-                        </struct>
-                        <setting name="EnableTimerInInit" value="false"/>
-                     </config_set>
-                     <config_set name="ftm_edge_aligned_mode">
-                        <array name="ftm_edge_aligned_channels_config"/>
-                     </config_set>
-                  </instance>
                   <instance name="UART_2" type="uart" type_id="uart_cd31a12aa8c79051fda42cc851a27c37" mode="interrupts" peripheral="UART3" enabled="true">
                      <config_set name="uartConfig_t" quick_selection="QuickSelection1">
                         <struct name="uartConfig">
@@ -1194,6 +1158,19 @@
                               <setting name="enable_priority" value="false"/>
                               <setting name="enable_custom_name" value="false"/>
                            </struct>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="I2C_1" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="I2C_Polling" peripheral="I2C1" enabled="true">
+                     <config_set name="fsl_i2c">
+                        <setting name="i2c_mode" value="kI2C_Master"/>
+                        <setting name="clockSource" value="BusInterfaceClock"/>
+                        <setting name="clockSourceFreq" value="GetFreq"/>
+                        <struct name="i2c_master_config">
+                           <setting name="enableMaster" value="true"/>
+                           <setting name="enableStopHold" value="false"/>
+                           <setting name="baudRate_Bps" value="400000"/>
+                           <setting name="glitchFilterWidth" value="0"/>
                         </struct>
                      </config_set>
                   </instance>

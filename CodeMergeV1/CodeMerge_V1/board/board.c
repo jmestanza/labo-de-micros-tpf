@@ -39,6 +39,25 @@
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 #include "fsl_i2c.h"
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
+#if defined BOARD_USE_CODEC
+#include "fsl_sgtl5000.h"
+#endif
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+#if defined BOARD_USE_CODEC
+codec_config_t boardCodecConfig = {
+    .I2C_SendFunc = BOARD_Codec_I2C_Send,
+    .I2C_ReceiveFunc = BOARD_Codec_I2C_Receive,
+    .op.Init = SGTL_Init,
+    .op.Deinit = SGTL_Deinit,
+    .op.SetFormat = SGTL_ConfigDataFormat
+};
+#endif
+
+
+
+
 /* Initialize debug console. */
 void BOARD_InitDebugConsole(void)
 {
@@ -111,5 +130,26 @@ status_t BOARD_Accel_I2C_Send(uint8_t deviceAddress, uint32_t subAddress, uint8_
 status_t BOARD_Accel_I2C_Receive(uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
 {
     return BOARD_I2C_Receive(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, rxBuff, rxBuffSize);
+}
+
+void BOARD_Codec_I2C_Init(void)
+{
+//    BOARD_I2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
+	BOARD_I2C_Init(BOARD_CODEC_I2C_BASEADDR, BOARD_CODEC_I2C_CLOCK_FREQ);
+
+}
+
+status_t BOARD_Codec_I2C_Send(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
+{
+    return BOARD_I2C_Send(BOARD_CODEC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
+                            txBuffSize);
+}
+
+status_t BOARD_Codec_I2C_Receive(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
+{
+    return BOARD_I2C_Receive(BOARD_CODEC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff,
+                               rxBuffSize);
 }
 #endif /* SDK_I2C_BASED_COMPONENT_USED */

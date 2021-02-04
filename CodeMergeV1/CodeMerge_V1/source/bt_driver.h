@@ -13,8 +13,9 @@
  */
 #define DEVICE_CON 1
 #define DEVICE_NOT_CON 0
-#define BUFFER_SIZE 16
-#define TIMEOUT_LIMIT 300 // 3 Seg
+#define BUFFER_SIZE_BT 16
+#define TIMEOUT_LIMIT 35 // 3 Seg
+#define MAX_PENALTY 3
 /*
  * Function declarations
  */

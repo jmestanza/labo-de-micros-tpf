@@ -36,9 +36,9 @@
 #include "fsl_debug_console_conf.h"
 #include "fsl_io.h"
 #ifdef FSL_RTOS_FREE_RTOS
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
+//#include "semphr.h"
 #endif
 /*******************************************************************************
  * Definitions

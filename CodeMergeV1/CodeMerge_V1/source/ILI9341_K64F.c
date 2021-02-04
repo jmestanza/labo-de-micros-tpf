@@ -128,7 +128,7 @@ uint8_t initcmd[] = {
 _Bool pitIsrFlag = false;
 dspi_transfer_t masterXfer;
 uint8_t masterBuffer[] = {0};
-uint8_t buffer[2*ILI9341_TFTWIDTH*ILI9341_TFTHEIGHT];
+uint8_t buffer[2*ILI9341_TFTWIDTH*ILI9341_TFTHEIGHT/4];
 
 /*
  * Function definitios

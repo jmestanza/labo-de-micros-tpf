@@ -22,11 +22,12 @@
  */
 bool state = DEVICE_NOT_CON;
 
-char bufferUART[BUFFER_SIZE];
+char bufferUART[BUFFER_SIZE_BT];
 char *buffer_ptr = bufferUART; // Porque no puedo comparar directamente con string sino
 
-uint8_t data2send[] = "0512_060_367_9915"; // Mensaje de prueba
+uint8_t data2send[] = "0512_060_367_9915X"; // Mensaje de prueba
 
+uint8_t penalty = 0;
 uint16_t aux = 0;
 uint16_t cont = 0;
 bool txOnGoing  = false;
@@ -53,7 +54,7 @@ void bt_init(void)
 	 * Deberia inicializar uart y timer x200ms
 	 * O no, y dejar las interrupciones en main con los callbacks
 	 */
-	data2send[8] = '\n';
+	data2send[17] = '\n';
 }
 
 void bt_callback()
@@ -65,12 +66,12 @@ void bt_callback()
     {
         data = UART_ReadByte(UART_2_PERIPHERAL);
 
-        /* If \n is not received, add data to buffer. */
+        /* If '_' is not received, add data to buffer. */
         if (data != '_') // Se me ocurrio usar '_' como terminador especial
         {
-            bufferUART[rxIndex] = data;
+        	bufferUART[rxIndex] = data;
             rxIndex++;
-            if(rxIndex == BUFFER_SIZE)
+            if(rxIndex >= BUFFER_SIZE_BT)
             {
             	clear_buffer();
                 LED_BLUE_TOGGLE();
@@ -80,53 +81,61 @@ void bt_callback()
         else
         {
         	bufferUART[rxIndex] = '\0';
-        	if(*buffer_ptr == *dev_command)
+        	if(!strcmp(&bufferUART[rxIndex-9],dev_command))
         	{
         		clear_buffer();
-        		FTM_StartTimer(FTM_1_PERIPHERAL, kFTM_SystemClock);
         		is_devAck = true;
         		LED_BLUE_OFF();
         		LED_GREEN_TOGGLE();
-        		state = DEVICE_CON;
+        		state = DEVICE_CON; // Enables PIT entering
         	}
-        	else if(*bufferUART == *dev_ack)
+        	else if(!strcmp(&bufferUART[rxIndex-9],dev_ack))
         	{
         		clear_buffer();
         		is_devAck = true;
         	}
+        	else
+			{
+        		clear_buffer();
+			}
         }
     }
 
-    /* If sending data. */
-    if(((kUART_TxDataRegEmptyFlag) & UART_GetStatusFlags(UART_2_PERIPHERAL)) && (txOnGoing))
-    {
-    	UART_WriteByte(UART_2_PERIPHERAL, data2send[cont]);
-    	if(cont == 8) // Esto deberia ser el size de los datos
-    	{
-    		UART_DisableInterrupts(UART_2_PERIPHERAL, kUART_TxDataRegEmptyInterruptEnable);
-    		cont = 0;
-    		txOnGoing = false;
-    	}
-    	else
-    	{
-    		cont++;
-    	}
-    }
+//    /* If sending data. */
+//    if(((kUART_TxDataRegEmptyFlag) & UART_GetStatusFlags(UART_2_PERIPHERAL)) && (txOnGoing))
+//    {
+//    	UART_WriteByte(UART_2_PERIPHERAL, data2send[cont]);
+//    	if(cont == 17) // Esto deberia ser el size de los datos
+//    	{
+//    		UART_DisableInterrupts(UART_2_PERIPHERAL, kUART_TxDataRegEmptyInterruptEnable);
+//    		cont = 0;
+//    		clear_buffer();
+//    		txOnGoing = false;
+//    	}
+//    	else
+//    	{
+//    		cont++;
+//    	}
+//    }
 
 }
 
 void bt_tim_callback(void)
 {
 	/*
-	 * Se llama cada 100ms cuando hay un dispositivo conectado
+	 * Se llama cada 200ms cuando hay un dispositivo conectado
 	 */
 	if(is_devAck)
 	{
 		/* Se envia byte a byte mediante interrupcion */
-		UART_EnableInterrupts(UART_2_PERIPHERAL, kUART_TxDataRegEmptyInterruptEnable);
-		txOnGoing = true;
+//		UART_EnableInterrupts(UART_2_PERIPHERAL, kUART_TxDataRegEmptyInterruptEnable);
+		//txOnGoing = true;
 		timeOut = 0;
 		is_devAck = false;
+		penalty = 0;
+		//clear_buffer();
+		UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 17);
+		//txOnGoing = false;
 	}
 	else
 	{
@@ -136,14 +145,24 @@ void bt_tim_callback(void)
 		timeOut++;
 		if(timeOut == TIMEOUT_LIMIT)
 		{
-			FTM_StopTimer(FTM_1_PERIPHERAL);
-			LED_GREEN_OFF();
+			penalty++;
+			if(penalty == MAX_PENALTY) // Max tries reached
+			{
+				LED_GREEN_OFF();
+				LED_BLUE_ON();
+				state = DEVICE_NOT_CON; // Disables PIT entering
+				penalty = 0;
+			}
+			else // Try new send
+			{
+				UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 17);
+			}
+			clear_buffer();
 			timeOut = 0;
-			state = DEVICE_NOT_CON;
 		}
 	}
 
-	if(!(aux % 10))
+	if(!(aux % 5))
 	{
 		LED_GREEN_TOGGLE(); // Para saber que esta andando
 	}
@@ -158,7 +177,7 @@ _Bool bt_getState(void)
 void clear_buffer(void)
 {
 	uint8_t i = 0;
-	for(i=0;i<BUFFER_SIZE;i++)
+	for(i=0;i<BUFFER_SIZE_BT;i++)
 	{
 		bufferUART[i] = '\0';
 	}

@@ -192,6 +192,22 @@
 /* Board accelerometer driver */
 #define BOARD_ACCEL_FXOS
 
+//#define BOARD_CODEC_I2C_BASEADDR I2C0
+#define BOARD_USE_CODEC 1
+#define SDK_I2C_BASED_COMPONENT_USED 1
+
+#define BOARD_CODEC_I2C_BASEADDR I2C1
+
+#define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetFreq(kCLOCK_BusClk)
+
+/* @brief The SDSPI disk PHY configuration. */
+#define BOARD_SDSPI_SPI_BASE SPI1_BASE /*!< SPI base address for SDSPI */
+#define BOARD_SDSPI_CD_GPIO_BASE GPIOB /*!< Port related to card detect pin for SDSPI */
+#ifndef BOARD_SDSPI_CD_PIN
+#define BOARD_SDSPI_CD_PIN 20U /*!< Card detect pin for SDSPI */
+#endif
+
+
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
@@ -217,6 +233,13 @@ status_t BOARD_I2C_Receive(I2C_Type *base,
 void BOARD_Accel_I2C_Init(void);
 status_t BOARD_Accel_I2C_Send(uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint32_t txBuff);
 status_t BOARD_Accel_I2C_Receive(uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint8_t *rxBuff, uint8_t rxBuffSize);
+
+void BOARD_Codec_I2C_Init(void);
+status_t BOARD_Codec_I2C_Send(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize);
+status_t BOARD_Codec_I2C_Receive(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize);
+
 #endif /* SDK_I2C_BASED_COMPONENT_USED */
 #if defined(__cplusplus)
 }
