@@ -16,6 +16,8 @@
 #define BUFFER_SIZE_BT 16
 #define TIMEOUT_LIMIT 35 // 3 Seg
 #define MAX_PENALTY 3
+
+
 /*
  * Function declarations
  */
@@ -23,7 +25,7 @@
 /*
  * bt_init: init uart and timer drivers to use
  */
-void bt_init(void);
+void bt_init(void (*callback)(char*));
 
 _Bool bt_getState(void);
 

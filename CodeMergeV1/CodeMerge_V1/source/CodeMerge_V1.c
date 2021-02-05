@@ -59,6 +59,7 @@
 #include "audio_and_song.h"
 #include "music.h"
 /* TODO: insert other definitions and declarations here. */
+void sound_play(char* songToPlay);
 void ecg_callback(void);
 void initialI2STestAndCodecInit(void);
 void play_mp3(const char* file_name);
@@ -113,9 +114,10 @@ int main(void) {
      * Bluetooth Init
      */
     BOARD_InitLEDs();
-    LED_BLUE_ON();
+    LED_RED_ON();
+    LED_BLUE_OFF();
     LED_GREEN_OFF();
-    bt_init();
+    bt_init(sound_play);
 
     // Test graphics vectors (generated manually)
 
@@ -237,14 +239,26 @@ int main(void) {
     return 0 ;
 }
 
-//void PIT0_IRQHandler(void)
-//{
-//
-//}
+
+
+void sound_play(char* songToPlay)
+{
+	if(!strcmp(songToPlay,"MP3.ECG.."))
+	{
+		playing_state.song_state = SONG_ECG_OUT_OF_RANGE;
+	}
+	if(!strcmp(songToPlay,"MP3.SPO.."))
+	{
+		playing_state.song_state = SONG_SPO2_OUT_OF_RANGE;
+	}
+	if(!strcmp(songToPlay,"MP3.TEM.."))
+	{
+		playing_state.song_state = SONG_TEMP_OUT_OF_RANGE;
+	}
+}
 
 void PIT2_IRQHandler(void)
 {
-
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_2, kPIT_TimerFlag);
 	i++;
 	j++;

@@ -35,10 +35,15 @@ bool txOnGoing  = false;
 const char *dev_command = "NewDevice";
 const char *dev_ack = "DeviceAck";
 
+const char *cmd_ecg_oor = "MP3.ECG..";
+const char *cmd_spo2_oor = "MP3.SPO..";
+const char *cmd_temp_oor = "MP3.TEM..";
+
 uint8_t rxIndex = 0;
 bool is_devAck = false;
 uint16_t timeOut = 0;
 
+void (*sound_callback)(char*);
 /*
  * Function declarations
  */
@@ -48,13 +53,10 @@ void clear_buffer(void);
  * Function definitions
  */
 
-void bt_init(void)
+void bt_init(void (*callback)(char*))
 {
-	/*
-	 * Deberia inicializar uart y timer x200ms
-	 * O no, y dejar las interrupciones en main con los callbacks
-	 */
 	data2send[17] = '\n';
+	sound_callback = callback;
 }
 
 void bt_callback()
@@ -74,8 +76,6 @@ void bt_callback()
             if(rxIndex >= BUFFER_SIZE_BT)
             {
             	clear_buffer();
-                LED_BLUE_TOGGLE();
-                LED_GREEN_TOGGLE();
             }
         }
         else
@@ -85,14 +85,28 @@ void bt_callback()
         	{
         		clear_buffer();
         		is_devAck = true;
-        		LED_BLUE_OFF();
-        		LED_GREEN_TOGGLE();
+        		LED_RED_OFF();
         		state = DEVICE_CON; // Enables PIT entering
         	}
         	else if(!strcmp(&bufferUART[rxIndex-9],dev_ack))
         	{
         		clear_buffer();
         		is_devAck = true;
+        	}
+        	else if(!strcmp(&bufferUART[rxIndex-9],cmd_ecg_oor))
+        	{
+        		sound_callback(&bufferUART[rxIndex-9]);
+        		clear_buffer();
+        	}
+        	else if(!strcmp(&bufferUART[rxIndex-9],cmd_spo2_oor))
+        	{
+        		sound_callback(&bufferUART[rxIndex-9]);
+        		clear_buffer();
+        	}
+        	else if(!strcmp(&bufferUART[rxIndex-9],cmd_temp_oor))
+        	{
+        		sound_callback(&bufferUART[rxIndex-9]);
+        		clear_buffer();
         	}
         	else
 			{
@@ -149,7 +163,7 @@ void bt_tim_callback(void)
 			if(penalty == MAX_PENALTY) // Max tries reached
 			{
 				LED_GREEN_OFF();
-				LED_BLUE_ON();
+				LED_RED_ON();
 				state = DEVICE_NOT_CON; // Disables PIT entering
 				penalty = 0;
 			}
