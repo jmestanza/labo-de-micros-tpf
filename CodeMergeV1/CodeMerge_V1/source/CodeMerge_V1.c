@@ -101,6 +101,7 @@ int main(void) {
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
+    BOARD_InitSDHC();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
   	/* Init FSL debug console. */
@@ -146,20 +147,18 @@ int main(void) {
     prev_spo2 = 00.00;
     prev_heart_rate = 00;
 
-
-
     /*
      * Audio
      */
 
-//    SYSMPU_Enable(SYSMPU, false);
-//	BOARD_Codec_I2C_Init();
-//
-//	PRINTF("Testing I2S!\n\r");
-//
-//	initialI2STestAndCodecInit();
-//
-//	PRINTF("If you heard sounds, then initialization is ok!\n\r");
+    SYSMPU_Enable(SYSMPU, false);
+	BOARD_Codec_I2C_Init();
+
+	PRINTF("Testing I2S!\n\r");
+
+	initialI2STestAndCodecInit();
+
+	PRINTF("If you heard sounds, then initialization is ok!\n\r");
 
     /*
      * LCD Init
@@ -187,11 +186,11 @@ int main(void) {
 
 
 
-//	if(SD_init() == 0) { // if SD init is ok!
-//		MP3SetSDInitializedFlag(); // setInitializedFlag on MP3 decoder! => we can read files on SD Card!
-//	}else{
-//		return -1;
-//	}
+	if(SD_init() == 0) { // if SD init is ok!
+		MP3SetSDInitializedFlag(); // setInitializedFlag on MP3 decoder! => we can read files on SD Card!
+	}else{
+		return -1;
+	}
 
 	/* Aca empezaria el testbench de las reproducciones de audio */
 
@@ -199,7 +198,7 @@ int main(void) {
 
 	// en el handler hago que cada 5 segundos cambie el estado de la cancion que se esta reproduciendo
 
-    // playing_state.song_state = SONG_NO_SOUND;
+     playing_state.song_state = SONG_ECG_OUT_OF_RANGE;
 
 //    gpioMode(PIN_SPO2, INPUT);
 //    gpioIRQ(PIN_SPO2, GPIO_IRQ_MODE_FALLING_EDGE, callback_pin);
@@ -211,29 +210,29 @@ int main(void) {
     while(1) {
     	// espero que PIT cambie el estado de song_state
 
-//    	if(playing_state.song_state != SONG_NO_SOUND){
-//    		switch(playing_state.song_state){
-//    		case SONG_ECG_OUT_OF_RANGE:
-//    			play_mp3("/./sonicpro.mp3");
-//    			// (!) Este dummy play es necesario (si entre las reproducciones hay intervalo mayor a 10 segundos)
-//    			// Muy probablemente la placa UDA1380 detecta silencio y se va a un modo bajo consumo.
-//    			// Es por eso que hay que hacer un "wakeup" con un sonido que se haya reproducido al menos 1 segundo antes
-//    			// de reproducir el mp3 verdadero. Si no es la placa quien detecta silencio, puede que sea i2s.
-//    			play_mp3("/./ecg_oor.mp3"); //
-//    			break;
-//    		case SONG_SPO2_OUT_OF_RANGE:
-//    			play_mp3("/./sonicpro.mp3");
-//    			play_mp3("/./spo2_oor.mp3");
-//    			break;
-//    		case SONG_TEMP_OUT_OF_RANGE:
-//    			play_mp3("/./sonicpro.mp3");
-//    			play_mp3("/./temp_oor.mp3");
-//    			break;
-//    		default:
-//    			PRINTF("Shouldn't be here");
-//    		}
-//    		playing_state.song_state = SONG_NO_SOUND;
-//    	}
+    	if(playing_state.song_state != SONG_NO_SOUND){
+    		switch(playing_state.song_state){
+    		case SONG_ECG_OUT_OF_RANGE:
+    			play_mp3("/./sonicpro.mp3");
+    			// (!) Este dummy play es necesario (si entre las reproducciones hay intervalo mayor a 10 segundos)
+    			// Muy probablemente la placa UDA1380 detecta silencio y se va a un modo bajo consumo.
+    			// Es por eso que hay que hacer un "wakeup" con un sonido que se haya reproducido al menos 1 segundo antes
+    			// de reproducir el mp3 verdadero. Si no es la placa quien detecta silencio, puede que sea i2s.
+    			play_mp3("/./ecg_oor.mp3"); //
+    			break;
+    		case SONG_SPO2_OUT_OF_RANGE:
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./spo2_oor.mp3");
+    			break;
+    		case SONG_TEMP_OUT_OF_RANGE:
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./temp_oor.mp3");
+    			break;
+    		default:
+    			PRINTF("Shouldn't be here");
+    		}
+    		playing_state.song_state = SONG_NO_SOUND;
+    	}
     }
     return 0 ;
 }
@@ -264,7 +263,10 @@ void PIT2_IRQHandler(void)
 			prev_spo2 = 0;
 			prev_heart_rate = 0;
 		}
- 		lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
+		if(playing_state.audio_state == AUDIO_STOP)
+		{
+			lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
+		}
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 	}
 
@@ -424,7 +426,7 @@ void play_mp3(const char* file_name){
 }
 
 void PIT_1_0_IRQHANDLER(void){
-	if(!lcdGFX_getState())
+	if(lcdGFX_getState())
 	{
 	    /* Clear interrupt flag.*/
 		PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);

@@ -154,6 +154,12 @@ BOARD_InitPins:
   - {pin_num: '55', peripheral: GPIOB, signal: 'GPIO, 2', pin_signal: ADC0_SE12/PTB2/I2C0_SCL/UART0_RTS_b/ENET0_1588_TMR0/FTM0_FLT3, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
   - {pin_num: '58', peripheral: UART3, signal: RX, pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1}
   - {pin_num: '59', peripheral: UART3, signal: TX, pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2}
+  - {pin_num: '82', peripheral: I2C1, signal: SCL, pin_signal: ADC1_SE6b/PTC10/I2C1_SCL/FTM3_CH6/I2S0_RX_FS/FB_AD5}
+  - {pin_num: '83', peripheral: I2C1, signal: SDA, pin_signal: ADC1_SE7b/PTC11/LLWU_P11/I2C1_SDA/FTM3_CH7/I2S0_RXD1/FB_RW_b}
+  - {pin_num: '64', peripheral: I2S0, signal: TX_BCLK, pin_signal: PTB18/CAN0_TX/FTM2_CH0/I2S0_TX_BCLK/FB_AD15/FTM2_QD_PHA}
+  - {pin_num: '65', peripheral: I2S0, signal: TX_FS, pin_signal: PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB}
+  - {pin_num: '71', peripheral: I2S0, signal: TXD0, pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0}
+  - {pin_num: '80', peripheral: I2S0, signal: MCLK, pin_signal: ADC1_SE4b/CMP0_IN2/PTC8/FTM3_CH4/I2S0_MCLK/FB_AD7}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -208,17 +214,35 @@ void BOARD_InitPins(void)
     /* PORTB11 (pin 59) is configured as UART3_TX */
     PORT_SetPinMux(PORTB, 11U, kPORT_MuxAlt3);
 
+    /* PORTB18 (pin 64) is configured as I2S0_TX_BCLK */
+    PORT_SetPinMux(PORTB, 18U, kPORT_MuxAlt4);
+
+    /* PORTB19 (pin 65) is configured as I2S0_TX_FS */
+    PORT_SetPinMux(PORTB, 19U, kPORT_MuxAlt4);
+
     /* PORTB2 (pin 55) is configured as PTB2 */
     PORT_SetPinMux(BOARD_PIN_SPO2_PORT, BOARD_PIN_SPO2_PIN, kPORT_MuxAsGpio);
 
     /* Interrupt configuration on PORTB2 (pin 55): Interrupt on falling edge */
     PORT_SetPinInterruptConfig(BOARD_PIN_SPO2_PORT, BOARD_PIN_SPO2_PIN, kPORT_InterruptFallingEdge);
 
+    /* PORTC1 (pin 71) is configured as I2S0_TXD0 */
+    PORT_SetPinMux(PORTC, 1U, kPORT_MuxAlt6);
+
+    /* PORTC10 (pin 82) is configured as I2C1_SCL */
+    PORT_SetPinMux(PORTC, 10U, kPORT_MuxAlt2);
+
+    /* PORTC11 (pin 83) is configured as I2C1_SDA */
+    PORT_SetPinMux(PORTC, 11U, kPORT_MuxAlt2);
+
     /* PORTC3 (pin 73) is configured as PTC3 */
     PORT_SetPinMux(BOARD_ILI9341_RST_PORT, BOARD_ILI9341_RST_PIN, kPORT_MuxAsGpio);
 
     /* PORTC4 (pin 76) is configured as PTC4 */
     PORT_SetPinMux(BOARD_ILI9341_DC_PORT, BOARD_ILI9341_DC_PIN, kPORT_MuxAsGpio);
+
+    /* PORTC8 (pin 80) is configured as I2S0_MCLK */
+    PORT_SetPinMux(PORTC, 8U, kPORT_MuxAlt4);
 
     /* PORTD0 (pin 93) is configured as SPI0_PCS0 */
     PORT_SetPinMux(PORTD, 0U, kPORT_MuxAlt2);

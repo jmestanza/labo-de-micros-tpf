@@ -771,6 +771,8 @@ void display_fillRoundRect(uint16_t x, uint16_t y, uint16_t w,
 
 void lcdGFX_init(void)
 {
+	isLCD_initialized = 1;
+
 	tft_begin();
 
     display_setRotation(3);
@@ -970,7 +972,6 @@ void lcdGFX_init(void)
 
 	PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 
-	isLCD_initialized = 1;
 }
 
 void lcdGFX_updateGFX(uint16_t dataECG, uint16_t dataSPO2)
