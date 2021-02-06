@@ -148,7 +148,11 @@ void bt_tim_callback(void)
 		is_devAck = false;
 		penalty = 0;
 		//clear_buffer();
-		UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 17);
+//		for(int16_t i=0;i<17;i++)
+//		{
+//			UART_WriteBlocking(UART_2_PERIPHERAL, &data2send[i], 1);
+//		}
+		UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 18);
 		//txOnGoing = false;
 	}
 	else
@@ -169,14 +173,18 @@ void bt_tim_callback(void)
 			}
 			else // Try new send
 			{
-				UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 17);
+//				for(int16_t i=0;i<17;i++)
+//				{
+//					UART_WriteBlocking(UART_2_PERIPHERAL, &data2send[i], 1);
+//				}
+				UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 18);
 			}
 			clear_buffer();
 			timeOut = 0;
 		}
 	}
 
-	if(!(aux % 5))
+	if(!(aux % 5) && (state == DEVICE_CON))
 	{
 		LED_GREEN_TOGGLE(); // Para saber que esta andando
 	}
@@ -196,4 +204,23 @@ void clear_buffer(void)
 		bufferUART[i] = '\0';
 	}
 	rxIndex = 0;
+}
+
+void bt_setBpmGFX(uint16_t bpmGFX)
+{
+	data2send[0] = bpmGFX/1000 + '0';
+	uint16_t aux;
+	aux = bpmGFX%1000;
+	data2send[1] = (aux)/100 + '0';
+	data2send[2] = ((aux)%100)/10 + '0';
+	data2send[3] = ((aux)%100)%10 + '0';
+}
+
+void bt_setBpmValue(uint16_t bpmValue)
+{
+	data2send[5] = bpmValue/100 + '0';
+	uint16_t aux;
+	aux = bpmValue%100;
+	data2send[6] = (aux)/10 + '0';
+	data2send[7] = (aux)%10 + '0';
 }

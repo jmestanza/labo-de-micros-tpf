@@ -121,30 +121,30 @@ int main(void) {
 
     // Test graphics vectors (generated manually)
 
-    for(uint16_t i=0;i<160;i++)
-    {
-    	oxy[i] = 20*sin(2*PI*i/30)+40;
-    }
-
-    for(uint16_t i=0;i<160;i++)
-    {
-    	bpm[i] = 40;
-    }
-    for(uint16_t i=0;i<10;i++)
-    {
-    	bpm[i+40] = 40+(i*40/10);
-    	bpm[i+40+80] = 40+(i*40/10);
-    }
-    for(uint16_t i=0;i<15;i++)
-    {
-    	bpm[i+50] = 80-(i*60/15);
-    	bpm[i+50+80] = 80-(i*60/15);
-    }
-    for(uint16_t i=0;i<5;i++)
-    {
-    	bpm[i+65] = 20+(i*60/15);
-    	bpm[i+65+80] = 20+(i*60/15);
-    }
+//    for(uint16_t i=0;i<160;i++)
+//    {
+//    	oxy[i] = 20*sin(2*PI*i/30)+40;
+//    }
+//
+//    for(uint16_t i=0;i<160;i++)
+//    {
+//    	bpm[i] = 40;
+//    }
+//    for(uint16_t i=0;i<10;i++)
+//    {
+//    	bpm[i+40] = 40+(i*40/10);
+//    	bpm[i+40+80] = 40+(i*40/10);
+//    }
+//    for(uint16_t i=0;i<15;i++)
+//    {
+//    	bpm[i+50] = 80-(i*60/15);
+//    	bpm[i+50+80] = 80-(i*60/15);
+//    }
+//    for(uint16_t i=0;i<5;i++)
+//    {
+//    	bpm[i+65] = 20+(i*60/15);
+//    	bpm[i+65+80] = 20+(i*60/15);
+//    }
 
     prev_spo2 = 00.00;
     prev_heart_rate = 00;
@@ -194,21 +194,9 @@ int main(void) {
 		return -1;
 	}
 
-	/* Aca empezaria el testbench de las reproducciones de audio */
+     playing_state.song_state = SONG_WELCOME;
 
-	// PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_1);
-
-	// en el handler hago que cada 5 segundos cambie el estado de la cancion que se esta reproduciendo
-
-     playing_state.song_state = SONG_ECG_OUT_OF_RANGE;
-
-//    gpioMode(PIN_SPO2, INPUT);
-//    gpioIRQ(PIN_SPO2, GPIO_IRQ_MODE_FALLING_EDGE, callback_pin);
-//    NVIC_EnableIRQ(PORTB_IRQn);
-
-    /* Force the counter to be placed into memory. */
-//  volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
+    /* Enter an infinite loop. */
     while(1) {
     	// espero que PIT cambie el estado de song_state
 
@@ -220,15 +208,19 @@ int main(void) {
     			// Muy probablemente la placa UDA1380 detecta silencio y se va a un modo bajo consumo.
     			// Es por eso que hay que hacer un "wakeup" con un sonido que se haya reproducido al menos 1 segundo antes
     			// de reproducir el mp3 verdadero. Si no es la placa quien detecta silencio, puede que sea i2s.
-    			play_mp3("/./ecg_oor.mp3"); //
+    			play_mp3("/./ecg.mp3"); //
     			break;
     		case SONG_SPO2_OUT_OF_RANGE:
     			play_mp3("/./sonicpro.mp3");
-    			play_mp3("/./spo2_oor.mp3");
+    			play_mp3("/./spo2.mp3");
     			break;
     		case SONG_TEMP_OUT_OF_RANGE:
     			play_mp3("/./sonicpro.mp3");
-    			play_mp3("/./temp_oor.mp3");
+    			play_mp3("/./temp.mp3");
+    			break;
+    		case SONG_WELCOME:
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./welcome.mp3");
     			break;
     		default:
     			PRINTF("Shouldn't be here");
@@ -238,8 +230,6 @@ int main(void) {
     }
     return 0 ;
 }
-
-
 
 void sound_play(char* songToPlay)
 {
@@ -281,6 +271,7 @@ void PIT2_IRQHandler(void)
 		{
 			lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
 		}
+		//bt_setBpmValue(prev_heart_rate);
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 	}
 
@@ -328,16 +319,15 @@ void PORTB_IRQHandler(void)
 void ecg_callback(void)
 {
 	ecg_get_samples(data);
+	int32_t dataSPO2ToPlot,dataHRToPlot;
+	int32_t new_sample;
 	for(int k=0;k<ECG_VALUES-1;k++)
 	{
-//		uint32_t uni,dec;
-//		uni = (aun_red_buffer[l]/100)%10;
-//		dec = (aun_red_buffer[l]/1000)%10;
 
 		sample_avg += (aun_red_buffer[l] - sample_avg/12);
-		int32_t new_sample;
+
 		new_sample = aun_red_buffer[l] - sample_avg/12; //muestra a graficar
-		int32_t dataSPO2ToPlot,dataHRToPlot;
+
 		dataSPO2ToPlot = (new_sample/10)+50;
 		dataHRToPlot = (data[k]+data[k+1])/82;
 
@@ -355,6 +345,7 @@ void ecg_callback(void)
 			l = 0;
 		}
 	}
+	//bt_setBpmGFX(dataHRToPlot*10);
 }
 
 void UART_2_SERIAL_RX_TX_IRQHANDLER()

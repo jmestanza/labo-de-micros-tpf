@@ -306,7 +306,10 @@ void fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 
 void fillScreen(uint16_t color)
 {
-    fillRect(0, 0, _width, _height, color);
+    fillRect(0, 0, _width, _height/4, color);
+    fillRect(0, _height/4, _width, _height/4, color);
+    fillRect(0, _height/2, _width, _height/4, color);
+    fillRect(0, 3*_height/4, _width, _height/4, color);
 }
 
 void drawPixel(uint16_t x, uint16_t y, uint16_t color)

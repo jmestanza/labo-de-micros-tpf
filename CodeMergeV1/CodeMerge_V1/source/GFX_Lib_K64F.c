@@ -776,28 +776,15 @@ void lcdGFX_init(void)
 	tft_begin();
 
     display_setRotation(3);
-//    display_fillScreen(ILI9341_BLACK);
+    display_fillScreen(ILI9341_BLACK);
 
-    for(int16_t i=0;i<320;i++)
-    {
-    	for(int16_t j=0;j<240;j++)
-    	{
-    		display_drawPixel(i,j,ILI9341_BLACK);
-    	}
-    }
 
     int16_t w, h;
     w = get_display_width();
     h = get_display_height();
 
-//    display_fillScreen(ILI9341_BLACK);
-    for(int16_t i=0;i<320;i++)
-    {
-    	for(int16_t j=0;j<240;j++)
-    	{
-    		display_drawPixel(i,j,ILI9341_BLACK);
-    	}
-    }
+    display_fillScreen(ILI9341_BLACK);
+
 
     gridECG_x = 10;
     gridECG_y = 110;
@@ -846,13 +833,13 @@ void lcdGFX_init(void)
     display_drawVLine(170, 10+(h/2), 100, GRID_COLOR);
 
 
-    uint8_t numSize = 5;
-	bpm_x = (3*w/4) - (numSize*5);
+    uint8_t numSize = 4;
+	bpm_x = (3*w/4) - (numSize*5) - 10;
 	bpm_y = (h/4) - (numSize*3.5) -20;
     display_setCursor(bpm_x, bpm_y);
 	display_setTextColor(ILI9341_GREEN);
 	display_setTextSize(numSize);
-	display_printString("00\r\n");
+	display_printString("000\r\n");
 
 
     for(uint16_t i=0;i<30;i++)
@@ -870,7 +857,7 @@ void lcdGFX_init(void)
 	display_printString("bpm\r\n");
 
     numSize = 1;
-    display_setCursor(280-65, 10);
+    display_setCursor(280-70, 10);
 	display_setTextColor(ILI9341_GREEN);
 	display_setTextSize(numSize);
 	display_printString("HR\r\n");
@@ -1034,16 +1021,18 @@ void lcdGFX_updateDATA(uint16_t dataECG, float dataSPO2, float dataTEMP)
 {
     // Transcode numbers and print
     uint8_t numSize;
-    char dec, uni, dec1, dec2;
+    char cent, dec, uni, dec1, dec2;
 
 	// Update ECG Value
-	numSize = 5;
+	numSize = 4;
 	display_setCursor(bpm_x, bpm_y);
 	display_setTextColor(ILI9341_GREEN);
 	display_setTextSize(numSize);
-	dec = (dataECG/10) + '0';
-	uni = (dataECG%10) + '0';
-	display_fillRect(bpm_x, bpm_y, 60, 35, ILI9341_BLACK); // Erase previous value
+	cent = (dataECG/100) + '0';
+	dec = (dataECG%100)/10 + '0';
+	uni = (dataECG%100)%10 + '0';
+	display_fillRect(bpm_x, bpm_y, 70, 35, ILI9341_BLACK); // Erase previous value
+	display_print(cent);
 	display_print(dec);
 	display_print(uni);
 
