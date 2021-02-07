@@ -51,6 +51,7 @@ void display_printString(char *text);
 uint16_t display_getCursorX(void);
 uint16_t display_getCursorY(void);
 uint16_t display_color565(uint8_t red, uint8_t green, uint8_t blue);
+
 /*
  * Functions for final user
  */

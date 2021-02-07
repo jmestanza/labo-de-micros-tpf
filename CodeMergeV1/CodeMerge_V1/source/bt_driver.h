@@ -15,23 +15,22 @@
 #define DEVICE_CON 1
 #define DEVICE_NOT_CON 0
 #define BUFFER_SIZE_BT 16
-#define TIMEOUT_LIMIT 15 // 3 Seg
+#define TIMEOUT_LIMIT 120 // 3 Seg
 #define MAX_PENALTY 3
-
 
 /*
  * Function declarations
  */
 
-/*
- * bt_init: init uart and timer drivers to use
- */
-void bt_init(void (*callback)(char*));
+void bt_init(void (*callback)(char*), uint8_t plotQty);
 
-_Bool bt_getState(void);
-
-void bt_setBpmGFX(uint16_t bpmGFX);
+void bt_setBpmPlot(uint16_t *bpmGFX);
 void bt_setBpmValue(uint16_t bpmValue);
+void bt_setSpo2Plot(uint16_t *spo2GFX);
+void bt_setSpo2Value(float spo2Value);
+void bt_setTempValue(float tempValue);
+
+_Bool bt_isConnected(void);
 
 void bt_callback(void);
 

@@ -8,29 +8,30 @@
 #include "board.h"
 #include "peripherals.h"
 /*
- *  - Esto basicamente son una interrupcion por UART y un TIM
- * Cuando se conecta un dispositivo, este envia un "Device Connected"
- * el sistema devuelve un "Ack"
- * Esto activa el timer periodico con el que se enviara la informacion de
- * las 3 variables, luego de cada set enviado se espera un "ACK"
- * Si se desconecta, en el siguiente ciclo de envio el sistema no recibiria el "ACK"
- * por lo que se pasa a estado de "Device not Connected"
+ * Private defines
  */
+#define BPM_PLT_POS 0 // De 0 a 99
+#define BPM_VAL_POS 12*(2 + 1) // Son 12 valores con dos digitos mas el "_"
+#define SPO_PLT_POS BPM_VAL_POS + (3 + 1) // Los tres dígitos mas el "_"
+#define SPO_VAL_POS SPO_PLT_POS + 12*(2 + 1) // Son 12 valores con dos digitos mas el "_"
+#define TEM_VAL_POS SPO_VAL_POS + (4 + 1) // Los 4 digitos mas el "_"
 
+// PlotBpm_ + DataBpm_ + PlotSpo2_ + DataSpo2_ + DataTemp_
+#define DATA_SIZE 12*3 + 4 + 12*3 + 5 + 3 + 1
 /*
  * General variables
  */
-bool state = DEVICE_NOT_CON;
+_Bool state = DEVICE_NOT_CON;
 
 char bufferUART[BUFFER_SIZE_BT];
 char *buffer_ptr = bufferUART; // Porque no puedo comparar directamente con string sino
-
-uint8_t data2send[] = "0512_060_367_9915X"; // Mensaje de prueba
+				//     0123456789ABCDEFGH
+uint8_t data2send[DATA_SIZE]; // Mensaje de prueba
 
 uint8_t penalty = 0;
+uint8_t points = 0;
 uint16_t aux = 0;
 uint16_t cont = 0;
-bool txOnGoing  = false;
 
 const char *dev_command = "NewDevice";
 const char *dev_ack = "DeviceAck";
@@ -38,9 +39,10 @@ const char *dev_ack = "DeviceAck";
 const char *cmd_ecg_oor = "MP3.ECG..";
 const char *cmd_spo2_oor = "MP3.SPO..";
 const char *cmd_temp_oor = "MP3.TEM..";
+const char *cmd_dedo = "MP3.FIN..";
 
 uint8_t rxIndex = 0;
-bool is_devAck = false;
+_Bool is_devAck = false;
 uint16_t timeOut = 0;
 
 void (*sound_callback)(char*);
@@ -53,10 +55,15 @@ void clear_buffer(void);
  * Function definitions
  */
 
-void bt_init(void (*callback)(char*))
+void bt_init(void (*callback)(char*), uint8_t plotQty)
 {
-	data2send[17] = '\n';
+	points = plotQty;
 	sound_callback = callback;
+	for(uint16_t i=0;i<DATA_SIZE;i++)
+	{
+		data2send[i] = '_';
+	}
+	data2send[DATA_SIZE-1] = '\n';
 }
 
 void bt_callback()
@@ -108,6 +115,11 @@ void bt_callback()
         		sound_callback(&bufferUART[rxIndex-9]);
         		clear_buffer();
         	}
+        	else if(!strcmp(&bufferUART[rxIndex-9],cmd_dedo))
+        	{
+        		sound_callback(&bufferUART[rxIndex-9]);
+        		clear_buffer();
+        	}
         	else
 			{
         		clear_buffer();
@@ -148,11 +160,7 @@ void bt_tim_callback(void)
 		is_devAck = false;
 		penalty = 0;
 		//clear_buffer();
-//		for(int16_t i=0;i<17;i++)
-//		{
-//			UART_WriteBlocking(UART_2_PERIPHERAL, &data2send[i], 1);
-//		}
-		UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 18);
+		UART_WriteBlocking(UART_2_PERIPHERAL, data2send, DATA_SIZE);
 		//txOnGoing = false;
 	}
 	else
@@ -173,54 +181,78 @@ void bt_tim_callback(void)
 			}
 			else // Try new send
 			{
-//				for(int16_t i=0;i<17;i++)
-//				{
-//					UART_WriteBlocking(UART_2_PERIPHERAL, &data2send[i], 1);
-//				}
-				UART_WriteBlocking(UART_2_PERIPHERAL, data2send, 18);
+
+				UART_WriteBlocking(UART_2_PERIPHERAL, data2send, DATA_SIZE);
 			}
 			clear_buffer();
 			timeOut = 0;
 		}
 	}
 
-	if(!(aux % 5) && (state == DEVICE_CON))
+	if(!(aux % 20) && (state == DEVICE_CON))
 	{
 		LED_GREEN_TOGGLE(); // Para saber que esta andando
 	}
 	aux++;
 }
 
-_Bool bt_getState(void)
+_Bool bt_isConnected(void)
 {
 	return state;
 }
 
 void clear_buffer(void)
 {
-	uint8_t i = 0;
-	for(i=0;i<BUFFER_SIZE_BT;i++)
-	{
-		bufferUART[i] = '\0';
-	}
+	memset(bufferUART,'\0',BUFFER_SIZE_BT);
+//	uint8_t i = 0;
+//	for(i=0;i<BUFFER_SIZE_BT;i++)
+//	{
+//		bufferUART[i] = '\0';
+//	}
 	rxIndex = 0;
 }
 
-void bt_setBpmGFX(uint16_t bpmGFX)
+/*
+ * Parsing functions
+ */
+void bt_setBpmPlot(uint16_t *bpmGFX)
 {
-	data2send[0] = bpmGFX/1000 + '0';
-	uint16_t aux;
-	aux = bpmGFX%1000;
-	data2send[1] = (aux)/100 + '0';
-	data2send[2] = ((aux)%100)/10 + '0';
-	data2send[3] = ((aux)%100)%10 + '0';
+	for(uint16_t u=0;u<points;u++)
+	{
+		data2send[BPM_PLT_POS +3*u] = bpmGFX[u]/10 + '0';
+		data2send[BPM_PLT_POS+1 +3*u] = bpmGFX[u]%10 + '0';
+	}
 }
 
 void bt_setBpmValue(uint16_t bpmValue)
 {
-	data2send[5] = bpmValue/100 + '0';
+	data2send[BPM_VAL_POS] = bpmValue/100 + '0';
 	uint16_t aux;
 	aux = bpmValue%100;
-	data2send[6] = (aux)/10 + '0';
-	data2send[7] = (aux)%10 + '0';
+	data2send[BPM_VAL_POS+1] = aux/10 + '0';
+	data2send[BPM_VAL_POS+2] = aux%10 + '0';
+}
+
+void bt_setSpo2Plot(uint16_t *spo2GFX)
+{
+	for(uint16_t u=0;u<points;u++)
+	{
+		data2send[SPO_PLT_POS +3*u] = spo2GFX[u]/10 + '0';
+		data2send[SPO_PLT_POS+1 +3*u] = spo2GFX[u]%10 + '0';
+	}
+}
+
+void bt_setSpo2Value(float spo2Value)
+{
+	data2send[SPO_VAL_POS] = spo2Value/10 + '0';
+	data2send[SPO_VAL_POS+1] = ((uint16_t)(spo2Value))%10 + '0';
+	data2send[SPO_VAL_POS+2] = ((uint16_t)(spo2Value*10))%10 + '0';
+	data2send[SPO_VAL_POS+3] = ((uint16_t)(spo2Value*100))%10 + '0';
+}
+
+void bt_setTempValue(float tempValue)
+{
+	data2send[TEM_VAL_POS] = tempValue/10 + '0';
+	data2send[TEM_VAL_POS+1] = ((uint16_t)(tempValue))%10 + '0';
+	data2send[TEM_VAL_POS+2] = ((uint16_t)(tempValue*10))%10 + '0';
 }

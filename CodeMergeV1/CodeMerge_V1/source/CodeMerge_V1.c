@@ -63,6 +63,7 @@ void sound_play(char* songToPlay);
 void ecg_callback(void);
 void initialI2STestAndCodecInit(void);
 void play_mp3(const char* file_name);
+
 /*
  * Audio data
  */
@@ -75,6 +76,11 @@ playing_state_t playing_state;
 uint16_t i,j,l;
 uint16_t bpm[160];
 uint16_t oxy[160];
+/*
+ * Plot data
+ */
+uint16_t bpmPlot_vec[ECG_VALUES];
+uint16_t spo2Plot_vec[ECG_VALUES];
 /*
  * Temperature data
  */
@@ -117,7 +123,7 @@ int main(void) {
     LED_RED_ON();
     LED_BLUE_OFF();
     LED_GREEN_OFF();
-    bt_init(sound_play);
+    bt_init(sound_play, ECG_VALUES);
 
     // Test graphics vectors (generated manually)
 
@@ -146,7 +152,7 @@ int main(void) {
 //    	bpm[i+65+80] = 20+(i*60/15);
 //    }
 
-    prev_spo2 = 00.00;
+    prev_spo2 = 0.00;
     prev_heart_rate = 00;
 
     /*
@@ -222,6 +228,10 @@ int main(void) {
     			play_mp3("/./sonicpro.mp3");
     			play_mp3("/./welcome.mp3");
     			break;
+    		case SONG_PUT_FINGER:
+    			play_mp3("/./sonicpro.mp3");
+    			play_mp3("/./dedo.mp3");
+    			break;
     		default:
     			PRINTF("Shouldn't be here");
     		}
@@ -245,6 +255,10 @@ void sound_play(char* songToPlay)
 	{
 		playing_state.song_state = SONG_TEMP_OUT_OF_RANGE;
 	}
+	if(!strcmp(songToPlay,"MP3.FIN.."))
+	{
+		playing_state.song_state = SONG_PUT_FINGER;
+	}
 }
 
 void PIT2_IRQHandler(void)
@@ -267,18 +281,22 @@ void PIT2_IRQHandler(void)
 			prev_spo2 = 0;
 			prev_heart_rate = 0;
 		}
+		// Parse values
+		bt_setBpmValue(prev_heart_rate);
+		bt_setSpo2Value(prev_spo2);
+		bt_setTempValue(temp);
+
+		// If not playing sound then send to LCD
 		if(playing_state.audio_state == AUDIO_STOP)
 		{
 			lcdGFX_updateDATA(prev_heart_rate, prev_spo2, temp);
 		}
-		//bt_setBpmValue(prev_heart_rate);
+
+		// Resume interrupt
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 	}
 
-	if(!(j%8) && bt_getState())
-	{
-		bt_tim_callback();
-	}
+	// Aca estaba lo de Bluetooth pero la siguiente prueba es pasarlo al callback del ecg
 }
 
 void PORTB_IRQHandler(void)
@@ -319,8 +337,8 @@ void PORTB_IRQHandler(void)
 void ecg_callback(void)
 {
 	ecg_get_samples(data);
-	int32_t dataSPO2ToPlot,dataHRToPlot;
-	int32_t new_sample;
+	uint16_t dataSPO2ToPlot,dataHRToPlot;
+	uint16_t new_sample;
 	for(int k=0;k<ECG_VALUES-1;k++)
 	{
 
@@ -332,12 +350,15 @@ void ecg_callback(void)
 		dataHRToPlot = (data[k]+data[k+1])/82;
 
 		// Anti-WindUp for graphics
-		if(dataSPO2ToPlot > 100) dataSPO2ToPlot = 100;
+		if(dataSPO2ToPlot > 99) dataSPO2ToPlot = 99;
 		if(dataSPO2ToPlot < 0) dataSPO2ToPlot = 0;
-		if(dataHRToPlot > 100) dataHRToPlot = 100;
+		if(dataHRToPlot > 99) dataHRToPlot = 99;
 		if(dataHRToPlot < 0) dataHRToPlot = 0;
-		//
 
+		bpmPlot_vec[k] = dataHRToPlot;
+		spo2Plot_vec[k] = dataSPO2ToPlot;
+
+		// Send to LCD
 		lcdGFX_updateGFX(dataHRToPlot, dataSPO2ToPlot);
 		l++;
 		if(l == 100)
@@ -345,7 +366,16 @@ void ecg_callback(void)
 			l = 0;
 		}
 	}
-	//bt_setBpmGFX(dataHRToPlot*10);
+
+	// Send to application
+	if(bt_isConnected())
+	{
+		// Parse values
+		bt_setBpmPlot(bpmPlot_vec);
+		bt_setSpo2Plot(spo2Plot_vec);
+
+		bt_tim_callback();
+	}
 }
 
 void UART_2_SERIAL_RX_TX_IRQHANDLER()
