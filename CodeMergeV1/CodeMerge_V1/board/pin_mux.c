@@ -71,7 +71,7 @@ pin_labels:
 - {pin_num: '97', pin_signal: PTD4/LLWU_P14/SPI0_PCS1/UART0_RTS_b/FTM0_CH4/FB_AD2/EWM_IN/SPI1_PCS0, label: 'J6[4]/RF_WIFI_CS', identifier: WIFI_CS}
 - {pin_num: '99', pin_signal: ADC0_SE7b/PTD6/LLWU_P15/SPI0_PCS3/UART0_RX/FTM0_CH6/FB_AD0/FTM0_FLT0/SPI1_SOUT, label: 'J6[6]/RF_WIFI_MOSI', identifier: WIFI_MOSI}
 - {pin_num: '92', pin_signal: PTC18/UART3_RTS_b/ENET0_1588_TMR2/FB_TBST_b/FB_CS2_b/FB_BE15_8_BLS23_16_b, label: 'J6[8]/RF_WIFI_IRQ', identifier: WIFI_IRQ;TMR_1588_2}
-- {pin_num: '86', pin_signal: PTC14/UART4_RX/FB_AD25, label: 'J199[3]/BT_TX'}
+- {pin_num: '86', pin_signal: PTC14/UART4_RX/FB_AD25, label: 'J199[3]/BT_TX', identifier: TEST}
 - {pin_num: '87', pin_signal: PTC15/UART4_TX/FB_AD24, label: 'J199[4]/BT_RX'}
 - {pin_num: '54', pin_signal: ADC0_SE9/ADC1_SE9/PTB1/I2C0_SDA/FTM1_CH1/RMII0_MDC/MII0_MDC/FTM1_QD_PHB, label: 'U13[11]/RMII0_MDC', identifier: RMII0_MDC}
 - {pin_num: '53', pin_signal: ADC0_SE8/ADC1_SE8/PTB0/LLWU_P5/I2C0_SCL/FTM1_CH0/RMII0_MDIO/MII0_MDIO/FTM1_QD_PHA, label: 'U13[10]/RMII0_MDIO', identifier: RMII0_MDIO}
@@ -160,6 +160,7 @@ BOARD_InitPins:
   - {pin_num: '65', peripheral: I2S0, signal: TX_FS, pin_signal: PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB}
   - {pin_num: '71', peripheral: I2S0, signal: TXD0, pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0}
   - {pin_num: '80', peripheral: I2S0, signal: MCLK, pin_signal: ADC1_SE4b/CMP0_IN2/PTC8/FTM3_CH4/I2S0_MCLK/FB_AD7}
+  - {pin_num: '86', peripheral: GPIOC, signal: 'GPIO, 14', pin_signal: PTC14/UART4_RX/FB_AD25, direction: OUTPUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -202,6 +203,13 @@ void BOARD_InitPins(void)
     /* Initialize GPIO functionality on pin PTC4 (pin 76)  */
     GPIO_PinInit(BOARD_ILI9341_DC_GPIO, BOARD_ILI9341_DC_PIN, &ILI9341_DC_config);
 
+    gpio_pin_config_t TEST_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PTC14 (pin 86)  */
+    GPIO_PinInit(BOARD_TEST_GPIO, BOARD_TEST_PIN, &TEST_config);
+
     /* PORTA0 (pin 34) is configured as JTAG_TCLK */
     PORT_SetPinMux(PORTA, 0U, kPORT_MuxAlt7);
 
@@ -234,6 +242,9 @@ void BOARD_InitPins(void)
 
     /* PORTC11 (pin 83) is configured as I2C1_SDA */
     PORT_SetPinMux(PORTC, 11U, kPORT_MuxAlt2);
+
+    /* PORTC14 (pin 86) is configured as PTC14 */
+    PORT_SetPinMux(BOARD_TEST_PORT, BOARD_TEST_PIN, kPORT_MuxAsGpio);
 
     /* PORTC3 (pin 73) is configured as PTC3 */
     PORT_SetPinMux(BOARD_ILI9341_RST_PORT, BOARD_ILI9341_RST_PIN, kPORT_MuxAsGpio);

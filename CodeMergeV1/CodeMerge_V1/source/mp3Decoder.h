@@ -38,16 +38,6 @@ typedef struct
     uint16_t    sampleCount;
 } mp3_decoder_frame_data_t;
 
-//typedef struct
-//{
-//    uint8_t title[ID3_MAX_FIELD_SIZE];
-//    uint8_t artist[ID3_MAX_FIELD_SIZE];
-//    uint8_t album[ID3_MAX_FIELD_SIZE];
-//    uint8_t trackNum[10];
-//    uint8_t year[10];
-//
-//} mp3_decoder_tag_data_t;
-
 /*******************************************************************************
  * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
  ******************************************************************************/

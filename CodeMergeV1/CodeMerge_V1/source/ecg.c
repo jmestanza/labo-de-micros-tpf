@@ -10,6 +10,7 @@
 #include "MK64F12.h"
 #include "peripherals.h"
 #include "fsl_pit.h"
+#include "pin_mux.h"
 
 
 
@@ -77,6 +78,7 @@ void ADC0_IRQHANDLER(void) {
   #if defined __CORTEX_M && (__CORTEX_M == 4U)
     __DSB();
   #endif
+
 }
 
 

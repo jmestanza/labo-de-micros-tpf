@@ -62,6 +62,13 @@ void BOARD_InitBootPins(void);
 #define BOARD_PIN_SPO2_PIN 2U     /*!<@brief PORTB pin index: 2 */
                                   /* @} */
 
+/*! @name PORTC14 (number 86), J199[3]/BT_TX
+  @{ */
+#define BOARD_TEST_GPIO GPIOC /*!<@brief GPIO device name: GPIOC */
+#define BOARD_TEST_PORT PORTC /*!<@brief PORT device name: PORTC */
+#define BOARD_TEST_PIN 14U    /*!<@brief PORTC pin index: 14 */
+                              /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

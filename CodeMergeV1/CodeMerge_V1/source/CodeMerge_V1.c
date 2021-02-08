@@ -32,6 +32,7 @@
  * @file    CodeMerge_V1.c
  * @brief   Application entry point.
  */
+#include <I2S_config.h>
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -54,11 +55,13 @@
 #include "fsl_sysmpu.h"
 #include "fsl_sgtl5000.h"
 #include "SD.h"
-#include "I2S.h"
 #include "mp3Decoder.h"
 #include "audio_and_song.h"
 #include "music.h"
 /* TODO: insert other definitions and declarations here. */
+
+// ADC16_SetChannelConfig(ADC0_PERIPHERAL,0, &ADC0_channelsConfig[0]);
+
 void sound_play(char* songToPlay);
 void ecg_callback(void);
 void initialI2STestAndCodecInit(void);
@@ -124,33 +127,6 @@ int main(void) {
     LED_BLUE_OFF();
     LED_GREEN_OFF();
     bt_init(sound_play, ECG_VALUES);
-
-    // Test graphics vectors (generated manually)
-
-//    for(uint16_t i=0;i<160;i++)
-//    {
-//    	oxy[i] = 20*sin(2*PI*i/30)+40;
-//    }
-//
-//    for(uint16_t i=0;i<160;i++)
-//    {
-//    	bpm[i] = 40;
-//    }
-//    for(uint16_t i=0;i<10;i++)
-//    {
-//    	bpm[i+40] = 40+(i*40/10);
-//    	bpm[i+40+80] = 40+(i*40/10);
-//    }
-//    for(uint16_t i=0;i<15;i++)
-//    {
-//    	bpm[i+50] = 80-(i*60/15);
-//    	bpm[i+50+80] = 80-(i*60/15);
-//    }
-//    for(uint16_t i=0;i<5;i++)
-//    {
-//    	bpm[i+65] = 20+(i*60/15);
-//    	bpm[i+65+80] = 20+(i*60/15);
-//    }
 
     prev_spo2 = 0.00;
     prev_heart_rate = 00;
@@ -222,7 +198,7 @@ int main(void) {
     			break;
     		case SONG_TEMP_OUT_OF_RANGE:
     			play_mp3("/./sonicpro.mp3");
-    			play_mp3("/./temp.mp3");
+    			play_mp3("/./temp_oor.mp3");
     			break;
     		case SONG_WELCOME:
     			play_mp3("/./sonicpro.mp3");
@@ -268,6 +244,8 @@ void PIT2_IRQHandler(void)
 	j++;
 	if(!(j%80))
 	{// Cada 2 seg
+
+
 		PIT_StopTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 		fever_temp_meassurement();
 		temp = fever_get_temperature();
@@ -293,6 +271,7 @@ void PIT2_IRQHandler(void)
 		}
 
 		// Resume interrupt
+
  		PIT_StartTimer(PIT_1_PERIPHERAL, kPIT_Chnl_2);
 	}
 
@@ -301,6 +280,7 @@ void PIT2_IRQHandler(void)
 
 void PORTB_IRQHandler(void)
 {
+
     /* Clear external interrupt flag. */
     GPIO_PortClearInterruptFlags(BOARD_PIN_SPO2_GPIO, 1U << BOARD_PIN_SPO2_PIN);
 
@@ -332,10 +312,13 @@ void PORTB_IRQHandler(void)
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
     __DSB();
 #endif
+
+
 }
 
 void ecg_callback(void)
 {
+
 	ecg_get_samples(data);
 	uint16_t dataSPO2ToPlot,dataHRToPlot;
 	uint16_t new_sample;
@@ -376,6 +359,7 @@ void ecg_callback(void)
 
 		bt_tim_callback();
 	}
+
 }
 
 void UART_2_SERIAL_RX_TX_IRQHANDLER()
@@ -424,7 +408,9 @@ void play_mp3(const char* file_name){
 	while (playing_state.audio_state != AUDIO_STOP && playing_state.audio_state != AUDIO_ERROR)
 	{
 		if(playing_state.audio_state == AUDIO_PLAYING){
+
 			mp3_decoder_result_t res = MP3GetDecodedFrame(buffer_out, MP3_DECODED_BUFFER_SIZE, &sampleCount, 0);
+
 			if (res == MP3DECODER_NO_ERROR)
 			{
 				MP3GetLastFrameData(&frameData);
@@ -481,6 +467,7 @@ void PIT_1_0_IRQHANDLER(void){
 
 void PIT_1_3_IRQHANDLER(void){
 	PIT_ClearStatusFlags(PIT_1_PERIPHERAL, kPIT_Chnl_3, PIT_TFLG_TIF(1));
+
 	if(isFinishedPlaying()){
 		resetVariables();
 	}else{
@@ -488,4 +475,5 @@ void PIT_1_3_IRQHANDLER(void){
 			mini_play_music();
 		}
 	}
+
 }

@@ -5,8 +5,8 @@
  *      Author: joa-m
  */
 
-#ifndef I2S_H_
-#define I2S_H_
+#ifndef I2S_CONFIG_H_
+#define I2S_CONFIG_H_
 
 #include "fsl_edma.h"
 //#include "music.h" en algun otro lado esta incluido
@@ -65,4 +65,4 @@ void newSongPointerAndLength(uint8_t * dst, uint32_t len);
 bool isFinishedPlaying(void);
 const sai_transfer_format_t * getFormatData(void);
 
-#endif /* I2S_H_ */
+#endif /* I2S_CONFIG_H_ */

@@ -4,7 +4,7 @@
  *  Created on: Feb 3, 2021
  *      Author: joa-m
  */
-#include "I2S.h"
+#include <I2S_config.h>
 
 AT_NONCACHEABLE_SECTION_INIT(sai_edma_handle_t txHandle) = {0};
 

@@ -214,6 +214,7 @@ void ADC0_init(void) {
   /* Configure channel multiplexing mode */
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
 
+
   ADC16_SetChannelConfig(ADC0_PERIPHERAL,0, &ADC0_channelsConfig[0]);
 }
 
